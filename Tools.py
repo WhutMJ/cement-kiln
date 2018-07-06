@@ -1,4 +1,4 @@
-  '''Tools.py
+'''Tools.py
 ~~~~~~~~~~~~
     所有的工具函数存储包
 
@@ -69,6 +69,14 @@ class tongjl:
     def Similarity(self,x,y):   #计算相似性
         result = 0
         return result
+    def Sort(self,x):
+        length = len(x)
+        x1 = []
+        for i in range(length):
+            if x[i]!='':
+                x1.append(x[i])
+        x1 = sorted(x1)
+        return x1
 class date:
     def DateIteration(self,startfilename,endfilename):       #实现自动检索所有的日期
         while (startfilename != endfilename):
