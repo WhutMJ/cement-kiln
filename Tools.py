@@ -77,6 +77,32 @@ class tongjl:
                 x1.append(x[i])
         x1 = sorted(x1)
         return x1
+
+    # 拉格朗日插值
+
+    # 表示插值基函数
+    def base(self,x, i_x, x_daicha):
+        length = len(x)
+        sum = 1
+        for i in range(length):
+            if i_x != i:
+                sum = sum * (x_daicha - x[i]) / (x[i_x] - x[i])
+        return sum
+
+    # 拉格朗日插值，x,y维度必须相同
+    # x表示插值序列横坐标，y表示插值序列纵坐标
+    # x0表示待插值节点
+    def lagrange(self,x, y, x0):
+        f = 0
+        length = len(x)
+        # f 代表插值函数
+        f = 0
+        for i in range(length):
+            f = f + self.base(x, i, x0) * y[i]
+        # 返回插值节点的纵坐标
+        return f
+
+
 class date:
     def DateIteration(self,startfilename,endfilename):       #实现自动检索所有的日期
         while (startfilename != endfilename):
