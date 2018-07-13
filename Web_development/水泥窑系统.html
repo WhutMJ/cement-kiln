@@ -1,198 +1,95 @@
 <!doctype html>
 <html lang="en">
 <head>
-<meta charset="UTF-8">
-<title>水泥窑</title>
-<style type="text/css">
-*{margin:0;padding:0;font-family:"微软雅黑";}
-
-.header{text-align:center;
-        margin:20px 30% 20px 30%;}
-
-.nav{background-color:#F0F8FF;
-     width:1260px;
-	 height:60px;
-	 border:solid 1px;
-     margin:20px 100px 20px 100px;}
-.nav ul{list-style:none;}
-.nav>ul>li{float:left;
-           line-height:40px;
-           text-align:center;
-		   width:180px;}
-.nav a{text-decoration: none;
-       display: block;
-       padding:10px;
-       style="color:black";}
-.nav a:hover{color:white;
-             background-color:#00FFFF;}
-
-.nav ul li ul li{float:none;
-                 background-color:#eee;
-				 font-size:13px;
-				 line-height:13px;
-                 border-top:2px solid #fff;
-				 width:180px;}
-.nav ul {position: absolute;}
-.nav ul li ul li a:hover{background-color:#7FFFD4;}
-
-.nav ul li ul{display: none;}
-.nav ul li:hover ul{display: block;}
-
-.left-side{float:left;
-           border:solid 1px;
-           width:750px;
-		   height:900px;
-		   margin:20px 20px 20px 100px;
-		   background-image:url(bg6.jpg);
-		   }
-.right-side{float:left;
-            border:solid 1px;
-            width:470px;
-			height:900px;
-			margin:20px 100px 20px 20px;
-			}
-.fst {width:470px;
-      height:300px;
-	  border:solid 1px;}
-.snd {width:470px;
-      height:300px;
-	  border:solid 1px;}
-.trd {width:470px;
-      height:300px;
-	  border:solid 1px;
-	  overflow:auto;}
-body{background-image:url();
-     background-repeat:no-repeat;
-	 background-size:100% 100%;
-	 background-attachment: fixed}
-</style>
-<script></script>
-<script>
-</script>
+	<meta charset="UTF-8">
+	<title>水泥窑</title>
+	<link rel="stylesheet" href="css/index.css">
 </head>
-<body>
-<div class="header">
-<h1>水泥窑系统网页版</h1>
-</div>
+<body background="img/tempback.jpg">
+	<div style="margin:20px 200px"><h1 style="text-align: center;font-size:62px;">水&nbsp;泥&nbsp;窑&nbsp;系&nbsp;统</h1></div>
 <div class="nav">
-<ul>
-<li><a href="#">数据</a>
-<ul>
-<li><a href="#">数据输入</a></li>
-<li><a href="#">打开数据文件</a></li>
-<li><a href="#">数据保存</a></li>
-<li><a href="#">数据另存为</a></li>
-<li><a href="#">数据修改</a></li>
-<li><a href="#">数据模拟</a></li>
-<li><a href="#">数据导入</a></li>
-<li><a href="#">数据导出</a></li>
-</ul></li>
-<li><a href="#">窑系统热耗分析可视化</a>
-<ul>
-<li><a href="#">窑系统数据数据可视化</a></li>
-<li><a href="#">独立因素热耗分析可视化</a></li>
-<li><a href="#">联合因素热耗分析可视化</a></li>
-<li><a href="#">数据另存为</a></li>
-<li><a href="#">窑系统热耗可视化</a></li>
-<li><a href="#">窑系统设备热耗可视化</a></li>
-</ul></li>
-<li><a href="#">窑系统生产指导</a>
-<ul>
-<li><a href="#">生产预警</a></li>
-<li><a href="#">生产预警指导</a></li>
-<li><a href="#">生产异常报警</a></li>
-<li><a href="#">生产异常指导</a></li>
-</ul></li>
-<li><a href="#">窑系统设置</a>
-<ul>
-<li><a href="#">窑系统设备</a></li>
-<li><a href="#">窑系统数据</a></li>
-<li><a href="#">用户设置</a></li>
-<li><a href="#">生产数据标准设置</a></li>
-<li><a href="#">可视化对象设置</a></li>
-</ul></li>
-<li><a href="#">结果输出</a>
-<ul>
-<li><a href="#">窑系统数据可视化输出</a></li>
-<li><a href="#">独立因素热耗分析结果输出</a></li>
-<li><a href="#">联合因素热耗分析结果输出</a></li>
-<li><a href="#">窑系统热耗结果输出</a></li>
-<li><a href="#">生产预警结果输出</a></li>
-<li><a href="#">生产一场结果输出</a></li>
-</ul></li>
-<li><a href="#">系统维护</a>
-<ul>
-<li><a href="#">用户管理</a></li>
-<li><a href="#">数据备份</a></li>
-<li><a href="#">数据恢复</a></li>
-<li><a href="#">知识库备份</a></li>
-<li><a href="#">系统日志</a></li>
-<li><a href="#">系统帮助</a></li>
-</ul></li>
-<li><a href="#">退出</a>
-<ul>
-<li><a href="#">用户切换</a></li>
-<li><a href="#">用户登录</a></li>
-<li><a href="#">系统退出</a></li>
-</ul></li>
+	<ul>
+		<li>
+			<a href="#">数据</a>
+			<ul>
+			<li><a href="#">数据输入</a></li>
+			<li><a href="#">打开数据文件</a></li>
+			<li><a href="#">数据保存</a></li>
+			<li><a href="#">数据另存为</a></li>
+			<li><a href="#">数据修改</a></li>
+			<li><a href="#">数据模拟</a></li>
+			<li><a href="#">数据导入</a></li>
+			<li><a href="#">数据导出</a></li>
+			</ul>
+		</li>
+		<li>
+			<a href="#">窑系统热耗分析可视化</a>
+			<ul>
+			<li><a href="#">窑系统数据数据可视化</a></li>
+			<li><a href="#">独立因素热耗分析可视化</a></li>
+			<li><a href="#">联合因素热耗分析可视化</a></li>
+			<li><a href="#">数据另存为</a></li>
+			<li><a href="#">窑系统热耗可视化</a></li>
+			<li><a href="#">窑系统设备热耗可视化</a></li>
+			</ul>
+		</li>
+		<li>
+			<a href="#">窑系统生产指导</a>
+			<ul>
+			<li><a href="#">生产预警</a></li>
+			<li><a href="#">生产预警指导</a></li>
+			<li><a href="#">生产异常报警</a></li>
+			<li><a href="#">生产异常指导</a></li>
+			</ul>
+		</li>
+		<li>
+			<a href="#">窑系统设置</a>
+			<ul>
+			<li><a href="#">窑系统设备</a></li>
+			<li><a href="#">窑系统数据</a></li>
+			<li><a href="#">用户设置</a></li>
+			<li><a href="#">生产数据标准设置</a></li>
+			<li><a href="#">可视化对象设置</a></li>
+			</ul>
+		</li>
+		<li>
+			<a href="#">结果输出</a>
+			<ul>
+				<li><a href="#">窑系统数据可视化输出</a></li>
+				<li><a href="#">独立因素热耗分析结果输出</a></li>
+				<li><a href="#">联合因素热耗分析结果输出</a></li>
+				<li><a href="#">窑系统热耗结果输出</a></li>
+				<li><a href="#">生产预警结果输出</a></li>
+				<li><a href="#">生产一场结果输出</a></li>
+			</ul>
+		</li>
+		<li>
+			<a href="#">系统维护</a>
+			<ul>
+				<li><a href="#">用户管理</a></li>
+				<li><a href="#">数据备份</a></li>
+				<li><a href="#">数据恢复</a></li>
+				<li><a href="#">知识库备份</a></li>
+				<li><a href="#">系统日志</a></li>
+				<li><a href="#">系统帮助</a></li>
+			</ul>
+		</li>
+		<li>
+			<a href="#">退出</a>
+		<ul>
+			<li><a href="#">用户切换</a></li>
+			<li><a href="#">用户登录</a></li>
+			<li><a href="#">系统退出</a></li>
+		</ul>
+		</li>
 </ul>
+</div>
 </div>
 <div class="left-side"></div>
 <div class="right-side">
 <div class="fst"></div>
 <div class="snd"></div>
-<div class="trd">
-<table width="100%" align=center border=1px > 
-    <tr> 
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>        
-	    <tr> 
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-        <tr> 
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-        <tr>
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-             <tr> 
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-                <tr> 
-        <td width="50%"><font size=5>123</td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-               <tr> 
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-               <tr> 
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-              <tr> 
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-               <tr> 
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-                <tr> 
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-               <tr> 
-        <td width="50%"><font size=5>123</font></td> 
-        <td width="50%"><font size=5>123</font></td> 
-    </tr>  
-          </TABLE>
-</div>
+<div class="trd"></div>
 </div>
 </body>
 </html>
