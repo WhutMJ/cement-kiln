@@ -1,7 +1,7 @@
-'''图标'''
 import sys
 import random
 from provide_data_for_gui import *
+from win32api import GetSystemMetrics
 
 from PyQt5 import QtWidgets,QtGui,QtCore
 from PyQt5.QtWidgets import *#QWidget, QApplication, QLabel, QPushButton
@@ -9,52 +9,13 @@ from PyQt5.QtCore import *
 from PyQt5.QtGui import QPainter,QIcon
 
 import matplotlib
-
 from numpy import arange, sin, pi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
-
-class MyMplCanvas(FigureCanvas):
-    """这是一个窗口部件，即QWidget（当然也是FigureCanvasAgg）"""
-    def __init__(self, parent=None, width=3, height=4, dpi=100):
-        fig = Figure(figsize=(width, height), dpi=dpi)
-        self.axes = fig.add_subplot(111)
-        # 每次plot()调用的时候，我们希望原来的坐标轴被清除(所以False)
-        self.axes.hold(False)
-
-        self.compute_initial_figure()
-
-        #
-        FigureCanvas.__init__(self, fig)
-        self.setParent(parent)
-
-        FigureCanvas.setSizePolicy(self,
-                                   QSizePolicy.Expanding,
-                                   QSizePolicy.Expanding)
-        FigureCanvas.updateGeometry(self)
-
-    def compute_initial_figure(self):
-        pass
-
-class MyDynamicMplCanvas(MyMplCanvas):
-    """动态画布：每秒自动更新，更换一条折线。"""
-    def __init__(self, *args, **kwargs):
-        MyMplCanvas.__init__(self, *args, **kwargs)
-        timer = QtCore.QTimer(self)
-        timer.timeout.connect(self.update_figure)
-        timer.start(1000)
-
-    def compute_initial_figure(self):
-        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
-
-    def update_figure(self):
-        # 构建4个随机整数，位于闭区间[0, 10]
-        l = [random.randint(0, 10) for i in range(4)]
-
-        self.axes.plot([0, 1, 2, 3], l, 'r')
-        self.draw()
-
+global day
+global index
 class MyWindow(QMainWindow):
+    flag=0
     def __init__(self,parent=None):
         super(MyWindow,self).__init__(parent)
         self.initPic()
@@ -64,6 +25,8 @@ class MyWindow(QMainWindow):
     def on_click(self):
         self.setTime()
     def double_click(self):
+        global day
+        self.flag=1
         self.calendar.hide()
         date=self.calendar.selectedDate().toString('yyyy-MM-dd')
         date_input = '12345678'
@@ -71,8 +34,8 @@ class MyWindow(QMainWindow):
         self.timeBtn.setText(date)
 
         day=int(date_input)
-        print(day)
-        col1,col2=get_by_hour(day)
+        #print(day)
+        '''col1,col2=get_by_hour(day)
 
         self.table.setRowCount(len(col1))
         self.table.setHorizontalHeaderLabels(['名称','数值'])
@@ -80,10 +43,8 @@ class MyWindow(QMainWindow):
             newItem = QTableWidgetItem(col1[i])
             self.table.setItem(i, 0, newItem)
             newItem = QTableWidgetItem(str(col2[i]))
-            self.table.setItem(i, 1, newItem)
-        '''for i in range(len(self.col1)):
-            self.table.setItem(i, 0, self.col1[i])
-            self.table.setItem(i, 1, self.col2[i])'''
+            self.table.setItem(i, 1, newItem)'''
+
 
 
     def initBtn(self):
@@ -261,30 +222,34 @@ class MyWindow(QMainWindow):
         exitMenu.addAction(exitAct)
 
     def initPic(self):
-        self.width = 900  # 图片宽度
-        self.height = 600  # 图片高度
+        metric_width = GetSystemMetrics(0)
+        metric_height = GetSystemMetrics(1)
+        print(metric_width)
+        print(metric_height)
+        self.width = metric_width*0.618  # 图片宽度
+        self.height = metric_height*0.618  # 图片高度
         self.pic_x = 30
         self.pic_y = 100  # 图片起始点
         #设置信息显示区域
         self.setWindowTitle("Cement Kiln")
         self.widget = QWidget()
+        self.table = QTableWidget(0, 2)
+        self.table.setMinimumHeight(100)
         self.messageView = QWidget()
-        self.functionList = QListWidget()
-        self.table = QTableWidget(0,2)
+        self.messageView.setMinimumHeight(100)
+        #self.functionList = QListWidget()
+        #self.functionList.setMinimumHeight(100)
         #size=self.messageView.size().height()
 
         self.table.horizontalHeader().setDefaultSectionSize(150)
         self.messageSplitter = QSplitter(Qt.Vertical)
-        self.messageSplitter.addWidget(self.messageView)
-        self.messageSplitter.addWidget(self.functionList)
         self.messageSplitter.addWidget(self.table)
+        self.messageSplitter.addWidget(self.messageView)
+        #self.messageSplitter.addWidget(self.functionList)
         self.mainSplitter = QSplitter(Qt.Horizontal)
         self.mainSplitter.addWidget(self.widget)
         self.mainSplitter.addWidget(self.messageSplitter)
         self.setCentralWidget(self.mainSplitter)
-        l = QVBoxLayout(self.messageView)
-        dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
-        l.addWidget(dc)
 
 
         l1 = QtWidgets.QLabel(self.widget)
@@ -300,49 +265,85 @@ class MyWindow(QMainWindow):
 
     def mousePressEvent(self, QMouseEvent):
         globalPos = self.mapToGlobal(QMouseEvent.pos())
-        print("The mouse is at (%d,%d)" % (QMouseEvent.pos().x(), QMouseEvent.pos().y()))
+        global index
+        #print("The mouse is at (%d,%d)" % (QMouseEvent.pos().x(), QMouseEvent.pos().y()))
         x=QMouseEvent.pos().x()-self.pic_x
         y=QMouseEvent.pos().y()-self.pic_y
         menuwidth=23
         y=y-menuwidth
 
         ratio_x=self.change_x
-        '''
-        if x>34*ratio_x and x<88*ratio_x and y>28*ratio_x and y<73*ratio_x:
-            self.messageView.setText("1级旋风筒")
-        if x > 101*ratio_x and x < 155*ratio_x and y > 65*ratio_x and y < 109*ratio_x:
-            self.messageView.setText("2级旋风筒")
-        if x > 34*ratio_x and x < 88*ratio_x and y > 105*ratio_x and y < 149*ratio_x:
-            self.messageView.setText("3级旋风筒")
-        if x > 102*ratio_x and x < 155*ratio_x and y > 143*ratio_x and y < 189*ratio_x:
-            self.messageView.setText("4级旋风筒")
-        if x > 34*ratio_x and x < 88*ratio_x and y > 196*ratio_x and y < 242*ratio_x:
-            self.messageView.setText("5级旋风筒")
-        if x > 146*ratio_x and x < 204*ratio_x and y > 197*ratio_x and y < 241*ratio_x:
-            self.messageView.setText("分解炉")
-        if x > 218*ratio_x and x < 251*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-            self.messageView.setText("窑尾")
-        if x > 252*ratio_x and x < 290*ratio_x and y > 272*ratio_x and y < 321*ratio_x:
-            self.messageView.setText("预热带")
-        if x > 297*ratio_x and x < 345*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-            self.messageView.setText("分解带")
-        if x > 352*ratio_x and x < 393*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-            self.messageView.setText("烧成带")
-        if x > 399*ratio_x and x < 440*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-            self.messageView.setText("冷却带")
-        if x > 426*ratio_x and x < 479*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-            self.messageView.setText("窑头")
-        if x > 498*ratio_x and x < 540*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
-            self.messageView.setText("篦冷机1段")
-        if x > 544*ratio_x and x < 584*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
-            self.messageView.setText("篦冷机2段")
-        if x > 587*ratio_x and x < 633*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
-            self.messageView.setText("篦冷机3段")
-        if x > 370*ratio_x and x < 427*ratio_x and y > 121*ratio_x and y < 164*ratio_x:
-            self.messageView.setText("高温风机")
-        if x > 426*ratio_x and x < 479*ratio_x and y > 345*ratio_x and y < 369*ratio_x:
-            self.messageView.setText("煤粉仓")'''
-
+        if self.flag == 1:
+            l = QVBoxLayout(self.messageView)
+            if x>34*ratio_x and x<88*ratio_x and y>28*ratio_x and y<73*ratio_x:
+                index = 8
+                sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
+                # dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
+                l.addWidget(sc)
+                #1级旋风筒
+            if x > 101*ratio_x and x < 155*ratio_x and y > 65*ratio_x and y < 109*ratio_x:
+                index = 12
+                sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
+                # dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
+                l.addWidget(sc)
+                #2级旋风筒
+            if x > 34*ratio_x and x < 88*ratio_x and y > 105*ratio_x and y < 149*ratio_x:
+                index = 17
+                sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
+                # dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
+                l.addWidget(sc)
+                # 3级旋风筒
+            if x > 102*ratio_x and x < 155*ratio_x and y > 143*ratio_x and y < 189*ratio_x:
+                index = 21
+                sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
+                # dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
+                l.addWidget(sc)
+                # 4级旋风筒
+            if x > 34*ratio_x and x < 88*ratio_x and y > 196*ratio_x and y < 242*ratio_x:
+                l = QVBoxLayout(self.messageView)
+                index = 24
+                sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
+                # dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
+                l.addWidget(sc)
+                # 5级旋风筒
+            if x > 146*ratio_x and x < 204*ratio_x and y > 197*ratio_x and y < 241*ratio_x:
+                pass
+                #self.messageView.setText("分解炉")
+            if x > 218*ratio_x and x < 251*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
+                pass
+                #self.messageView.setText("窑尾")
+            if x > 252*ratio_x and x < 290*ratio_x and y > 272*ratio_x and y < 321*ratio_x:
+                pass
+                #                self.messageView.setText("预热带")
+            if x > 297*ratio_x and x < 345*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
+                pass
+                #self.messageView.setText("分解带")
+            if x > 352*ratio_x and x < 393*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
+                pass
+                #                self.messageView.setText("烧成带")
+            if x > 399*ratio_x and x < 440*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
+                pass
+                #                self.messageView.setText("冷却带")
+            if x > 426*ratio_x and x < 479*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
+                pass
+                #                self.messageView.setText("窑头")
+            if x > 498*ratio_x and x < 540*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
+                pass
+                #                self.messageView.setText("篦冷机1段")
+            if x > 544*ratio_x and x < 584*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
+                pass
+                #                self.messageView.setText("篦冷机2段")
+            if x > 587*ratio_x and x < 633*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
+                pass
+                #                self.messageView.setText("篦冷机3段")
+            if x > 370*ratio_x and x < 427*ratio_x and y > 121*ratio_x and y < 164*ratio_x:
+                pass
+                #                self.messageView.setText("高温风机")
+            if x > 426*ratio_x and x < 479*ratio_x and y > 345*ratio_x and y < 369*ratio_x:
+                pass
+                #                self.messageView.setText("煤粉仓")
+        else:
+            print("请先选择时间")
         '''def event(self, event):
         if event.type() == QEvent.KeyPress and \
                 event.key() == Qt.Key_Tab:
@@ -375,6 +376,58 @@ class MyWindow(QMainWindow):
             painter.drawRect(self.rec)
         #self.QPainter.drawRect(x1, y1, x2, y2)
         #self.QPainter.drawRect(50, 50, 50, 50)
+
+
+class MyMplCanvas(FigureCanvas):
+    """这是一个窗口部件，即QWidget（当然也是FigureCanvasAgg）"""
+    def __init__(self, parent=None, width=3, height=4, dpi=100):
+        global index
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+        # 每次plot()调用的时候，我们希望原来的坐标轴被清除(所以False)
+        self.axes.hold(False)
+
+        self.compute_initial_figure()
+
+        tablename = get_by_day(day)
+        self.axes.set_title(tablename[index])
+        #
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+
+        FigureCanvas.setSizePolicy(self,
+                                   QSizePolicy.Expanding,
+                                   QSizePolicy.Expanding)
+        FigureCanvas.updateGeometry(self)
+
+    def compute_initial_figure(self):
+        pass
+
+class MyStaticMplCanvas(MyMplCanvas):
+    """静态画布：一条正弦线"""
+    def compute_initial_figure(self):
+        global day,index
+        t = arange(0, 24, 1)
+        tablevalue = get_by_day(day)
+        self.axes.plot(t, tablevalue[index])
+
+class MyDynamicMplCanvas(MyMplCanvas):
+    """动态画布：每秒自动更新，更换一条折线。"""
+    def __init__(self, *args, **kwargs):
+        MyMplCanvas.__init__(self, *args, **kwargs)
+        timer = QtCore.QTimer(self)
+        timer.timeout.connect(self.update_figure)
+        timer.start(1000)
+
+    def compute_initial_figure(self):
+        self.axes.plot([0, 1, 2, 3], [1, 2, 0, 4], 'r')
+
+    def update_figure(self):
+        # 构建4个随机整数，位于闭区间[0, 10]
+        l = [random.randint(0, 10) for i in range(4)]
+
+        self.axes.plot([0, 1, 2, 3], l, 'r')
+        self.draw()
 
 
 if __name__ == '__main__':
