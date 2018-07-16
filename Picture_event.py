@@ -8,12 +8,17 @@ from PyQt5.QtWidgets import *#QWidget, QApplication, QLabel, QPushButton
 from PyQt5.QtCore import *
 from PyQt5.QtGui import QPainter,QIcon
 
+import matplotlib.font_manager as fm
 import matplotlib
 from numpy import arange, sin, pi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 global day
 global index
+
+myfont = fm.FontProperties(fname="C:\\Windows\\Fonts\\simsun.ttc", size=14)
+matplotlib.rcParams["axes.unicode_minus"] = False
+
 class MyWindow(QMainWindow):
     flag=0
     def __init__(self,parent=None):
@@ -274,11 +279,11 @@ class MyWindow(QMainWindow):
 
         ratio_x=self.change_x
         if self.flag == 1:
-            l = QVBoxLayout(self.messageView)
+
             if x>34*ratio_x and x<88*ratio_x and y>28*ratio_x and y<73*ratio_x:
                 index = 8
+                l = QVBoxLayout(self.messageView)
                 sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
-                # dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
                 l.addWidget(sc)
                 #1级旋风筒
             if x > 101*ratio_x and x < 155*ratio_x and y > 65*ratio_x and y < 109*ratio_x:
@@ -390,7 +395,7 @@ class MyMplCanvas(FigureCanvas):
         self.compute_initial_figure()
 
         tablename = get_by_day(day)
-        self.axes.set_title(tablename[index])
+        self.axes.set_title(tablename[0][index], fontproperties=myfont)
         #
         FigureCanvas.__init__(self, fig)
         self.setParent(parent)
@@ -409,7 +414,7 @@ class MyStaticMplCanvas(MyMplCanvas):
         global day,index
         t = arange(0, 24, 1)
         tablevalue = get_by_day(day)
-        self.axes.plot(t, tablevalue[index])
+        self.axes.plot(t, tablevalue[1][index])
 
 class MyDynamicMplCanvas(MyMplCanvas):
     """动态画布：每秒自动更新，更换一条折线。"""
