@@ -1,5 +1,4 @@
 *{margin:0;padding:0;}
-
 .nav{
 	background-color:white;
 	width: 87.55%;height:60px;
@@ -64,4 +63,12 @@
 	  border:solid 1px;}
 .trd {width:470px;
       height:300px;
-	  border:solid 1px;}
+	  border:solid 1px;
+	  overflow-y:scroll;
+	  overflow-x:none;}
+.line{position:absolute;
+      height:2px;
+	  width:470px;
+	  overflow:hidden;
+	  background:red;
+	  cursor:n-resize;}

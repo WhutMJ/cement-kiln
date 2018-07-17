@@ -6,7 +6,7 @@
 	<link rel="stylesheet" href="css/index.css">
 </head>
 <body background="img/tempback.jpg">
-	<div style="margin:20px 200px"><h1 style="text-align: center;font-size:62px;">水&nbsp;泥&nbsp;窑&nbsp;系&nbsp;统</h1></div>
+	<div style="margin:20px 100px"><h1 style="text-align: center;font-size:62px;">水&nbsp;泥&nbsp;窑&nbsp;系&nbsp;统</h1></div>
 <div class="nav">
 	<ul>
 		<li>
@@ -84,12 +84,99 @@
 		</li>
 </ul>
 </div>
-</div>
-<div class="left-side"></div>
+<div class="left-side"><img src="img/flowchart.jpg" width=750px height=500px></div>
 <div class="right-side">
 <div class="fst"></div>
+<div class="line"></div>
 <div class="snd"></div>
-<div class="trd"></div>
+<div class="trd">
+<table width="100%" align=center border=1px class="form" > 
+               <tr> 
+        <td width="50%" height="30px">表单数据</td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+              <tr> 
+        <td width="50%" height="30px"></td> 
+        <td width="50%" height="30px"></td> 
+    </tr>  
+          </table>
+</div>
 </div>
 </body>
+<script type="text/javascript">
+function $(ClassName) {
+ return document.getElementByClassName(ClassName) ;
+}
+window.onload = function() {
+ var oright-side=$("right-side"), ofst=$("fst"), osnd=$("snd"), oline=$("line");
+ oLine.onmousedown = function(e) {
+  var disY = (e || event).clientY;
+  oLine.top = oLine.offsetTop;
+  document.onmousemove = function(e) { 
+   var iT = oLine.top + ((e || event).clientY - disY);
+  var e=e||window.event,tarnameb=e.target||e.srcElement;
+   var maxT = oBox.clientHeight - oLine.offsetHeight;
+   oLine.style.margin = 0;
+   iT < 0 && (iT = 0);
+   iT > maxT && (iT = maxT);
+   oLine.style.Top = oTop.style.Height = iT + "px";
+   ofst.style.Height = oBox.clientHeight - iT + "px";
+ 
+   return false
+  }; 
+  document.onmouseup = function() {
+   document.onmousemove = null;
+   document.onmouseup = null; 
+   oLine.releaseCapture && oLine.releaseCapture()
+  };
+  oLine.setCapture && oLine.setCapture();
+  return false;
+ };
+};
+
+</script>
 </html>
