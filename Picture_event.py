@@ -1,5 +1,6 @@
 import sys
 import random
+import sip
 from provide_data_for_gui import *
 from win32api import GetSystemMetrics
 
@@ -16,7 +17,7 @@ from matplotlib.figure import Figure
 global day
 global index
 
-myfont = fm.FontProperties(fname="C:\\Windows\\Fonts\\simsun.ttc", size=14)
+myfont = fm.FontProperties(fname="C:\\Windows\\Fonts\\simsun.ttc", size=14)#设置字体，实现显示中文
 matplotlib.rcParams["axes.unicode_minus"] = False
 
 class MyWindow(QMainWindow):
@@ -33,7 +34,7 @@ class MyWindow(QMainWindow):
         global day
         self.flag=1
         self.calendar.hide()
-        date=self.calendar.selectedDate().toString('yyyy-MM-dd')
+        date=self.calendar.selectedDate().toString('yyyy-MM-dd')#日期显示格式 例:2017-01-02
         date_input = '12345678'
         date_input = date[:4]+date[5:7]+date[8:10]
         self.timeBtn.setText(date)
@@ -228,9 +229,9 @@ class MyWindow(QMainWindow):
 
     def initPic(self):
         metric_width = GetSystemMetrics(0)
-        metric_height = GetSystemMetrics(1)
-        print(metric_width)
-        print(metric_height)
+        metric_height = GetSystemMetrics(1)#获取电脑分辨率
+        #print(metric_width)
+        #print(metric_height)
         self.width = metric_width*0.618  # 图片宽度
         self.height = metric_height*0.618  # 图片高度
         self.pic_x = 30
@@ -238,7 +239,7 @@ class MyWindow(QMainWindow):
         #设置信息显示区域
         self.setWindowTitle("Cement Kiln")
         self.widget = QWidget()
-        self.table = QTableWidget(0, 2)
+        self.table = QTableWidget(0, 2) #以表格形式显示数据
         self.table.setMinimumHeight(100)
         self.messageView = QWidget()
         self.messageView.setMinimumHeight(100)
@@ -256,8 +257,10 @@ class MyWindow(QMainWindow):
         self.mainSplitter.addWidget(self.messageSplitter)
         self.setCentralWidget(self.mainSplitter)
 
+        self.table.setMaximumHeight(300)
+        self.l = QVBoxLayout(self.messageView)
 
-        l1 = QtWidgets.QLabel(self.widget)
+        l1 = QtWidgets.QLabel(self.widget)  #显示窑系统图片
         l1.setPixmap(QtGui.QPixmap('picture\yaoxt.png').scaled(self.width, self.height, aspectRatioMode=Qt.KeepAspectRatio))  # 改变图片大小.scaled(self.width, self.height, aspectRatioMode=Qt.KeepAspectRatio)
         pic_size = QtGui.QPixmap('picture\yaoxt.png')
         self.change_x = self.width / pic_size.width()  # 由于图片显示保持比例，故放缩比例只需要计算x方向即可
@@ -267,6 +270,8 @@ class MyWindow(QMainWindow):
         self.resize(1200, 800)
         self.showMaximized()
 
+    def change_pic(self):
+        pass
 
     def mousePressEvent(self, QMouseEvent):
         globalPos = self.mapToGlobal(QMouseEvent.pos())
@@ -278,74 +283,96 @@ class MyWindow(QMainWindow):
         y=y-menuwidth
 
         ratio_x=self.change_x
-        if self.flag == 1:
-
+        if self.flag == 1:#判断是否选择了时间
+            #l.setObjectName('picture')
             if x>34*ratio_x and x<88*ratio_x and y>28*ratio_x and y<73*ratio_x:
                 index = 8
-                l = QVBoxLayout(self.messageView)
-                sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
-                l.addWidget(sc)
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #1级旋风筒
             if x > 101*ratio_x and x < 155*ratio_x and y > 65*ratio_x and y < 109*ratio_x:
                 index = 12
-                sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
                 # dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
-                l.addWidget(sc)
+                self.l.addChildWidget(sc)
                 #2级旋风筒
             if x > 34*ratio_x and x < 88*ratio_x and y > 105*ratio_x and y < 149*ratio_x:
                 index = 17
-                sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
                 # dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
-                l.addWidget(sc)
+                self.l.addChildWidget(sc)
                 # 3级旋风筒
             if x > 102*ratio_x and x < 155*ratio_x and y > 143*ratio_x and y < 189*ratio_x:
                 index = 21
-                sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
                 # dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
-                l.addWidget(sc)
+                self.l.addChildWidget(sc)
                 # 4级旋风筒
             if x > 34*ratio_x and x < 88*ratio_x and y > 196*ratio_x and y < 242*ratio_x:
-                l = QVBoxLayout(self.messageView)
                 index = 24
-                sc = MyStaticMplCanvas(self.messageView, width=2, height=4, dpi=100)
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
                 # dc = MyDynamicMplCanvas(self.messageView, width=1, height=4, dpi=100)
-                l.addWidget(sc)
+                self.l.addChildWidget(sc)
                 # 5级旋风筒
             if x > 146*ratio_x and x < 204*ratio_x and y > 197*ratio_x and y < 241*ratio_x:
-                pass
+                index = 29
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #self.messageView.setText("分解炉")
             if x > 218*ratio_x and x < 251*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-                pass
+                index = 28
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #self.messageView.setText("窑尾")
             if x > 252*ratio_x and x < 290*ratio_x and y > 272*ratio_x and y < 321*ratio_x:
-                pass
+                index = 8
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #                self.messageView.setText("预热带")
             if x > 297*ratio_x and x < 345*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-                pass
+                index = 8
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3,dpi=100)
+                self.l.addChildWidget(sc)
                 #self.messageView.setText("分解带")
             if x > 352*ratio_x and x < 393*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-                pass
+                index = 8
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #                self.messageView.setText("烧成带")
             if x > 399*ratio_x and x < 440*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-                pass
+                index = 8
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #                self.messageView.setText("冷却带")
             if x > 426*ratio_x and x < 479*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-                pass
+                index = 5
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #                self.messageView.setText("窑头")
             if x > 498*ratio_x and x < 540*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
-                pass
+                index = 33
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #                self.messageView.setText("篦冷机1段")
             if x > 544*ratio_x and x < 584*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
-                pass
+                index = 36
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #                self.messageView.setText("篦冷机2段")
             if x > 587*ratio_x and x < 633*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
-                pass
+                index = 38
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #                self.messageView.setText("篦冷机3段")
             if x > 370*ratio_x and x < 427*ratio_x and y > 121*ratio_x and y < 164*ratio_x:
-                pass
+                index = 40
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #                self.messageView.setText("高温风机")
             if x > 426*ratio_x and x < 479*ratio_x and y > 345*ratio_x and y < 369*ratio_x:
-                pass
+                index = 0
+                sc = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.l.addChildWidget(sc)
                 #                self.messageView.setText("煤粉仓")
         else:
             print("请先选择时间")
