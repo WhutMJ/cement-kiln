@@ -1,6 +1,6 @@
 *{margin:0;padding:0;}
 .nav{
-	background-color:white;
+	background-color:#F0F8FF;
 	width: 87.55%;height:60px;
 	margin:0 auto;
 	border-color: black;
@@ -46,20 +46,20 @@
            border:solid 1px;
            width:750px;
 		   height:900px;
-		   margin:20px 20px 20px 100px;
-		   background-image:url(bg6.jpg);
-		   }
+		   margin:20px 20px 20px 100px;}
 .right-side{float:left;
             border:solid 1px;
             width:470px;
 			height:900px;
-			margin:20px 100px 20px 20px;
-			}
+			margin:20px 100px 20px 20px;}
 .fst {width:470px;
       height:300px;
-	  border:solid 1px;}
-.snd {width:470px;
-      height:300px;
+     -webkit-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;}
+.box1 {width:470px;
+      height:600px;
 	  border:solid 1px;}
 .trd {width:470px;
       height:300px;
@@ -70,5 +70,5 @@
       height:2px;
 	  width:470px;
 	  overflow:hidden;
-	  background:red;
+	  background:black;
 	  cursor:n-resize;}

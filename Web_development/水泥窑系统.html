@@ -84,11 +84,14 @@
 		</li>
 </ul>
 </div>
-<div class="left-side"><img src="img/flowchart.jpg" width=750px height=500px></div>
+<div class="left-side" ><img src="img/flowchart.jpg" width=750px height=600px></div>
 <div class="right-side">
-<div class="fst"></div>
-<div class="line"></div>
-<div class="snd"></div>
+  <div class="box1" id="box1">
+<div class="fst" id="fst" ><img src="img/linechart.jpg"  width=468px height=100%></div>
+<div class="line" id="line"></div>
+<div class="snd"  id="snd"></div>
+  </div>
+  <div class="box2">
 <div class="trd">
 <table width="100%" align=center border=1px class="form" > 
                <tr> 
@@ -147,36 +150,5 @@
 </div>
 </div>
 </body>
-<script type="text/javascript">
-function $(ClassName) {
- return document.getElementByClassName(ClassName) ;
-}
-window.onload = function() {
- var oright-side=$("right-side"), ofst=$("fst"), osnd=$("snd"), oline=$("line");
- oLine.onmousedown = function(e) {
-  var disY = (e || event).clientY;
-  oLine.top = oLine.offsetTop;
-  document.onmousemove = function(e) { 
-   var iT = oLine.top + ((e || event).clientY - disY);
-  var e=e||window.event,tarnameb=e.target||e.srcElement;
-   var maxT = oBox.clientHeight - oLine.offsetHeight;
-   oLine.style.margin = 0;
-   iT < 0 && (iT = 0);
-   iT > maxT && (iT = maxT);
-   oLine.style.Top = oTop.style.Height = iT + "px";
-   ofst.style.Height = oBox.clientHeight - iT + "px";
- 
-   return false
-  }; 
-  document.onmouseup = function() {
-   document.onmousemove = null;
-   document.onmouseup = null; 
-   oLine.releaseCapture && oLine.releaseCapture()
-  };
-  oLine.setCapture && oLine.setCapture();
-  return false;
- };
-};
-
-</script>
+<script src="js/drag.js"></script>
 </html>
