@@ -26,6 +26,52 @@
 
 # -*- coding: utf-8 -*-
 from math import *
+
+
+def blank_to_zero(source):      #将表中空白的部分取值为0
+    result = source
+    for i in range(len(source)):
+        if source[i] == '':
+            result[i] = 0
+    return result
+
+def Delete_blank(source1, source2):           #去掉每一列中的空缺值
+    '''
+    :param source1: the first list
+    :param source2: the second list
+    :return: the lists that have been dealed with
+    '''
+    result1 = []
+    result2 = []
+    for index in range(len(source1)):
+        if source1[index] == '' or source2[index] == '':
+            continue
+        elif source1[index] == 'Y' or source2[index] == 'N':
+            continue
+        else:
+            result1.append(source1[index])
+            result2.append(source2[index])
+
+    return result1, result2
+
+def Delete_blank_more(source):
+    length = len(source)
+    result = [[] for i in range(length)]
+    Index = 0
+    for index in range(len(source[0])):
+        for i in range(length):
+            if source[i][index] == '':
+                Index = 1
+                break
+        if Index == 1:
+            Index = 0
+            continue
+        else:
+            for i in range(length):
+                result[i].append(source[i][index])
+    return result
+
+
 class tongjl:
     def Average(self,x):    #计算平均值,其中去掉了空白值，计算的不是非空白区域的均值
         l = length = len(x)     #记录x的长度
@@ -58,7 +104,8 @@ class tongjl:
             result.append(y[i] ** 0.5)
         '''
         return (y ** 0.5)
-    def Zhongs(self,x):     #计算众数
+
+    def Zhongs(self, x):     #计算众数
         length = len(set(x))
         result = []
         index = max(x.count(i) for i in set(x))
@@ -69,46 +116,18 @@ class tongjl:
     def Similarity(self,x,y):   #计算相似性
         result = 0
         return result
-    def Sort(self,x):
-        length = len(x)
-        x1 = []
-        for i in range(length):
-            if x[i]!='':
-                x1.append(x[i])
-        x1 = sorted(x1)
-        return x1
-
-    # 拉格朗日插值
-
-    # 表示插值基函数
-    def base(self,x, i_x, x_daicha):
-        length = len(x)
-        sum = 1
-        for i in range(length):
-            if i_x != i:
-                sum = sum * (x_daicha - x[i]) / (x[i_x] - x[i])
-        return sum
-
-    # 拉格朗日插值，x,y维度必须相同
-    # x表示插值序列横坐标，y表示插值序列纵坐标
-    # x0表示待插值节点
-    def lagrange(self,x, y, x0):
-        f = 0
-        length = len(x)
-        # f 代表插值函数
-        f = 0
-        for i in range(length):
-            f = f + self.base(x, i, x0) * y[i]
-        # 返回插值节点的纵坐标
-        return f
-
-
 class date:
-    def DateIteration(self,startfilename,endfilename):       #实现自动检索所有的日期
+
+
+    def DateIteration(self, startfilename, endfilename):       #实现自动检索所有的日期
+        result = []
         while (startfilename != endfilename):
             startfilename = date.DateIncreases(self,startfilename)
-            print(startfilename)
-    def DateIncreases(self,filename):
+            result.append(startfilename)
+        return result
+
+
+    def DateIncreases(self,filename):                       #查找输入日期的下一个日期
         if (int(filename[filename.index(".") - 2:filename.index(".")]) < 9):
             filename = filename[:filename.index(".") - 1] + str(
                 int(filename[filename.index(".") - 1]) + 1) + filename[filename.index("."):]
@@ -153,3 +172,14 @@ class date:
                 filename = filename[:filename.index(".") - 6] + str(
                     int(filename[filename.index(".") - 6:filename.index(".") - 4]) + 1) + '0101' + filename[filename.index("."):]
         return filename
+
+
+'''
+if __name__ == "__main__":
+    data = [[1, 2, 3, 4, 5, 6, 7, 8, 9],
+            [1, '', 3, 4, 5, 6, '', 8, 9],
+            [1, 2, 3, '', 5, 6, 7, 8, 9],
+            [1, 2, 3, 4, 5, 6, 7, 8, 9]]
+    result = Delete_blank_more(data)
+    print(result)
+'''

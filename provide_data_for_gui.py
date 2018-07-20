@@ -36,7 +36,7 @@ def get_by_day(time):              #获取一天的二维数组的数据
     table_name = read_sheet.row_values(0, 2)
     table_value = []
     for i in range(len(table_name)):
-        x = read_sheet.col_values(i+2, index, index+23)
+        x = read_sheet.col_values(i+2, index, index+24)
         for j in range(len(x)):
             if x[j] == '':
                 x[j] = 'null'
