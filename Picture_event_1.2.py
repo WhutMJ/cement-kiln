@@ -428,7 +428,6 @@ class MyWindow(QMainWindow):
         elif self.click_flag == 1:
             self.sp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.sp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
-            print('123')
             self.pic1.replaceWidget(self.fp1, self.sp1)
             self.pic2.replaceWidget(self.fp2, self.sp2)
             self.click_flag = 2
@@ -467,7 +466,7 @@ class MyWindow(QMainWindow):
 
 
 class MyLabel(QLabel):
-    changeindex = pyqtSignal(int)
+    changeindex = pyqtSignal(int)  # 单击窑系统部件时会发出信号
 
     def __init__(self, parent=None):
         super(MyLabel, self).__init__(parent)
@@ -577,13 +576,32 @@ class MyTempMplCanvas(MyMplCanvas):
         if index_T == 0:
             pass
         else:
-            t = arange(0, 24, 1)
             tablevalue = get_by_day(day)
             count, null = self.cal_null(tablevalue[1][index_T])
 
             if count >= 1:
-                pass
+                value = [0 for i in range(24 - count)]
+                t = [i for i in range(24 - count)]
+                x_label = [str(i) for i in range(24 - count + 1)]
+                j = 0
+                x_label[j] = '0'
+                for i in range(24):
+                    if null[i] == 1:
+                        pass
+                    else:
+                        value[j] = tablevalue[1][index_T][i]
+                        # t[j] = i
+                        x_label[j + 1] = str(i)
+                        j += 1
+                self.axes.plot(t, value)
+                self.axes.set_xticklabels(x_label)
+                for tick in self.axes.get_xmajorticklabels():
+                    tick.set_fontsize(8)
+                xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
+                self.axes.xaxis.set_major_locator(xmajorLocator)
+                self.axes.set_title(tablevalue[0][index_T], fontproperties=myfont)
             else:
+                t = arange(0, 24, 1)
                 self.axes.plot(t, tablevalue[1][index_T])
                 xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
                 xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
@@ -600,12 +618,31 @@ class MyPressMplCanvas(MyMplCanvas):
         if index_P == 0:
             pass
         else:
-            t = arange(0, 24, 1)
             tablevalue = get_by_day(day)
             count, null = self.cal_null(tablevalue[1][index_P])
+
             if count >= 1:
-                pass
+                value = [0 for i in range(24 - count)]
+                t = [i for i in range(24 - count)]
+                x_label = [str(i) for i in range(24 - count + 1)]
+                j = 0
+                x_label[j] = '0'
+                for i in range(24):
+                    if null[i] == 1:
+                        pass
+                    else:
+                        value[j] = tablevalue[1][index_P][i]
+                        # t[j] = i
+                        x_label[j + 1] = str(i)
+                        j += 1
+                self.axes.plot(t, value)
+                self.axes.set_xticklabels(x_label)
+                for tick in self.axes.get_xmajorticklabels():
+                    tick.set_fontsize(8)
+                xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
+                self.axes.xaxis.set_major_locator(xmajorLocator)
             else:
+                t = arange(0, 24, 1)
                 self.axes.plot(t, tablevalue[1][index_P])
                 xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
                 xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
