@@ -59,12 +59,12 @@ class MyWindow(QMainWindow):
 
     def initBtn(self):
         self.timeBtn=QPushButton('双击确定',self.widget)
-        self.timeBtn.move(self.width*0.5,40)
+        self.timeBtn.move(self.width*0.5, self.height*0.05)
         self.timeBtn.clicked.connect(self.on_click)
         self.timeBtn.show()
 
         self.timeLabel = QLabel(self.widget)
-        self.timeLabel.move(self.width*0.5-30, 45)
+        self.timeLabel.move(self.width*0.5-30, self.height*0.05+5)
         self.timeLabel.resize(30,20)
         self.timeLabel.setText('日期')
         self.timeLabel.show()
@@ -245,7 +245,7 @@ class MyWindow(QMainWindow):
         self.pic_y = 200  # 图片起始点
         #设置信息显示区域
         self.setWindowTitle("Cement Kiln")
-        self.widget = QWidget(self)
+        self.widget = QWidget()
         self.table = QTableWidget(0, 2) #以表格形式显示数据
         self.table.setMinimumHeight(100)
         self.messageView = QWidget()
@@ -275,86 +275,106 @@ class MyWindow(QMainWindow):
         gwfj = QPixmap('picture\\gwfj.png')#高温风机
         ljg_sp = QPixmap('picture\\ljg_sp.png')#水平连接管
         ljg_sz = QPixmap('picture\\ljg_sz.png')#竖直连接管
+        ljg_zj_1 = QPixmap('picture\\ljg_zj_1.png')#左上
+        ljg_zj_2 = QPixmap('picture\\ljg_zj_2.png')#右上
+        ljg_zj_3 = QPixmap('picture\\ljg_zj_3.png')#左下
+        ljg_zj_4 = QPixmap('picture\\ljg_zj_4.png')#右下
+
         yao = QPixmap('picture\\yao.png')
+        ratio=1.5#图片放大倍数
 
         self.l1=MyLabel()
-        self.l1.setPixmap(xft)
+        self.l1.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l1.setObjectName('一级筒A')
         self.l1.changeindex.connect(self.change_pic)
+        self.widget.autoFillBackground()
 
         self.l2 = MyLabel()
-        self.l2.setPixmap(xft)
+        self.l2.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l2.setObjectName('一级筒A')
         self.l2.changeindex.connect(self.change_pic)
 
         self.l3 = MyLabel()
-        self.l3.setPixmap(xft)
+        self.l3.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l3.setObjectName('二级筒A')
         self.l3.changeindex.connect(self.change_pic)
 
         self.l4 = MyLabel()
-        self.l4.setPixmap(xft)
+        self.l4.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l4.setObjectName('三级筒A')
         self.l4.changeindex.connect(self.change_pic)
 
         self.l5 = MyLabel()
-        self.l5.setPixmap(xft)
+        self.l5.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l5.setObjectName('四级筒A')
         self.l5.changeindex.connect(self.change_pic)
 
         self.l6 = MyLabel()
-        self.l6.setPixmap(xft)
+        self.l6.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l6.setObjectName('五级筒A')
         self.l6.changeindex.connect(self.change_pic)
 
         self.l7 = MyLabel()
-        self.l7.setPixmap(fjl)
+        self.l7.setPixmap(fjl.scaled(fjl.width()*ratio,fjl.height()*ratio))
         self.l7.setObjectName('分解炉')
         self.l7.changeindex.connect(self.change_pic)
 
-        self.l8=MyLabel()
-        self.l8.setPixmap(ljg_sp)
-        self.l8.setObjectName('水平连接管')
-        self.l8.changeindex.connect(self.change_pic)
+        self.ljg_sp=QLabel()
+        self.ljg_sp.setPixmap(ljg_sp.scaled(ljg_sp.width()*ratio,ljg_sp.height()*ratio))
+
+        self.ljg_sz=QLabel()
+        self.ljg_sz.setPixmap(ljg_sz.scaled(ljg_sz.width()*ratio,ljg_sz.height()*ratio))
+
+        self.ljg1=QLabel()
+        self.ljg1.setPixmap(ljg_zj_2.scaled(ljg_zj_2.width()*ratio,ljg_zj_2.height()*ratio))
+
+        self.ljg2=QLabel()
+        self.ljg2.setPixmap(ljg_zj_1.scaled(ljg_zj_1.width()*ratio,ljg_zj_1.height()*ratio))
+
+        self.ljg3=QLabel()
+        self.ljg3.setPixmap(ljg_zj_2.scaled(ljg_zj_2.width()*ratio,ljg_zj_2.height()*ratio))
+
+        self.ljg4=QLabel()
+        self.ljg4.setPixmap(ljg_zj_1.scaled(ljg_zj_1.width()*ratio,ljg_zj_1.height()*ratio))
 
         self.l9 = MyLabel()
-        self.l9.setPixmap(yao)
+        self.l9.setPixmap(yao.scaled(yao.width()*ratio,yao.height()*ratio))
         self.l9.setObjectName('窑')
         self.l9.changeindex.connect(self.change_pic)
 
 
         self.l10 = MyLabel()
-        self.l10.setPixmap(blj)
+        self.l10.setPixmap(blj.scaled(blj.width()*ratio,blj.height()*ratio))
         self.l10.setObjectName('篦冷机')
         self.l10.changeindex.connect(self.change_pic)
 
         self.l11 = MyLabel()
-        self.l11.setPixmap(xft)
+        self.l11.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l11.setObjectName('一级筒B')
         self.l11.changeindex.connect(self.change_pic)
 
         self.l12 = MyLabel()
-        self.l12.setPixmap(xft)
+        self.l12.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l12.setObjectName('一级筒B')
         self.l12.changeindex.connect(self.change_pic)
 
         self.l13 = MyLabel()
-        self.l13.setPixmap(xft)
+        self.l13.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l13.setObjectName('二级筒B')
         self.l13.changeindex.connect(self.change_pic)
 
         self.l14 = MyLabel()
-        self.l14.setPixmap(xft)
+        self.l14.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l14.setObjectName('三级筒B')
         self.l14.changeindex.connect(self.change_pic)
 
         self.l15 = MyLabel()
-        self.l15.setPixmap(xft)
+        self.l15.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l15.setObjectName('四级筒B')
         self.l15.changeindex.connect(self.change_pic)
 
         self.l16 = MyLabel()
-        self.l16.setPixmap(xft)
+        self.l16.setPixmap(xft.scaled(xft.width()*ratio,xft.height()*ratio))
         self.l16.setObjectName('五级筒B')
         self.l16.changeindex.connect(self.change_pic)
 
@@ -368,9 +388,13 @@ class MyWindow(QMainWindow):
         lay.addWidget(self.l5, 3, 2)
         lay.addWidget(self.l6, 4, 1)
         lay.addWidget(self.l7, 3, 4)
-        lay.addWidget(self.l8, 3, 3)
 
-        lay.addWidget(self.l9, 5, 5, 6, 8)
+        lay.addWidget(self.ljg1, 0, 2)
+        lay.addWidget(self.ljg2, 1, 1)
+        lay.addWidget(self.ljg3, 2, 2)
+        lay.addWidget(self.ljg4, 3, 1)
+
+        lay.addWidget(self.l9, 5, 5, 3, 3)
         lay.addWidget(self.l10, 6, 9)
 
         lay.addWidget(self.l11, 0, 6)
@@ -379,12 +403,13 @@ class MyWindow(QMainWindow):
         lay.addWidget(self.l14, 2, 6)
         lay.addWidget(self.l15, 3, 5)
         lay.addWidget(self.l16, 4, 6)
+        lay.addWidget(QLabel(''),8,5,10,3)
 
         lay.setSpacing(0)
-        lay.setAlignment(Qt.AlignLeft)
+        lay.setAlignment(Qt.AlignLeft|Qt.AlignCenter)
 
         self.widget.setLayout(lay)
-        self.widget.move(100,100)
+        #self.widget.move(100,100)
 
         self.resize(800,600)
         self.showMaximized()
@@ -403,94 +428,6 @@ class MyWindow(QMainWindow):
             self.fp = MyStaticMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.l.replaceWidget(self.sp, self.fp)
             self.click_flag = 1
-
-
-            #                self.messageView.setText("煤粉仓")
-    '''def mousePressEvent(self, QMouseEvent):
-        globalPos = self.mapToGlobal(QMouseEvent.pos())
-        global index
-        #print("The mouse is at (%d,%d)" % (QMouseEvent.pos().x(), QMouseEvent.pos().y()))
-        x=QMouseEvent.pos().x()-self.pic_x
-        y=QMouseEvent.pos().y()-self.pic_y
-        menuwidth=23
-        y=y-menuwidth
-
-        ratio_x=self.change_x
-        if self.flag == 1:#判断是否选择了时间
-            #l.setObjectName('picture')
-            if x>34*ratio_x and x<88*ratio_x and y>28*ratio_x and y<73*ratio_x:
-                index = 8
-                self.change_pic()
-                #1级旋风筒
-            if x > 101*ratio_x and x < 155*ratio_x and y > 65*ratio_x and y < 109*ratio_x:
-                index = 12
-                self.change_pic()
-                #2级旋风筒
-            if x > 34*ratio_x and x < 88*ratio_x and y > 105*ratio_x and y < 149*ratio_x:
-                index = 17
-                self.change_pic()
-                # 3级旋风筒
-            if x > 102*ratio_x and x < 155*ratio_x and y > 143*ratio_x and y < 189*ratio_x:
-                index = 21
-                self.change_pic()
-                # 4级旋风筒
-            if x > 34*ratio_x and x < 88*ratio_x and y > 196*ratio_x and y < 242*ratio_x:
-                index = 24
-                self.change_pic()
-                # 5级旋风筒
-            if x > 146*ratio_x and x < 204*ratio_x and y > 197*ratio_x and y < 241*ratio_x:
-                index = 29
-                self.change_pic()
-                #self.messageView.setText("分解炉")
-            if x > 218*ratio_x and x < 251*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-                index = 28
-                self.change_pic()
-                #self.messageView.setText("窑尾")
-            if x > 252*ratio_x and x < 290*ratio_x and y > 272*ratio_x and y < 321*ratio_x:
-                index = 8
-                self.change_pic()
-                #                self.messageView.setText("预热带")
-            if x > 297*ratio_x and x < 345*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-                index = 8
-                self.change_pic()
-                #self.messageView.setText("分解带")
-            if x > 352*ratio_x and x < 393*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-                index = 8
-                self.change_pic()
-                #                self.messageView.setText("烧成带")
-            if x > 399*ratio_x and x < 440*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-                index = 8
-                self.change_pic()
-                #                self.messageView.setText("冷却带")
-            if x > 426*ratio_x and x < 479*ratio_x and y > 272*ratio_x and y < 322*ratio_x:
-                index = 5
-                self.change_pic()
-                #                self.messageView.setText("窑头")
-            if x > 498*ratio_x and x < 540*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
-                index = 33
-                self.change_pic()
-                #                self.messageView.setText("篦冷机1段")
-            if x > 544*ratio_x and x < 584*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
-                index = 36
-                self.change_pic()
-                #                self.messageView.setText("篦冷机2段")
-            if x > 587*ratio_x and x < 633*ratio_x and y > 298*ratio_x and y < 323*ratio_x:
-                index = 38
-                self.change_pic()
-                #                self.messageView.setText("篦冷机3段")
-            if x > 370*ratio_x and x < 427*ratio_x and y > 121*ratio_x and y < 164*ratio_x:
-                index = 40
-                self.change_pic()
-                #                self.messageView.setText("高温风机")
-            if x > 426*ratio_x and x < 479*ratio_x and y > 345*ratio_x and y < 369*ratio_x:
-                index = 0
-                self.change_pic()
-                #                self.messageView.setText("煤粉仓")
-        else:
-            self.msg()'''
-
-    def msg(self):
-        reply=QMessageBox.information(self,'提示','请先选择时间',QMessageBox.Yes|QMessageBox.No)
 
     def closeEvent(self, event):
         reply = QtWidgets.QMessageBox.question(self,
@@ -542,13 +479,13 @@ class MyLabel(QLabel):
                 index = 14
                 self.call_win(index)
             elif self.objectName() == '三级筒A':
-                index = 16
+                index = 17
                 self.call_win(index)
             elif self.objectName() == '三级筒B':
                 index = 18
                 self.call_win(index)
             elif self.objectName() == '四级筒A':
-                index = 20
+                index = 21
                 self.call_win(index)
             elif self.objectName() == '四级筒B':
                 index = 23
@@ -605,9 +542,6 @@ class MyStaticMplCanvas(MyMplCanvas):
         global day,index
         t = arange(0, 24, 1)
         tablevalue = get_by_day(day)
-        '''for i in range(len(tablevalue)):
-            print(i)
-            print(tablevalue[0][i])'''
         self.axes.plot(t, tablevalue[1][index])
 
 class MyDynamicMplCanvas(MyMplCanvas):
