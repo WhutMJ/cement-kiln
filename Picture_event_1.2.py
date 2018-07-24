@@ -275,20 +275,21 @@ class MyWindow(QMainWindow):
 
         self.click_flag = 0
 
-        xft = QPixmap('picture\\xft_dl.png')  # 旋风筒
+        xft = QPixmap('picture\\xft.png')  # 旋风筒
         fjl = QPixmap('picture\\fjl.png')  # 分解炉
         blj = QPixmap('picture\\blj.png')  # 篦冷机
+        fjl_yao = QPixmap('picture\\fjl_yao')  # 分解炉与窑之间的连接部件
         mfc = QPixmap('picture\\mfc.png')  # 煤粉仓
         gwfj = QPixmap('picture\\gwfj.png')  # 高温风机
         ljg_sp = QPixmap('picture\\ljg_sp.png')  # 水平连接管
         ljg_sz = QPixmap('picture\\ljg_sz.png')  # 竖直连接管
-        ljg_zj_1 = QPixmap('picture\\ljg_zj_1.png')  # 左上
-        ljg_zj_2 = QPixmap('picture\\ljg_zj_2.png')  # 右上
+        ljg_zj_1 = QPixmap('picture\\ljg_1.png')  # 左上
+        ljg_zj_2 = QPixmap('picture\\ljg_2.png')  # 右上
         ljg_zj_3 = QPixmap('picture\\ljg_zj_3.png')  # 左下
         ljg_zj_4 = QPixmap('picture\\ljg_zj_4.png')  # 右下
 
         yao = QPixmap('picture\\yao.png')
-        ratio = 1.5  # 图片放大倍数
+        ratio = 0.3  # 图片放大倍数
 
         self.l1 = MyLabel()
         self.l1.setPixmap(xft.scaled(xft.width() * ratio, xft.height() * ratio))
@@ -344,6 +345,18 @@ class MyWindow(QMainWindow):
         self.ljg4 = QLabel()
         self.ljg4.setPixmap(ljg_zj_1.scaled(ljg_zj_1.width() * ratio, ljg_zj_1.height() * ratio))
 
+        self.ljg5 = QLabel()
+        self.ljg5.setPixmap(ljg_zj_2.scaled(ljg_zj_2.width() * ratio, ljg_zj_2.height() * ratio))
+
+        self.ljg6 = QLabel()
+        self.ljg6.setPixmap(ljg_zj_1.scaled(ljg_zj_1.width() * ratio, ljg_zj_1.height() * ratio))
+
+        self.ljg7 = QLabel()
+        self.ljg7.setPixmap(ljg_zj_2.scaled(ljg_zj_2.width() * ratio, ljg_zj_2.height() * ratio))
+
+        self.ljg8 = QLabel()
+        self.ljg8.setPixmap(ljg_zj_1.scaled(ljg_zj_1.width() * ratio, ljg_zj_1.height() * ratio))
+
         self.l9 = MyLabel()
         self.l9.setPixmap(yao.scaled(yao.width() * ratio, yao.height() * ratio))
         self.l9.setObjectName('窑')
@@ -384,31 +397,44 @@ class MyWindow(QMainWindow):
         self.l16.setObjectName('五级筒B')
         self.l16.changeindex.connect(self.change_pic)
 
-        lay = QGridLayout()
+        self.fjl_yao = MyLabel()
+        self.fjl_yao.setPixmap(fjl_yao.scaled(fjl_yao.width() * ratio, fjl_yao.height() * ratio))
+        self.fjl_yao.setObjectName('分解炉--窑')
 
-        lay.addWidget(self.l1, 0, 0)
-        lay.addWidget(self.l2, 0, 1)
-        lay.addWidget(self.l3, 1, 2)
-        lay.addWidget(self.l4, 2, 1)
-        lay.addWidget(self.l5, 3, 2)
-        lay.addWidget(self.l6, 4, 1)
-        lay.addWidget(self.l7, 3, 4)
+        lay = QGridLayout()
+        x0 = 0
+        y0 = 0  # 初始位置
+        dx = 3
+        dy = 3  # 跨越列行
+        lay.addWidget(self.l1, x0, y0)  # 1级筒A
+        lay.addWidget(self.l2, x0, y0 + 1)  # 1级筒A
+        lay.addWidget(self.l3, x0 + 1, y0 + 2)  # 2级筒A
+        lay.addWidget(self.l4, x0 + 2, y0 + 1)  # 3级筒A
+        lay.addWidget(self.l5, x0 + 3, y0 + 2)  # 4级筒A
+        lay.addWidget(self.l6, x0 + 4, y0 + 1)  # 5级筒A
+        lay.addWidget(self.l7, x0 + 3, y0 + 4, dx, dy)  # 分解炉
+        lay.addWidget(self.fjl_yao, x0 + 6, y0 + 5)
 
         lay.addWidget(self.ljg1, 0, 2)
         lay.addWidget(self.ljg2, 1, 1)
         lay.addWidget(self.ljg3, 2, 2)
         lay.addWidget(self.ljg4, 3, 1)
+        lay.addWidget(self.ljg5, 0, 2)
+        lay.addWidget(self.ljg6, 1, 1)
+        lay.addWidget(self.ljg7, 2, 2)
+        lay.addWidget(self.ljg8, 3, 1)
 
-        lay.addWidget(self.l9, 5, 5, 3, 3)
-        lay.addWidget(self.l10, 6, 9)
 
-        lay.addWidget(self.l11, 0, 6)
-        lay.addWidget(self.l12, 0, 7)
-        lay.addWidget(self.l13, 1, 5)
-        lay.addWidget(self.l14, 2, 6)
-        lay.addWidget(self.l15, 3, 5)
-        lay.addWidget(self.l16, 4, 6)
-        lay.addWidget(QLabel(''), 8, 5, 10, 3)
+        lay.addWidget(self.l9, x0 + 6, y0 + 6, 2, dy * 3)  # 窑
+        lay.addWidget(self.l10, x0 + 6, y0 + 10 + dy * 2, 2, dy)  # 篦冷机
+
+        lay.addWidget(self.l11, x0 + 0, y0 + 8)  # 1级筒B
+        lay.addWidget(self.l12, x0 + 0, y0 + 9)  # 1级筒B
+        lay.addWidget(self.l13, x0 + 1, y0 + 7)  # 2级筒B
+        lay.addWidget(self.l14, x0 + 2, y0 + 8)  # 3级筒B
+        lay.addWidget(self.l15, x0 + 3, y0 + 7)  # 4级筒B
+        lay.addWidget(self.l16, x0 + 4, y0 + 8)  # 5级筒B
+        # lay.addWidget(QLabel(''), 8, 5, 10, 3)
 
         lay.setSpacing(0)
         lay.setAlignment(Qt.AlignLeft | Qt.AlignCenter)
