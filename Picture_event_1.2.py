@@ -14,10 +14,12 @@ import matplotlib
 from numpy import arange, sin, pi
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
+import mpl_toolkits.axisartist as axisartist
 
 global day, flag, index_T, index_P
 
 myfont = fm.FontProperties(fname="C:\\Windows\\Fonts\\simsun.ttc", size=14)  # 设置字体，实现显示中文
+labelfont = fm.FontProperties(fname="C:\\Windows\\Fonts\\simsun.ttc", size=9)  # 设置字体，实现显示中文
 matplotlib.rcParams["axes.unicode_minus"] = False
 
 
@@ -543,7 +545,13 @@ class MyMplCanvas(FigureCanvas):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         # 每次plot()调用的时候，我们希望原来的坐标轴被清除(所以False)
-        self.axes.hold(False)
+        # self.axes.hold(False)
+        '''self.ax = axisartist.Subplot(fig, 111)
+        fig.add_axes(self.ax)
+        self.ax.axis['bottom'].set_axisline_style('->', size=1.5)
+        self.ax.axis["left"].set_axisline_style("->", size=1.5)
+        self.ax.axis["top"].set_visible(False)
+        self.ax.axis["right"].set_visible(False)'''
 
         self.compute_initial_figure()
 
@@ -578,7 +586,12 @@ class MyTempMplCanvas(MyMplCanvas):
         else:
             tablevalue = get_by_day(day)
             count, null = self.cal_null(tablevalue[1][index_T])
-
+            self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
+            self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+            for tick_x in self.axes.get_xmajorticklabels():
+                tick_x.set_fontsize(8)
+            for tick_y in self.axes.get_ymajorticklabels():
+                tick_y.set_fontsize(7)
             if count >= 1:
                 value = [0 for i in range(24 - count)]
                 t = [i for i in range(24 - count)]
@@ -595,8 +608,7 @@ class MyTempMplCanvas(MyMplCanvas):
                         j += 1
                 self.axes.plot(t, value)
                 self.axes.set_xticklabels(x_label)
-                for tick in self.axes.get_xmajorticklabels():
-                    tick.set_fontsize(8)
+
                 xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
                 self.axes.xaxis.set_major_locator(xmajorLocator)
                 self.axes.set_title(tablevalue[0][index_T], fontproperties=myfont)
@@ -620,7 +632,12 @@ class MyPressMplCanvas(MyMplCanvas):
         else:
             tablevalue = get_by_day(day)
             count, null = self.cal_null(tablevalue[1][index_P])
-
+            self.axes.set_ylabel('压强/kPa', verticalalignment='center', fontproperties=labelfont)
+            self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+            for tick_x in self.axes.get_xmajorticklabels():
+                tick_x.set_fontsize(8)
+            for tick_y in self.axes.get_ymajorticklabels():
+                tick_y.set_fontsize(7)
             if count >= 1:
                 value = [0 for i in range(24 - count)]
                 t = [i for i in range(24 - count)]
@@ -641,6 +658,7 @@ class MyPressMplCanvas(MyMplCanvas):
                     tick.set_fontsize(8)
                 xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
                 self.axes.xaxis.set_major_locator(xmajorLocator)
+
             else:
                 t = arange(0, 24, 1)
                 self.axes.plot(t, tablevalue[1][index_P])
