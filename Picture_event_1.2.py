@@ -323,7 +323,7 @@ class MyWindow(QMainWindow):
         self.l6.changeindex.connect(self.change_pic)
 
         self.l7 = MyLabel()
-        self.l7.setPixmap(fjl.scaled(fjl.width() * ratio, fjl.height() * ratio))
+        self.l7.setPixmap(fjl.scaled(xft.width() * 6.9*ratio, fjl.height() * 0.5))
         self.l7.setObjectName('分解炉')
         self.l7.changeindex.connect(self.change_pic)
 
@@ -346,16 +346,16 @@ class MyWindow(QMainWindow):
         self.ljg4.setPixmap(ljg_zj_1.scaled(ljg_zj_1.width() * ratio, ljg_zj_1.height() * ratio))
 
         self.ljg5 = QLabel()
-        self.ljg5.setPixmap(ljg_zj_2.scaled(ljg_zj_2.width() * ratio, ljg_zj_2.height() * ratio))
+        self.ljg5.setPixmap(ljg_zj_1.scaled(ljg_zj_2.width() * ratio, ljg_zj_2.height() * ratio))
 
         self.ljg6 = QLabel()
-        self.ljg6.setPixmap(ljg_zj_1.scaled(ljg_zj_1.width() * ratio, ljg_zj_1.height() * ratio))
+        self.ljg6.setPixmap(ljg_zj_2.scaled(ljg_zj_1.width() * ratio, ljg_zj_1.height() * ratio))
 
         self.ljg7 = QLabel()
-        self.ljg7.setPixmap(ljg_zj_2.scaled(ljg_zj_2.width() * ratio, ljg_zj_2.height() * ratio))
+        self.ljg7.setPixmap(ljg_zj_1.scaled(ljg_zj_2.width() * ratio, ljg_zj_2.height() * ratio))
 
         self.ljg8 = QLabel()
-        self.ljg8.setPixmap(ljg_zj_1.scaled(ljg_zj_1.width() * ratio, ljg_zj_1.height() * ratio))
+        self.ljg8.setPixmap(ljg_zj_2.scaled(ljg_zj_1.width() * ratio, ljg_zj_1.height() * ratio))
 
         self.l9 = MyLabel()
         self.l9.setPixmap(yao.scaled(yao.width() * ratio, yao.height() * ratio))
@@ -411,29 +411,28 @@ class MyWindow(QMainWindow):
         lay.addWidget(self.l3, x0 + 1, y0 + 2)  # 2级筒A
         lay.addWidget(self.l4, x0 + 2, y0 + 1)  # 3级筒A
         lay.addWidget(self.l5, x0 + 3, y0 + 2)  # 4级筒A
+        lay.addWidget(self.l7, x0 + 3, y0 + 1, dx, dy + 4)  # 分解炉
         lay.addWidget(self.l6, x0 + 4, y0 + 1)  # 5级筒A
-        lay.addWidget(self.l7, x0 + 3, y0 + 4, dx, dy)  # 分解炉
-        lay.addWidget(self.fjl_yao, x0 + 6, y0 + 5)
+        lay.addWidget(self.fjl_yao, x0 + 6, y0 + 4)
 
-        lay.addWidget(self.ljg1, 0, 2)
-        lay.addWidget(self.ljg2, 1, 1)
-        lay.addWidget(self.ljg3, 2, 2)
-        lay.addWidget(self.ljg4, 3, 1)
-        lay.addWidget(self.ljg5, 0, 2)
-        lay.addWidget(self.ljg6, 1, 1)
-        lay.addWidget(self.ljg7, 2, 2)
-        lay.addWidget(self.ljg8, 3, 1)
+        '''lay.addWidget(self.ljg1, x0 + 0, y0 + 2)
+        lay.addWidget(self.ljg2, x0 + 1, y0 + 1)
+        lay.addWidget(self.ljg3, x0 + 2, y0 + 2)
+        lay.addWidget(self.ljg4, x0 + 3, y0 + 1)
+        lay.addWidget(self.ljg5, x0 + 0, y0 + 7)
+        lay.addWidget(self.ljg6, x0 + 1, y0 + 8)
+        lay.addWidget(self.ljg7, x0 + 2, y0 + 7)
+        lay.addWidget(self.ljg8, x0 + 3, y0 + 8)'''
 
+        lay.addWidget(self.l9, x0 + 6, y0 + 5, 2, dy*3)  # 窑
+        lay.addWidget(self.l10, x0 + 6, y0 + 16, 2, dy)  # 篦冷机
 
-        lay.addWidget(self.l9, x0 + 6, y0 + 6, 2, dy * 3)  # 窑
-        lay.addWidget(self.l10, x0 + 6, y0 + 10 + dy * 2, 2, dy)  # 篦冷机
-
-        lay.addWidget(self.l11, x0 + 0, y0 + 8)  # 1级筒B
-        lay.addWidget(self.l12, x0 + 0, y0 + 9)  # 1级筒B
-        lay.addWidget(self.l13, x0 + 1, y0 + 7)  # 2级筒B
-        lay.addWidget(self.l14, x0 + 2, y0 + 8)  # 3级筒B
-        lay.addWidget(self.l15, x0 + 3, y0 + 7)  # 4级筒B
-        lay.addWidget(self.l16, x0 + 4, y0 + 8)  # 5级筒B
+        lay.addWidget(self.l11, x0 + 0, y0 + 7)  # 1级筒B
+        lay.addWidget(self.l12, x0 + 0, y0 + 8)  # 1级筒B
+        lay.addWidget(self.l13, x0 + 1, y0 + 6)  # 2级筒B
+        lay.addWidget(self.l14, x0 + 2, y0 + 7)  # 3级筒B
+        lay.addWidget(self.l15, x0 + 3, y0 + 6)  # 4级筒B
+        lay.addWidget(self.l16, x0 + 4, y0 + 7)  # 5级筒B
         # lay.addWidget(QLabel(''), 8, 5, 10, 3)
 
         lay.setSpacing(0)
@@ -442,7 +441,7 @@ class MyWindow(QMainWindow):
         self.widget.setLayout(lay)
         # self.widget.move(100,100)
 
-        self.resize(800, 600)
+        self.resize(metric_width, metric_height)
         self.showMaximized()
 
     def change_pic(self, click_flag):
