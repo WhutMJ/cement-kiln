@@ -93,3 +93,4 @@ def getValue_hour():
 def setValue_hour(value):
     global hour
     hour = value
+

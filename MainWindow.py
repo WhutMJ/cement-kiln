@@ -25,6 +25,7 @@ class MyWindow(QMainWindow):
         self.initMenu()  # 初始化菜单栏
         self.updatePic()  # 加载图片资源
         self.setTimer()  # 设定计时器，稍后会摆在正确位置
+        self.xft = {}  # 旋风筒初始化
 
         self.set_window = MyWindow2()  # 初始化对话框
         self.set_window.show()
@@ -75,13 +76,16 @@ class MyWindow(QMainWindow):
                             day_str[0:4], day_str[4:6], day_str[6:8]))
 
     def initDevice(self, flag_Seri, num):
-        #self.lay.deleteAllItems()
+
+        self.lay = QGridLayout()#重置布局，否则上次的部件不会消失
+
         metric_width = GetSystemMetrics(0)
         metric_height = GetSystemMetrics(1)  # 获取电脑分辨率
         self.width = metric_width  # 图片宽度
         self.height = metric_height  # 图片高度
         self.click_flag = 0  # 折线图的切换图片标志
-
+        con.setValue_flag_Ser(flag_Seri)
+        con.setValue_number(int(num))
         # 设置信息显示区域
         self.setWindowTitle("Cement Kiln")
         self.widget = QWidget()
@@ -114,15 +118,12 @@ class MyWindow(QMainWindow):
         self.pic1 = QVBoxLayout(self.tab1)
         self.pic2 = QVBoxLayout(self.tab2)
 
-        con.setValue_flag_Ser(flag_Seri)
-        con.setValue_number(int(num))
-        self.update_normal_Pic()#重置为正常图片
+        self.update_normal_Pic()  # 重置为正常图片
         self.initPic()  # 初始化窑系统各部件
 
         self.initBtn()  # 初始化时间选择控件
 
     def on_click(self):  # 单击选择时间按钮
-        print(self.flag_timeBtn)
         if self.flag_timeBtn == 0:
             self.flag_timeBtn = 1
             self.calendar = QCalendarWidget(self)
@@ -152,11 +153,11 @@ class MyWindow(QMainWindow):
 
         self.updateInfor()
 
-    def initPic(self):#初始化布局
+    def initPic(self):  # 初始化布局
 
         # self.widget.autoFillBackground()
         if con.getValue_flagTime()==0:
-            self.lay = QGridLayout()
+            self.lay = QGridLayout()  # 初始化布局
         xft_row = 1  # 旋风筒所占行数
         xft_col = 2  # 旋风筒所占列数
         fjl_row = 3  # 分解炉所占行数
@@ -217,7 +218,6 @@ class MyWindow(QMainWindow):
         self.gwfj_d = QPixmap('picture\\gwfj_d.png')  # 高温风机
         self.yao_d = QPixmap('picture\\yao_d.png')
 
-
     def update_normal_Pic(self):
 
         number = con.getValue_number()
@@ -225,7 +225,6 @@ class MyWindow(QMainWindow):
 
         self.ratio = 0.3 * self.width / 1366  # 图片放大倍数
 
-        self.xft = {}
         self.xft[0] = MyLabel()
         self.xft[0].setPixmap(self.xft_dl.scaled(self.xft_dl.width() * self.ratio, self.xft_dl.height() * self.ratio))
         self.xft[0].setObjectName('%d级筒A' % 1)
@@ -307,9 +306,9 @@ class MyWindow(QMainWindow):
     def judgePic(self):
         day = con.getValue_day()
         tvalue = get_by_day(day)
-        hour=con.getValue_hour()
-        number=con.getValue_number()
-        flag_Ser=con.getValue_flag_Ser()
+        hour = con.getValue_hour()
+        number = con.getValue_number()
+        flag_Ser = con.getValue_flag_Ser()
         if tvalue[1][8][hour] == 'null':
             pass
         elif tvalue[1][8][hour] > 300:
@@ -338,39 +337,38 @@ class MyWindow(QMainWindow):
                 self.xft[i].setPixmap(
                     self.xft_zuo_d.scaled(self.xft_zuo.width() * self.ratio, self.xft_zuo.height() * self.ratio))
                 self.xft[i].setObjectName('%d级筒A' % i)
-        if flag_Ser==2:
-            if tvalue[1][10][hour]=='null':
+        if flag_Ser == 2:
+            if tvalue[1][10][hour] == 'null':
                 pass
-            elif tvalue[1][10][hour]>300:
+            elif tvalue[1][10][hour] > 300:
                 self.xft[number + 1].setPixmap(
                     self.xft_dl_d.scaled(self.xft_dl.width() * self.ratio, self.xft_dl.height() * self.ratio))
                 self.xft[number + 1].setObjectName('%d级筒B' % 1)
-            if tvalue[1][(number-1)*4+10][hour]=='null':
+            if tvalue[1][(number - 1) * 4 + 10][hour] == 'null':
                 pass
-            elif tvalue[1][(number-1)*4+10][hour]>300:
+            elif tvalue[1][(number - 1) * 4 + 10][hour] > 300:
                 self.xft[2 * number + 1].setPixmap(
                     self.xft_dl_d.scaled(self.xft_dl.width() * self.ratio, self.xft_dl.height() * self.ratio))
                 self.xft[2 * number + 1].setObjectName('%d级筒B' % number)
             for i in arange(number + 2, 2 * number + 1, 2):  # 不会取到2*number,奇数旋风筒为左管
-                if tvalue[1][(i-number-1)*4+10][hour]=='null':
+                if tvalue[1][(i - number - 1) * 4 + 10][hour] == 'null':
                     pass
-                elif tvalue[1][(i-number-1)*4+10][hour]>300:
+                elif tvalue[1][(i - number - 1) * 4 + 10][hour] > 300:
                     self.xft[i].setPixmap(
                         self.xft_zuo_d.scaled(self.xft_zuo.width() * self.ratio, self.xft_zuo.height() * self.ratio))
                     self.xft[i].setObjectName('%d级筒B' % (i % (number + 1)))
 
-
             for i in arange(number + 3, 2 * number + 1, 2):  # 偶数旋风筒为右管
-                if tvalue[1][(i-number-1)*4+10][hour]=='null':
+                if tvalue[1][(i - number - 1) * 4 + 10][hour] == 'null':
                     pass
-                elif tvalue[1][(i-number-1)*4+10][hour]>300:
+                elif tvalue[1][(i - number - 1) * 4 + 10][hour] > 300:
                     self.xft[i].setPixmap(
-                    self.xft_you_d.scaled(self.xft_you.width() * self.ratio, self.xft_you.height() * self.ratio))
+                        self.xft_you_d.scaled(self.xft_you.width() * self.ratio, self.xft_you.height() * self.ratio))
                     self.xft[i].setObjectName('%d级筒B' % (i % (number + 1)))
 
-        if tvalue[1][29][hour]=='null':
+        if tvalue[1][29][hour] == 'null':
             pass
-        elif tvalue[1][29][hour]>300:
+        elif tvalue[1][29][hour] > 300:
             if number % 2 == 0:
                 self.lab_fjl.setPixmap(
                     self.fjl_d.scaled(self.xft_dl.width() * 5 * self.ratio, self.xft_dl.height() * 3 * self.ratio))
@@ -379,20 +377,19 @@ class MyWindow(QMainWindow):
                     self.fjl_d.scaled(self.xft_dl.width() * 7 * self.ratio, self.xft_dl.height() * 3 * self.ratio))
             self.lab_fjl.setObjectName('分解炉')
 
-        if tvalue[1][28][hour]=='null':
+        if tvalue[1][28][hour] == 'null':
             pass
-        elif tvalue[1][28][hour]>300:
+        elif tvalue[1][28][hour] > 300:
             self.lab_yao.setPixmap(
                 self.yao_d.scaled(self.xft_dl.width() * 9 * self.ratio, self.yao.height() * self.ratio))
             self.lab_yao.setObjectName('窑')
 
-
-        if tvalue[1][33][hour]=='null':
+        if tvalue[1][33][hour] == 'null':
             pass
-        elif tvalue[1][33][hour]>0:
+        elif tvalue[1][33][hour] > 0:
             self.lab_blj.setPixmap(self.blj_d.scaled(self.blj.width() * self.ratio, self.blj.height() * self.ratio))
             self.lab_blj.setObjectName('篦冷机')
-        self.initPic()
+        # self.initPic()
 
     def initBtn(self):
         con.setValue_flag_Time(0)  # 初始化选择时间标志
@@ -427,8 +424,9 @@ class MyWindow(QMainWindow):
             self.hourBo.setCurrentText('0')
         else:
             hour = int(self.hourBo.currentText())  # 获得用户在组合框选择的数据
-            print('组合框的数据%i' % hour)
-            self.judgePic()
+
+            self.judgePic()  # 更换图片资源
+            self.initPic()  # 显示图片
             self.updateInfor()
 
     def setTimer(self):
