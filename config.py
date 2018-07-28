@@ -1,7 +1,7 @@
 '''以下为窑系统所需的全局变量的获取与设置'''
 global day, flag_Time, index_T, index_P, flag_Ser, number, filepath, flag_Visual
 #     日期， 时间选择标志，温度，压强，  单双系列标志，旋风筒数,文件路径,热耗可视化标志
-
+global hour
 
 day = 0
 flag_Time = 0
@@ -11,6 +11,7 @@ flag_Ser = 0
 number = 0
 filepath = ''
 flag_Visual = 0  # 为 0 则表示以天显示，为 1 则以小时显示
+hour = 0
 
 
 def getValue_filepath():
@@ -83,3 +84,12 @@ def getValue_flag_Visual():
 def setValue_flag_Visual(value):
     global flag_Visual
     flag_Visual = value
+
+
+def getValue_hour():
+    return hour
+
+
+def setValue_hour(value):
+    global hour
+    hour = value
