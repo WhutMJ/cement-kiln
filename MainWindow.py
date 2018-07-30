@@ -396,18 +396,18 @@ class MyWindow(QMainWindow):
         self.click_flag = 0  # 初始化选择图片标志
         self.flag_timeBtn = 0  # 初始化点击时间选择按钮标志，避免重复单击按钮出现的bug
         self.timeBtn = QPushButton('双击确定', self.widget)
-        self.hourBo = QComboBox(self.widget)  # 声明一个组合框hourBo
+        self.timeBtn.move(self.width * 0.5, self.height * 0.05)
+        self.timeBtn.clicked.connect(self.on_click)
+        self.timeBtn.show()
 
+
+        self.hourBo = QComboBox(self.widget)  # 声明一个组合框hourBo
         for i in range(24):  # 循环添加组合框的元素0-23
             self.hourBo.addItem(str(i))
-
-        self.timeBtn.move(self.width * 0.5, self.height * 0.05)
         self.hourBo.move(self.width * 0.5 + 100, self.height * 0.05)  # 组合框位置
-        self.timeBtn.clicked.connect(self.on_click)
         self.hourBo.activated[str].connect(self.getHour)  # 点击时间响应
+        self.hourBo.hide()
 
-        self.timeBtn.show()
-        self.hourBo.show()
 
         self.timeLabel = QLabel(self.widget)
         self.timeLabel.move(self.width * 0.5 - 30, self.height * 0.05 + 5)
@@ -417,13 +417,13 @@ class MyWindow(QMainWindow):
         self.timeLabel.show()
 
     def getHour(self):
-        hour = con.getValue_hour()
         flag_Time = con.getValue_flagTime()
         if flag_Time == 0:  # 判断在选择小时前选择日期没，若没显示先选日期
             QMessageBox.information(self, '提示', '请先选择日期', QMessageBox.Yes | QMessageBox.No)
             self.hourBo.setCurrentText('0')
         else:
             hour = int(self.hourBo.currentText())  # 获得用户在组合框选择的数据
+            con.setValue_hour(hour)
 
             self.judgePic()  # 更换图片资源
             self.initPic()  # 显示图片
@@ -454,13 +454,13 @@ class MyWindow(QMainWindow):
     # 窑系统热耗可视化
     def heatVisual(self):
         con.setValue_flag_Visual(1)
-
+        self.hourBo.show()
         self.updateInfor()
 
     # 窑系统设备热耗可视化
     def deviceVisual(self):
         con.setValue_flag_Visual(0)
-
+        self.hourBo.hide()
         self.updateInfor()
 
     # 文件导入
@@ -660,9 +660,9 @@ class MyWindow(QMainWindow):
             self.table.setRowCount(len(col1))
             self.table.setHorizontalHeaderLabels(['名称', '数值'])
 
-            hour = 10
+            hour = con.getValue_hour()
             # 以后会改
-
+            print(hour)
             for i in range(len(col1)):
                 newItem = QTableWidgetItem(col1[i])
                 self.table.setItem(i, 0, newItem)

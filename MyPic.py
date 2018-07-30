@@ -116,13 +116,15 @@ class MyMplCanvas(FigureCanvas):
                                    QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-    def cal_null(self, str):  # 计算一天的空数据个数及其下标
-        null = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+    def cal_null(self, str):  # 计算一天的空数据个数及不为空下标
+        # null = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
+        null = []
         count = 0
         for i in range(len(str)):
             if str[i] == 'null':
-                null[i] = 1
                 count += 1
+            else:
+                null.append(i)  # 记录数据不为空的下标
         return count, null
 
     def compute_initial_figure(self):
@@ -148,22 +150,17 @@ class MyTempMplCanvas(MyMplCanvas):
                 for tick_y in self.axes.get_ymajorticklabels():
                     tick_y.set_fontsize(7)
                 if count >= 1:
-                    value = [0 for i in range(24 - count)]
+                    value=[]
                     t = [i for i in range(24 - count)]
-                    x_label = [str(i) for i in range(24 - count + 1)]
+                    x_label=[]
+                    x_label.append('0')
                     j = 0
-                    x_label[j] = '0'
-                    for i in range(24):
-                        if null[i] == 1:
-                            pass
-                        else:
-                            value[j] = tablevalue[1][index_T][i]
-                            # t[j] = i
-                            x_label[j + 1] = str(i)
-                            j += 1
+                    # x_label[j] = '0'
+                    for i in range(24 - count):
+                        value.append(tablevalue[1][index_T][null[i]])
+                        x_label.append(str(null[i]))
                     self.axes.plot(t, value)
                     self.axes.set_xticklabels(x_label)
-
                     xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
                     self.axes.set_title(tablevalue[0][index_T], fontproperties=myfont)
@@ -175,47 +172,46 @@ class MyTempMplCanvas(MyMplCanvas):
                     self.axes.xaxis.set_major_locator(xmajorLocator)
                     self.axes.xaxis.set_minor_locator(xminorLocator)
                     self.axes.set_title(tablevalue[0][index_T], fontproperties=myfont)
-            else:#显示 10 小时的数据
+            elif con.getValue_flag_Visual() == 1:  # 显示 10 小时的数据
                 tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
+                hour = con.getValue_hour()  # 显示hour之前的10小时数据(包括此hour)
 
-                #以后会将day换成hour
+                count, null = self.cal_null(tablevalue[1][index_T])  # null[i] 记录了数据不为空的下标
 
-                count, null = self.cal_null(tablevalue[1][index_T])
                 self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                 self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
                 for tick_x in self.axes.get_xmajorticklabels():
                     tick_x.set_fontsize(8)
                 for tick_y in self.axes.get_ymajorticklabels():
                     tick_y.set_fontsize(7)
-                if count >= 1:
-                    value = [0 for i in range(10 - count)]
-                    t = [i for i in range(10 - count)]
-                    x_label = [str(i) for i in range(10 - count + 1)]
-                    j = 0
-                    x_label[j] = '0'
-                    for i in range(10):
-                        if null[i] == 1:
-                            pass
-                        else:
-                            value[j] = tablevalue[1][index_T][i]
-                            # t[j] = i
-                            x_label[j + 1] = str(i)
-                            j += 1
-                    self.axes.plot(t, value)
-                    self.axes.set_xticklabels(x_label)
 
-                    xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
-                    self.axes.xaxis.set_major_locator(xmajorLocator)
-                    self.axes.set_title(tablevalue[0][index_T], fontproperties=myfont)
-                else:
-                    t = arange(0, 10, 1)
-                    self.axes.plot(t, tablevalue[1][index_T][0:10])
-                    # 以后需要修改参数不一定是[0:10]
-                    xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
-                    #xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
-                    self.axes.xaxis.set_major_locator(xmajorLocator)
-                    #self.axes.xaxis.set_minor_locator(xminorLocator)
-                    self.axes.set_title(tablevalue[0][index_T], fontproperties=myfont)
+                value = []
+                t = []
+                x_label = []
+
+                # x_label[j] = '0'
+                cycle = 10  # 循环十次
+                for i in range(len(null)):  # 找到第hour小时的下标
+                    if null[i] == hour:
+                        j = i
+
+                while (cycle > 0):
+                    value.insert(0,tablevalue[1][index_T][null[j]])
+                    # t[j] = i
+                    x_label.insert(0,str(null[j]))
+                    j -= 1
+                    cycle -= 1
+                    t.append(10-cycle)
+                    if j < 0:
+                        break
+                x_label.insert(0,'0')
+                self.axes.plot(t, value)
+                self.axes.set_xticklabels(x_label)
+
+                xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
+                self.axes.xaxis.set_major_locator(xmajorLocator)
+                self.axes.set_title(tablevalue[0][index_T], fontproperties=myfont)
+
 
 
 class MyPressMplCanvas(MyMplCanvas):
@@ -224,39 +220,34 @@ class MyPressMplCanvas(MyMplCanvas):
     def compute_initial_figure(self):
         day = con.getValue_day()
         index_P = con.getValue_index_P()
+
         if index_P == 0:
             pass
         else:
             if con.getValue_flag_Visual() == 0:  # 显示一天的图片
-                tablevalue = get_by_day(day)
+                tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
                 count, null = self.cal_null(tablevalue[1][index_P])
-                self.axes.set_ylabel('压强/kPa', verticalalignment='center', fontproperties=labelfont)
+                self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                 self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
                 for tick_x in self.axes.get_xmajorticklabels():
                     tick_x.set_fontsize(8)
                 for tick_y in self.axes.get_ymajorticklabels():
                     tick_y.set_fontsize(7)
                 if count >= 1:
-                    value = [0 for i in range(24 - count)]
+                    value = []
                     t = [i for i in range(24 - count)]
-                    x_label = [str(i) for i in range(24 - count + 1)]
+                    x_label = []
+                    x_label.append('0')
                     j = 0
-                    x_label[j] = '0'
-                    for i in range(24):
-                        if null[i] == 1:
-                            pass
-                        else:
-                            value[j] = tablevalue[1][index_P][i]
-                            # t[j] = i
-                            x_label[j + 1] = str(i)
-                            j += 1
+                    # x_label[j] = '0'
+                    for i in range(24 - count):
+                        value.append(tablevalue[1][index_P][null[i]])
+                        x_label.append(str(null[i]))
                     self.axes.plot(t, value)
                     self.axes.set_xticklabels(x_label)
-                    for tick in self.axes.get_xmajorticklabels():
-                        tick.set_fontsize(8)
                     xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
-
+                    self.axes.set_title(tablevalue[0][index_P], fontproperties=myfont)
                 else:
                     t = arange(0, 24, 1)
                     self.axes.plot(t, tablevalue[1][index_P])
@@ -265,44 +256,45 @@ class MyPressMplCanvas(MyMplCanvas):
                     self.axes.xaxis.set_major_locator(xmajorLocator)
                     self.axes.xaxis.set_minor_locator(xminorLocator)
                     self.axes.set_title(tablevalue[0][index_P], fontproperties=myfont)
-            else:
-                tablevalue = get_by_day(day)
-                count, null = self.cal_null(tablevalue[1][index_P])
-                self.axes.set_ylabel('压强/kPa', verticalalignment='center', fontproperties=labelfont)
+            elif con.getValue_flag_Visual() == 1:  # 显示 10 小时的数据
+                tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
+                hour = con.getValue_hour()  # 显示hour之前的10小时数据(包括此hour)
+
+                count, null = self.cal_null(tablevalue[1][index_P])  # null[i] 记录了数据不为空的下标
+
+                self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                 self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
                 for tick_x in self.axes.get_xmajorticklabels():
                     tick_x.set_fontsize(8)
                 for tick_y in self.axes.get_ymajorticklabels():
                     tick_y.set_fontsize(7)
-                if count >= 1:
-                    value = [0 for i in range(10 - count)]
-                    t = [i for i in range(10 - count)]
-                    x_label = [str(i) for i in range(10 - count + 1)]
-                    j = 0
-                    x_label[j] = '0'
-                    for i in range(10):
-                        if null[i] == 1:
-                            pass
-                        else:
-                            value[j] = tablevalue[1][index_P][i]
-                            # t[j] = i
-                            x_label[j + 1] = str(i)
-                            j += 1
-                    self.axes.plot(t, value)
-                    self.axes.set_xticklabels(x_label)
-                    for tick in self.axes.get_xmajorticklabels():
-                        tick.set_fontsize(8)
-                    xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
-                    self.axes.xaxis.set_major_locator(xmajorLocator)
 
-                else:
-                    t = arange(0, 10, 1)
-                    self.axes.plot(t, tablevalue[1][index_P][0:10])
-                    #以后需要修改参数不一定是[0:10]
-                    xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
-                    self.axes.xaxis.set_major_locator(xmajorLocator)
-                    self.axes.set_title(tablevalue[0][index_P], fontproperties=myfont)
+                value = []
+                t = []
+                x_label = []
 
+                # x_label[j] = '0'
+                cycle = 10  # 循环十次
+                for i in range(len(null)):  # 找到第hour小时的下标
+                    if null[i] == hour:
+                        j = i
+
+                while (cycle > 0):
+                    value.insert(0, tablevalue[1][index_P][null[j]])
+                    # t[j] = i
+                    x_label.insert(0, str(null[j]))
+                    j -= 1
+                    cycle -= 1
+                    t.append(10 - cycle)
+                    if j < 0:
+                        break
+                x_label.insert(0, '0')
+                self.axes.plot(t, value)
+                self.axes.set_xticklabels(x_label)
+
+                xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
+                self.axes.xaxis.set_major_locator(xmajorLocator)
+                self.axes.set_title(tablevalue[0][index_P], fontproperties=myfont)
     '''def __init__(self, *args, **kwargs):
         MyMplCanvas.__init__(self, *args, **kwargs)
         timer = QtCore.QTimer(self)
