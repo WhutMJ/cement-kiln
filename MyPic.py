@@ -3,7 +3,7 @@
 import os
 import config as con
 
-from provide_data_for_gui import *
+from provide_data import *
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
@@ -165,8 +165,11 @@ class MyTempMplCanvas(MyMplCanvas):
         if index_T == 0:
             pass
         else:
+
             if con.getValue_flag_Visual() == 0:  # 显示一天的图片
+                print(456)
                 tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
+                print(123)
                 count, null = self.cal_null(tablevalue[1][index_T])
                 self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                 self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)

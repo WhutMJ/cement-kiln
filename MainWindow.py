@@ -550,7 +550,6 @@ class MyWindow(QMainWindow):
         self.timeLabel.resize(30, 20)
         self.timeLabel.setText('日期')
 
-        self.timeLabel.show()
 
     def getHour(self):
         flag_Time = con.getValue_flagTime()
@@ -837,8 +836,11 @@ class MyWindow(QMainWindow):
     def change_pic(self, index1, index2, name):  # 接收从标签传过来的温度和压强的下标及部件名称
         self.selectLab(name)
         if self.click_flag == 0:
+            print(678)
             self.fp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
+            print(987)
             self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
+            print(456)
             self.pic1.addWidget(self.fp1)
             self.pic2.addWidget(self.fp2)
             self.change_table(index1, index2)
