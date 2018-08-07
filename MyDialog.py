@@ -340,12 +340,11 @@ class MyDataReviseDlg(QMainWindow):  # 数据修改功能窗口
 
     def tableItemChanged(self):
         self.tableWidget.currentItem().setForeground(QBrush(QColor(255, 0, 0)))
-        print(self.tableWidget.currentRow())
         self.row_changed.append(self.tableWidget.currentRow())
 
     def accept(self):
 
-        for row in self.row_changed:
+        for row in list(set(self.row_changed)):
             row_data = []
             for col in range(2):
                 item = self.tableWidget.item(row, col)
@@ -358,9 +357,8 @@ class MyDataReviseDlg(QMainWindow):  # 数据修改功能窗口
                 try:
                     row_data.append(float(item.text()))
                 except Exception:
-                    row_data.append('')
+                    row_data.append(None)
             self.new_data.append(row_data)
-
         if update_data(self.new_data):
             reply = QMessageBox.information(self, '提示', '修改成功', QMessageBox.Yes)
             if reply == QMessageBox.Yes:
