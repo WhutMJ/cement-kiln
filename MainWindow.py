@@ -19,6 +19,7 @@ class MyWindow(QMainWindow):
 
         if Login_test(user, password):
             self.loginDlg.hide()
+            self.userName=user
             self.initWindow()
         else:
             QMessageBox.information(self, '提示', '用户名或密码错误', QMessageBox.Yes)
@@ -39,7 +40,7 @@ class MyWindow(QMainWindow):
         palette = QPalette()
         palette.setColor(QPalette.Background, QColor(46, 139, 130))  # 更改背景色
         self.setPalette(palette)
-        self.setWindowTitle("Cement Kiln")  # 设置主窗口标题
+        self.setWindowTitle("Cement Kiln--%s"%self.userName)  # 设置主窗口标题
         self.initMenu()  # 初始化菜单栏
         self.updatePic()  # 加载图片资源
         self.setTimer()  # 设定计时器，稍后会摆在正确位置
@@ -250,10 +251,16 @@ class MyWindow(QMainWindow):
             self.lay.addWidget(self.xft[number + 1], 0, 10 - flag_Ser)
             for i in arange(number + 2, 2 * number + 1):
                 self.lay.addWidget(self.xft[i], (i - 2) % number, 8 - flag_Ser, xft_row, xft_col)
-                if i % 2 == 0:
-                    self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 9-flag_Ser)
+                if number%2==0:
+                    if i % 2 == 0:
+                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 8-flag_Ser)
+                    else:
+                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 9-flag_Ser)
                 else:
-                    self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 8-flag_Ser)
+                    if i % 2 == 0:
+                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 9-flag_Ser)
+                    else:
+                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 8-flag_Ser)
             if number % 2 == 0:
                 self.lay.addWidget(self.jt[4], number - 1, 7 - flag_Ser, 2, 3)
                 self.lay.addWidget(self.jt[5], number, 7 - flag_Ser, 2, 2)
