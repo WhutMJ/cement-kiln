@@ -1,6 +1,8 @@
 from provide_data_for_gui import *
 import config as con
 import sys
+from youlg_predict import *
+from rexiaolv_model import *
 from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
@@ -16,7 +18,7 @@ class MyLoginDlg(QDialog):
 
     def __init__(self):
         super(MyLoginDlg, self).__init__()
-        self.resize(400, 300)
+        self.setFixedSize(400,300)  # 72为win10任务栏高度
         self.setWindowTitle('Login')
         self.buttonBox = QtWidgets.QDialogButtonBox(self)
         self.buttonBox.setGeometry(QtCore.QRect(-60, 240, 341, 32))
@@ -161,9 +163,15 @@ class MyDataInputDlg(QMainWindow):  # 数据输入功能窗口
         self.tableWidget = QtWidgets.QTableWidget(self)
         self.tableWidget.setGeometry(QtCore.QRect(width * 0.01, height * 0.04, width * 0.98, height * 0.69))
         self.tableWidget.setObjectName("dataInputWidget")
+        '''
         day = str(con.getValue_day())
         hour = str(con.getValue_hour())
-        value, name = get_by_fragment(day + hour)
+        print(123)
+        '''
+        date = get_time_now()
+        day = date[:8]
+        hour = date[8:]
+        value, name = get_by_fragment()
         self.col_num = len(value[0]) - 3
         self.row_num = len(value)
         self.tableWidget.setColumnCount(self.col_num)
@@ -180,11 +188,16 @@ class MyDataInputDlg(QMainWindow):  # 数据输入功能窗口
                 self.tableWidget.setItem(i, j, newItem)
                 self.tableWidget.item(i, j).setFlags(Qt.ItemIsEnabled)
 
-        date = int(self.tableWidget.item(self.row_num - 1, 0).text())
+        newItem = QTableWidgetItem(str(day))
+        self.tableWidget.setItem(self.tableWidget.rowCount() - 1, 0, newItem)
+        newItem = QTableWidgetItem(str(hour))
+        self.tableWidget.setItem(self.tableWidget.rowCount() - 1, 1, newItem)
+
+        '''date = int(self.tableWidget.item(self.row_num - 1, 0).text())
         hour = int(self.tableWidget.item(self.row_num - 1, 1).text())
 
         if hour < 24:
-            newItem = QTableWidgetItem(str(date))
+            newItem = QTableWidgetItem(str(day))
             self.tableWidget.setItem(self.tableWidget.rowCount() - 1, 0, newItem)
             newItem = QTableWidgetItem(str(hour + 1))
             self.tableWidget.setItem(self.tableWidget.rowCount() - 1, 1, newItem)
@@ -193,7 +206,7 @@ class MyDataInputDlg(QMainWindow):  # 数据输入功能窗口
             newItem = QTableWidgetItem(str(date + 1))
             self.tableWidget.setItem(self.tableWidget.rowCount() - 1, 0, newItem)
             newItem = QTableWidgetItem(str(0))
-            self.tableWidget.setItem(self.tableWidget.rowCount() - 1, 1, newItem)
+            self.tableWidget.setItem(self.tableWidget.rowCount() - 1, 1, newItem)'''
 
         self.red = 180
         self.green = 180
@@ -221,11 +234,18 @@ class MyDataInputDlg(QMainWindow):  # 数据输入功能窗口
     def addRowData(self):
         self.delFirstRow()
         new_row = []
-        for col in range(self.tableWidget.columnCount()):
+        for col in range(2):
             item = self.tableWidget.item(self.tableWidget.rowCount() - 1, col)
             item.setBackground(QBrush(QColor(255, 255, 255)))
             try:
                 new_row.append(int(item.text()))
+            except Exception:
+                new_row.append('')
+        for col in range(2, self.tableWidget.columnCount()):
+            item = self.tableWidget.item(self.tableWidget.rowCount() - 1, col)
+            item.setBackground(QBrush(QColor(255, 255, 255)))
+            try:
+                new_row.append(float(item.text()))
             except Exception:
                 new_row.append('')
                 self.tableWidget.setItem(self.row_num - 1, col, QTableWidgetItem(''))  # 单元格为None无法设置不可编辑
@@ -263,8 +283,8 @@ class MyDataInputDlg(QMainWindow):  # 数据输入功能窗口
         if save_data(self.new_data):
             reply = QMessageBox.information(self, '提示', '最新数据已经导入，是否自动生成生产预警', QMessageBox.Yes | QMessageBox.No)
             if reply == QMessageBox.Yes:
-                print(str(self.new_data[0][0]) + str(self.new_data[0][1]))
-                print(len(self.new_data))  # 确认后要传入生产预警窗口的两个参数:数据输入的日期+小时(str类型);数据条数(int类型)
+                self.warningDlg = MyProduceWarDlg(con.getValue_day(), con.getValue_hour(), 1)
+
                 self.close()
             else:
                 self.close()
@@ -315,7 +335,7 @@ class MyDataReviseDlg(QMainWindow):  # 数据修改功能窗口
         day = str(con.getValue_day())
         hour = str(con.getValue_hour())
 
-        value, name = get_by_fragment(day + hour)
+        value, name = get_by_fragment()
 
         self.col_num = len(value[0]) - 3  # 最后三列不要
         self.row_num = len(value)
@@ -331,9 +351,14 @@ class MyDataReviseDlg(QMainWindow):  # 数据修改功能窗口
 
         self.tableWidget.setHorizontalHeaderLabels(col_label)
         for i in range(len(value)):
-            for j in range(self.col_num):
+            for j in range(2):
                 newItem = QTableWidgetItem(str(value[i][j]))
                 self.tableWidget.setItem(i, j, newItem)
+                self.tableWidget.item(i, j).setFlags(Qt.ItemIsEnabled)
+            for j in range(2, self.col_num):
+                newItem = QTableWidgetItem(str(value[i][j]))
+                self.tableWidget.setItem(i, j, newItem)
+
         self.tableWidget.itemChanged[QTableWidgetItem].connect(self.tableItemChanged)  # 编辑单元格后字体会显示红色
         self.tableWidget.scrollToBottom()
         self.showMaximized()
@@ -375,7 +400,7 @@ class MyDataReviseDlg(QMainWindow):  # 数据修改功能窗口
 
 
 class MyProduceWarDlg(QMainWindow):
-    def __init__(self, date, number):
+    def __init__(self, day, hour, number=1):
         super(MyProduceWarDlg, self).__init__()
 
         self.setWindowTitle('生产预警')
@@ -386,24 +411,40 @@ class MyProduceWarDlg(QMainWindow):
         self.pageView = QTabWidget()
         self.tab = {}
         self.pic = {}
-        number = int(number)
+
         for i in range(number):
             self.tab[i] = QLabel()
-            self.pageView.addTab(self.tab[i], '%d小时' % i)
+            self.pageView.addTab(self.tab[i], '%d小时' % (hour+i))
             self.pic[i] = QVBoxLayout(self.tab[i])
-
-            Ca = MyCaMplCanvas(date)
-            Effic = MyEfficMpCanvas(date)
-            Coal = MyCoalMpCanvas(date)
-
-            self.pic[i].addWidget(QLabel('钙离子合格比'))
+            data = get_by_hour(str(day) + str(hour))
+            value = Production_warning_youligai(data[1])
+            Ca = MyCaMplCanvas(value)
+            self.pic[i].addWidget(QLabel('游离钙合格比'))
             self.pic[i].addWidget(Ca)
+
+            self.line = QtWidgets.QFrame(self)
+            self.line.setGeometry(QtCore.QRect(0, QDesktopWidget().screenGeometry().height() * 0.73,
+                                               QDesktopWidget().screenGeometry().width(), 16))
+            self.line.setFrameShape(QtWidgets.QFrame.HLine)
+            self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
+            self.pic[i].addWidget(self.line)
+
+            value = Production_warning_rexiaolv(data[1])
+            Effic = MyEfficMpCanvas(value)
             self.pic[i].addWidget(QLabel('热效率分析'))
             self.pic[i].addWidget(Effic)
+            self.line2 = QtWidgets.QFrame(self)
+            self.line2.setGeometry(QtCore.QRect(0, QDesktopWidget().screenGeometry().height() * 0.73,
+                                               QDesktopWidget().screenGeometry().width(), 16))
+            self.line2.setFrameShape(QtWidgets.QFrame.HLine)
+            self.line2.setFrameShadow(QtWidgets.QFrame.Sunken)
+            self.pic[i].addWidget(self.line2)
+            Coal = MyCoalMpCanvas(value)
             self.pic[i].addWidget(Coal)
 
         # 设置将self.pageView为中心Widget
         self.setCentralWidget(self.pageView)
+        self.show()
 
 
 class MyMplCanvas(FigureCanvas):
@@ -425,41 +466,14 @@ class MyMplCanvas(FigureCanvas):
                                    QSizePolicy.Expanding)
         FigureCanvas.updateGeometry(self)
 
-    def cal_null(self, str):  # 计算一天的空数据个数及不为空下标
-        # null = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]
-        null = []
-        count = 0
-        for i in range(len(str)):
-            if str[i] == 'null':
-                count += 1
-            else:
-                null.append(i)  # 记录数据不为空的下标
-        return count, null
-
     def compute_initial_figure(self):
         pass
 
-    def find_data(self, Day, Hour):
-        filename = '总数据.xls'
-        readfile = xlrd.open_workbook(filename)
-        read_sheet = readfile.sheet_by_name('Sheet1')
-        date_value = read_sheet.col_values(0, 0)
-
-        index = 1
-        hour = 0
-        while date_value[index] != Day and hour != Hour:
-            hour = read_sheet.cell_value(index, 1)
-            index += 1
-        data = read_sheet.row_values(index, 0)
-
-        return data
-
 
 class MyCaMplCanvas(MyMplCanvas):
-    def __init__(self, date):
+    def __init__(self, value):
+        self.value = value
         super(MyCaMplCanvas, self).__init__()
-        self.day = date[:8]
-        self.hour = date[8:]
 
     def compute_initial_figure(self):
         # data = MyMplCanvas.find_data(self.day, self.hour)
@@ -470,23 +484,24 @@ class MyCaMplCanvas(MyMplCanvas):
         # data是选中的那一行的数据，利用data来将合格、不合格的数据求出来，存在Percentage的列表中
 
         # Percentage
-        Percentage = [30, 70]  # 这是测试用的
-
+        Percentage = [30, 70]  # 前者为合格，后者为不合格
+        Percentage[0] = self.value[1] * 100
+        Percentage[1] = self.value[0] * 100
         self.axes.barh(range(2), Percentage, height=0.7, color='steelblue', alpha=0.8)
         self.axes.set_yticks(range(2))
         self.axes.set_yticklabels(['合格', '不合格'])
         self.axes.set_xlim(0, 100)
         self.axes.set_xlabel('百分比 %')
-        self.axes.set_title('钙离子是否合格的百分比')
+        self.axes.set_title('游离钙是否合格的百分比')
 
-        for x,y, in zip(Percentage,range(2)):
-            self.axes.text(x+5,y,'%.1f'%x,ha='center',va='center',fontsize=15)
+        for x, y, in zip(Percentage, range(2)):
+            self.axes.text(x + 5, y, '%.2f' % x, ha='right', va='center', fontsize=10)
+
 
 class MyEfficMpCanvas(MyMplCanvas):
-    def __init__(self, date):
+    def __init__(self, value):
+        self.value = value
         super(MyEfficMpCanvas, self).__init__()
-        self.day = date[:8]
-        self.hour = date[8:]
 
     def compute_initial_figure(self):
         #        data = MyMplCanvas.find_data(self.day, self.hour)  # data是选中那天的输入的所有数据
@@ -495,12 +510,12 @@ class MyEfficMpCanvas(MyMplCanvas):
         matplotlib.rcParams['axes.unicode_minus'] = False
 
         # 利用data算出热耗，以及1减去热耗剩余的值，放在size列表中，后面一个是热耗
-        size = [40, 60]  # 测试用
-        label_list = ['', '热耗']
+        size = [100 - self.value * 100, self.value * 100]  # 测试用
+        label_list = ['', '热效率']
         color = ['yellow', 'red']
         explode = [0, 0]
         self.axes.pie(size, explode=explode, colors=color, labels=label_list, labeldistance=1.1,
-                      autopct="%1.1f%%", shadow=False, startangle=90, pctdistance=0.6)
+                      autopct="%1.2f%%", shadow=False, startangle=90, pctdistance=0.6)
         self.axes.axis("equal")  # 设置横轴和纵轴大小相等，这样饼才是圆的
         self.axes.set_title('回转窑的热效率')
         self.axes.legend()
@@ -510,8 +525,6 @@ class MyCoalMpCanvas(QWidget):
     def __init__(self, date):
         super(MyCoalMpCanvas, self).__init__()
         self.compute_initial_figure()
-        self.day = date[:8]
-        self.hour = date[8:]
 
     def compute_initial_figure(self):
         #        data = self.find_data(self.day, self.hour)  # 和上面的data相同
@@ -522,7 +535,7 @@ class MyCoalMpCanvas(QWidget):
         self.Label = QLabel()
         self.lay = QVBoxLayout()
 
-        self.Label.setText('分解炉的标煤耗：  %d   kg/kg' % consumption)
+        self.Label.setText('分解炉的标煤耗：  %d   kJ/kg' % consumption)
         ft = QFont()
         ft.setPointSize(12)
         self.Label.setFont(ft)
@@ -536,25 +549,10 @@ class MyCoalMpCanvas(QWidget):
 
         self.setLayout(self.lay)
 
-    def find_data(self, Day, Hour):
-        filename = '总数据.xls'
-        readfile = xlrd.open_workbook(filename)
-        read_sheet = readfile.sheet_by_name('Sheet1')
-        date_value = read_sheet.col_values(0, 0)
-
-        index = 1
-        hour = 0
-        while date_value[index] != Day and hour != Hour:
-            hour = read_sheet.cell_value(index, 1)
-            index += 1
-        data = read_sheet.row_values(index, 0)
-
-        return data
-
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    #form = MyDataReviseDlg()
-    form=MyProduceWarDlg(str(20170123),7)
+    # form = MyDataReviseDlg()
+    form = MyProduceWarDlg(20170315, 2)
     form.show()
     app.exec_()

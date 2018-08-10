@@ -33,81 +33,87 @@ class MyLabel(QLabel):
         flag_Time = con.getValue_flagTime()
 
         if flag_Time == 1:  # 判断是否选择了时间
+            name = get_table_name()
+            print(self.objectName())
             if self.objectName() == '1级筒A0':
-                con.setValue_index_T(8)
-                con.setValue_index_P(9)
+                con.setValue_index_T(name.index('yijitwdA'))
+                con.setValue_index_P(name.index('yijityqA'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '1级筒A':
-                con.setValue_index_T(8)
-                con.setValue_index_P(9)
+                con.setValue_index_T(name.index('yijitwdA'))
+                con.setValue_index_P(name.index('yijityqA'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '1级筒B0':
-                con.setValue_index_T(10)
-                con.setValue_index_P(11)
+                con.setValue_index_T(name.index('yijitwdB'))
+                con.setValue_index_P(name.index('yijityqB'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '1级筒B':
-                con.setValue_index_T(10)
-                con.setValue_index_P(11)
+                con.setValue_index_T(name.index('yijitwdB'))
+                con.setValue_index_P(name.index('yijityqB'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '2级筒A':
-                con.setValue_index_T(12)
-                con.setValue_index_P(13)
+                con.setValue_index_T(name.index('erjitwdA'))
+                con.setValue_index_P(name.index('erjityqA'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '2级筒B':
-                con.setValue_index_T(14)
-                con.setValue_index_P(15)
+                con.setValue_index_T(name.index('erjitwdB'))
+                con.setValue_index_P(name.index('erjityqB'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '3级筒A':
-                con.setValue_index_T(16)
-                con.setValue_index_P(17)
+                con.setValue_index_T(name.index('sanjitwdA'))
+                con.setValue_index_P(name.index('sanjityqA'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '3级筒B':
-                con.setValue_index_T(18)
-                con.setValue_index_P(19)
+                con.setValue_index_T(name.index('sanjitwdB'))
+                con.setValue_index_P(name.index('sanjityqB'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '4级筒A':
-                con.setValue_index_T(20)
-                con.setValue_index_P(21)
+                con.setValue_index_T(name.index('sijitwdA'))
+                con.setValue_index_P(name.index('sijityqA'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '4级筒B':
-                con.setValue_index_T(22)
-                con.setValue_index_P(23)
+                con.setValue_index_T(name.index('sijitwdB'))
+                con.setValue_index_P(name.index('sijityqB'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '5级筒A':
-                con.setValue_index_T(24)
-                con.setValue_index_P(25)
+                con.setValue_index_T(name.index('wujitwdA'))
+                con.setValue_index_P(name.index('wujityqA'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '5级筒B':
-                con.setValue_index_T(26)
-                con.setValue_index_P(27)
+                con.setValue_index_T(name.index('wujitwdB'))
+                con.setValue_index_P(name.index('wujityqB'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '分解炉':
-                con.setValue_index_T(29)
-                con.setValue_index_P(30)
+                con.setValue_index_T(name.index('fenjielwd'))
+                con.setValue_index_P(name.index('fenjielyq'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '窑1':
-                con.setValue_index_T(28)
-                con.setValue_index_P(0)
+                con.setValue_index_T(0)
+                con.setValue_index_P(name.index('yaoweic'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '窑2':
-                con.setValue_index_T(0)
-                con.setValue_index_P(0)
+                con.setValue_index_T(name.index('tongtiwd'))
+                con.setValue_index_P(name.index('yaos'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '窑3':
-                con.setValue_index_T(0)
-                con.setValue_index_P(32)
+                con.setValue_index_T(name.index('yaotouyl'))
+                con.setValue_index_P(name.index('yaotouc'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '篦冷机1段':
-                con.setValue_index_T(33)
-                con.setValue_index_P(34)
+                con.setValue_index_T(name.index('bilengjydyl'))
+                con.setValue_index_P(name.index('bilengjydS1'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '篦冷机2段':
-                con.setValue_index_T(36)
-                con.setValue_index_P(37)
+                con.setValue_index_T(name.index('bilengjedS1'))
+                con.setValue_index_P(name.index('bilengjedI1'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
             elif self.objectName() == '篦冷机3段':
-                con.setValue_index_T(38)
-                con.setValue_index_P(39)
+                con.setValue_index_T(name.index('bilengjsdS1'))
+                con.setValue_index_P(name.index('bilengjsdI1'))
+                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+            elif self.objectName()=='分解炉--窑':
+                con.setValue_index_T(0)
+                con.setValue_index_P(0)
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
         else:
             self.msg()
@@ -168,35 +174,26 @@ class MyTempMplCanvas(MyMplCanvas):
         else:
             if con.getValue_flag_Visual() == 0:  # 显示一天的图片
                 tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
-                count, null = self.cal_null(tablevalue[1][index_T])
+                count, null = self.cal_null(tablevalue[1][index_T - 2])
                 self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                 self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
                 for tick_x in self.axes.get_xmajorticklabels():
                     tick_x.set_fontsize(8)
                 for tick_y in self.axes.get_ymajorticklabels():
                     tick_y.set_fontsize(7)
+
                 if count >= 1:
-                    value = []
-                    t = [i for i in range(24 - count)]
-                    x_label = []
-                    x_label.append('0')
-                    j = 0
-                    # x_label[j] = '0'
-                    for i in range(24 - count):
-                        value.append(tablevalue[1][index_T][null[i]])
-                        x_label.append(str(null[i]))
+                    x = [i for i in range(24)]
+                    y = tablevalue[1][index_T - 2]
+                    self.axes.plot(x, y, 'bx-')
 
-                    #在此标注出异常点
-                    self.axes.plot(t[2],value[2],'ro')
-
-                    self.axes.plot(t, value)
-                    self.axes.set_xticklabels(x_label)
-                    xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
+                    # self.axes.set_xticklabels(x_label)
+                    xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
                     self.axes.set_title(tablevalue[0][index_T], fontproperties=myfont)
                 else:
                     t = arange(0, 24, 1)
-                    self.axes.plot(t, tablevalue[1][index_T])
+                    self.axes.plot(t, tablevalue[1][index_T - 2])
                     xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
                     xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
@@ -205,7 +202,6 @@ class MyTempMplCanvas(MyMplCanvas):
             elif con.getValue_flag_Visual() == 1:  # 显示 10 小时的数据
                 tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
                 hour = con.getValue_hour()  # 显示hour之前的10小时数据(包括此hour)
-                count, null = self.cal_null(tablevalue[1][index_T])  # null[i] 记录了数据不为空的下标
                 self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                 self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
                 for tick_x in self.axes.get_xmajorticklabels():
@@ -213,31 +209,16 @@ class MyTempMplCanvas(MyMplCanvas):
                 for tick_y in self.axes.get_ymajorticklabels():
                     tick_y.set_fontsize(7)
 
-                value = []
-                t = []
-                x_label = []
+                y = tablevalue[1][index_T - 2]
 
-                # x_label[j] = '0'
-                cycle = 10  # 循环十次
-                for i in range(len(null)):  # 找到第hour小时的下标
-                    if null[i] == hour:
-                        j = i
+                if hour >= 10:
+                    x = [i for i in range(hour - 10, hour)]
+                    y2 = y[hour - 10:hour]
+                else:
+                    x = [i for i in range(hour + 1)]
+                    y2 = y[:hour + 1]
 
-                if null != []:
-                    while (cycle > 0):
-
-                        value.insert(0, tablevalue[1][index_T][null[j]])
-                        # t[j] = i
-
-                        x_label.insert(0, str(null[j]))
-                        j -= 1
-                        cycle -= 1
-                        t.append(10 - cycle)
-                        if j < 0:
-                            break
-                x_label.insert(0, '0')
-                self.axes.plot(t, value)
-                self.axes.set_xticklabels(x_label)
+                self.axes.plot(x, y2)
 
                 xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
                 self.axes.xaxis.set_major_locator(xmajorLocator)
@@ -256,7 +237,7 @@ class MyPressMplCanvas(MyMplCanvas):
         else:
             if con.getValue_flag_Visual() == 0:  # 显示一天的图片
                 tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
-                count, null = self.cal_null(tablevalue[1][index_P])
+                count, null = self.cal_null(tablevalue[1][index_P - 2])
                 self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                 self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
                 for tick_x in self.axes.get_xmajorticklabels():
@@ -264,23 +245,16 @@ class MyPressMplCanvas(MyMplCanvas):
                 for tick_y in self.axes.get_ymajorticklabels():
                     tick_y.set_fontsize(7)
                 if count >= 1:
-                    value = []
-                    t = [i for i in range(24 - count)]
-                    x_label = []
-                    x_label.append('0')
-                    j = 0
-                    # x_label[j] = '0'
-                    for i in range(24 - count):
-                        value.append(tablevalue[1][index_P][null[i]])
-                        x_label.append(str(null[i]))
-                    self.axes.plot(t, value)
-                    self.axes.set_xticklabels(x_label)
-                    xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为5的倍数
+                    x = [i for i in range(24)]
+                    y = tablevalue[1][index_P - 2]
+                    self.axes.plot(x, y, 'bx-')
+
+                    xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
                     self.axes.set_title(tablevalue[0][index_P], fontproperties=myfont)
                 else:
                     t = arange(0, 24, 1)
-                    self.axes.plot(t, tablevalue[1][index_P])
+                    self.axes.plot(t, tablevalue[1][index_P - 2])
                     xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
                     xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
@@ -290,8 +264,6 @@ class MyPressMplCanvas(MyMplCanvas):
                 tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
                 hour = con.getValue_hour()  # 显示hour之前的10小时数据(包括此hour)
 
-                count, null = self.cal_null(tablevalue[1][index_P])  # null[i] 记录了数据不为空的下标
-
                 self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                 self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
                 for tick_x in self.axes.get_xmajorticklabels():
@@ -299,28 +271,16 @@ class MyPressMplCanvas(MyMplCanvas):
                 for tick_y in self.axes.get_ymajorticklabels():
                     tick_y.set_fontsize(7)
 
-                value = []
-                t = []
-                x_label = []
+                y = tablevalue[1][index_P - 2]
 
-                # x_label[j] = '0'
-                cycle = 10  # 循环十次
-                for i in range(len(null)):  # 找到第hour小时的下标
-                    if null[i] == hour:
-                        j = i
-                if null != []:
-                    while (cycle > 0):
-                        value.insert(0, tablevalue[1][index_P][null[j]])
-                        # t[j] = i
-                        x_label.insert(0, str(null[j]))
-                        j -= 1
-                        cycle -= 1
-                        t.append(10 - cycle)
-                        if j < 0:
-                            break
-                x_label.insert(0, '0')  # 不知道为什么标签的第一个是不显示的，所以要在首位随便插入一个字符
-                self.axes.plot(t, value)
-                self.axes.set_xticklabels(x_label)
+                if hour >= 10:
+                    x = [i for i in range(hour - 10, hour)]
+                    y2 = y[hour - 10:hour]
+                else:
+                    x = [i for i in range(hour + 1)]
+                    y2 = y[:hour + 1]
+
+                self.axes.plot(x, y2)
 
                 xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
                 self.axes.xaxis.set_major_locator(xmajorLocator)
