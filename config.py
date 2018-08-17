@@ -6,8 +6,8 @@ global hour, flag_Hour, password, username, flag_Ctrl
 
 day = 0
 flag_Time = 0
-index_T = 0
-index_P = 0
+index_T = []
+index_P = []
 flag_Ser = 0
 number = 0
 filepath = ''
@@ -78,7 +78,14 @@ def getValue_index_T():
 
 def setValue_index_T(value):
     global index_T
-    index_T = value
+    if getValue_flag_Ctrl() == 0:
+        index_T=[]
+        index_T.append(value)
+    else:
+        if value in index_T:
+            index_T.remove(value)
+        else:
+            index_T.append(value)
 
 
 def getValue_index_P():
@@ -87,8 +94,14 @@ def getValue_index_P():
 
 def setValue_index_P(value):
     global index_P
-    index_P = value
-
+    if getValue_flag_Ctrl() == 0:
+        index_P=[]
+        index_P.append(value)
+    else:
+        if value in index_P:
+            index_P.remove(value)
+        else:
+            index_P.append(value)
 
 def getValue_flag_Ser():
     return flag_Ser

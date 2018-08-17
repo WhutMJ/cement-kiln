@@ -955,7 +955,7 @@ class MyWindow(QMainWindow):
             self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.pic1.addWidget(self.fp1)
             self.pic2.addWidget(self.fp2)
-            self.change_table(index1 - 2, index2 - 2)
+            #self.change_table(index1 - 2, index2 - 2)
             self.click_flag = 1
             self.updateInfor()
         elif self.click_flag == 1:
@@ -963,7 +963,7 @@ class MyWindow(QMainWindow):
             self.sp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.pic1.replaceWidget(self.fp1, self.sp1)
             self.pic2.replaceWidget(self.fp2, self.sp2)
-            self.change_table(index1 - 2, index2 - 2)
+            #self.change_table(index1 - 2, index2 - 2)
             self.click_flag = 2
             self.updateInfor()
         elif self.click_flag == 2:
@@ -971,7 +971,7 @@ class MyWindow(QMainWindow):
             self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.pic1.replaceWidget(self.sp1, self.fp1)
             self.pic2.replaceWidget(self.sp2, self.fp2)
-            self.change_table(index1 - 2, index2 - 2)
+            #self.change_table(index1 - 2, index2 - 2)
             self.click_flag = 1
             self.updateInfor()
 
