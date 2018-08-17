@@ -1,7 +1,8 @@
 '''以下为窑系统所需的全局变量的获取与设置'''
 global day, flag_Time, index_T, index_P, flag_Ser, number, filepath, flag_Visual
 #     日期， 时间选择标志，温度，压强，  单双系列标志，旋风筒数,文件路径,热耗可视化标志
-global hour, flag_Hour, password
+global hour, flag_Hour, password, username, flag_Ctrl
+#                                           判断是否按住了Ctrl键
 
 day = 0
 flag_Time = 0
@@ -12,8 +13,28 @@ number = 0
 filepath = ''
 flag_Visual = 0  # 为 0 则表示以天显示，为 1 则以小时显示
 hour = 0
-flag_Hour=0
+flag_Hour = 0
 password = '123456'
+flag_Ctrl = 0  # 没有按下
+
+
+def getValue_flag_Ctrl():
+    return flag_Ctrl
+
+
+def setValue_flag_Ctrl(value):
+    global flag_Ctrl
+    flag_Ctrl = value
+
+
+def getValue_username():
+    return username
+
+
+def setValue_username(value):
+    global username
+    username = value
+
 
 def getValue_filepath():
     return filepath
@@ -33,7 +54,7 @@ def setValue_day(value):
     day = value
 
 
-def getValue_flagTime():
+def getValue_flag_Time():
     return flag_Time
 
 

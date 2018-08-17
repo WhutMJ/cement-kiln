@@ -16,10 +16,9 @@ class MyWindow(QMainWindow):
         self.loginDlg.login_signal.connect(self.login)
 
     def login(self, user, password):
-
         if Login_test(user, password):
             self.loginDlg.hide()
-            self.userName=user
+            con.setValue_username(user)
             self.initWindow()
         else:
             QMessageBox.information(self, '提示', '用户名或密码错误', QMessageBox.Yes)
@@ -40,7 +39,7 @@ class MyWindow(QMainWindow):
         palette = QPalette()
         palette.setColor(QPalette.Background, QColor(46, 139, 130))  # 更改背景色
         self.setPalette(palette)
-        self.setWindowTitle("Cement Kiln--%s"%self.userName)  # 设置主窗口标题
+        self.setWindowTitle("Cement Kiln--%s" % con.getValue_username())  # 设置主窗口标题
         self.initMenu()  # 初始化菜单栏
         self.updatePic()  # 加载图片资源
         self.setTimer()  # 设定计时器，稍后会摆在正确位置
@@ -51,47 +50,47 @@ class MyWindow(QMainWindow):
         self.deviceDlg.yao_par_signal.connect(self.initDevice)
 
     def initInfor(self):  # 信息栏
-        self.lab_infor = QLabel(self.widget)
+        self.lab_infor = QLabel(self.mainWidget)
         self.lab_infor.setStyleSheet('background-color:white')
-        self.lab_infor.resize(self.width, self.lab_infor.height())
+        self.lab_infor.resize(self.width * 0.65, self.lab_infor.height())
         if con.getValue_flag_Visual() == 0:
-            self.lab_infor.setText('\t窑系统设备热耗可视化\t选择时间：未选择\t热耗：无数据')
+            self.lab_infor.setText('\t窑系统设备数据可视化\t选择时间：未选择\t热耗：无数据')
         else:
-            self.lab_infor.setText('\t窑系统热耗可视化\t选择时间：未选择\t热耗：无数据')
+            self.lab_infor.setText('\t窑系统数据可视化\t选择时间：未选择\t热耗：无数据')
 
     def updateInfor(self):
 
-        flag_Time = con.getValue_flagTime()
+        flag_Time = con.getValue_flag_Time()
         day = con.getValue_day()
         # print(con.getValue_flag_Visual())
         if con.getValue_number() != 0:  # 判断用户是否完成了窑系统配置信息
             if con.getValue_flag_Visual() == 1:
 
                 if flag_Time == 0:
-                    self.lab_infor.setText('\t窑系统热耗可视化\t选择时间：未选择\t热耗：无数据')
+                    self.lab_infor.setText('\t窑系统数据可视化\t选择时间：未选择\t热耗：无数据')
                 elif self.click_flag == 0:
                     day_str = str(day)
                     self.lab_infor.setText(
-                        '\t窑系统热耗可视化\t选择时间：%s-%s-%s\t热耗：无数据' % (day_str[0:4], day_str[4:6], day_str[6:8]))
+                        '\t窑系统数据可视化\t选择时间：%s-%s-%s\t热耗：无数据' % (day_str[0:4], day_str[4:6], day_str[6:8]))
                 else:
                     day_str = str(day)
                     value = get_by_day(str(day))
                     self.lab_infor.setText(
-                        '\t窑系统热耗可视化\t选择时间：%s-%s-%s\t热耗：' % (
+                        '\t窑系统数据可视化\t选择时间：%s-%s-%s\t热耗：' % (
                             day_str[0:4], day_str[4:6], day_str[6:8]))
             else:
 
                 if flag_Time == 0:
-                    self.lab_infor.setText('\t窑系统设备热耗可视化\t选择时间：未选择\t热耗：无数据')
+                    self.lab_infor.setText('\t窑系统设备数据可视化\t选择时间：未选择\t热耗：无数据')
                 elif self.click_flag == 0:
                     day_str = str(day)
                     self.lab_infor.setText(
-                        '\t窑系统设备热耗可视化\t选择时间：%s-%s-%s\t热耗：无数据' % (day_str[0:4], day_str[4:6], day_str[6:8]))
+                        '\t窑系统设备数据可视化\t选择时间：%s-%s-%s\t热耗：无数据' % (day_str[0:4], day_str[4:6], day_str[6:8]))
                 else:
                     value = get_by_day(str(day))
                     day_str = str(day)
                     self.lab_infor.setText(
-                        '\t窑系统设备热耗可视化\t选择时间：%s-%s-%s\t热耗：' % (
+                        '\t窑系统设备数据可视化\t选择时间：%s-%s-%s\t热耗：' % (
                             day_str[0:4], day_str[4:6], day_str[6:8]))
 
     def initDevice(self, flag_Seri, num):
@@ -106,7 +105,7 @@ class MyWindow(QMainWindow):
         self.widget = QWidget()
         self.table = QTableWidget(0, 2)  # 以表格形式显示数据
         self.table.setMinimumHeight(100)
-        self.table.horizontalHeader().setDefaultSectionSize(120)
+        self.table.horizontalHeader().setDefaultSectionSize(120)  # 列宽
 
         self.messageView = QTabWidget()
         self.messageView.setMinimumHeight(100)
@@ -140,8 +139,8 @@ class MyWindow(QMainWindow):
         self.main_lay = QHBoxLayout()
         self.main_lay.addWidget(self.widget)
         self.main_lay.addLayout(self.cblLay)
-        self.mainWidget = QWidget()
 
+        self.mainWidget = QWidget()
         self.mainWidget.setLayout(self.main_lay)
         self.setCentralWidget(self.mainWidget)
 
@@ -197,7 +196,7 @@ class MyWindow(QMainWindow):
     def initPic(self):  # 初始化布局
 
         # self.widget.autoFillBackground()
-        if con.getValue_flagTime() == 0:
+        if con.getValue_flag_Time() == 0:
             self.lay = QGridLayout()  # 初始化布局
         xft_row = 1  # 旋风筒所占行数
         xft_col = 2  # 旋风筒所占列数
@@ -210,10 +209,10 @@ class MyWindow(QMainWindow):
             self.lay.addWidget(self.jt[0], number - 1, 1, 2, 3)
             self.lay.addWidget(self.jt[1], number, 2, 2, 2)
             self.lay.addWidget(self.lab_fjl, number - 2, 2, fjl_row, fjl_col)  # 分解炉
-            self.lay.addWidget(self.xft[number], number - 1, 2)#A系列旋风筒最后一级
+            self.lay.addWidget(self.xft[number], number - 1, 2)  # A系列旋风筒最后一级
 
             self.lay.addWidget(self.fjl_yao, number - 2 + fjl_row, (fjl_col - 1) / 2 + 2)  # 连接件
-            if flag_Ser==1:
+            if flag_Ser == 1:
                 self.lay.addWidget(self.lab_yao_1, number - 2 + fjl_row, (fjl_col - 1) / 2 + 3, 1, 3)
             self.lay.addWidget(self.lab_yao_2, number - 2 + fjl_row, (fjl_col - 1) / 2 + 6, 1, 3)
             self.lay.addWidget(self.lab_yao_3, number - 2 + fjl_row, (fjl_col - 1) / 2 + 9, 1, 3)
@@ -242,25 +241,25 @@ class MyWindow(QMainWindow):
         self.lay.addWidget(self.xft[0], 0, 0)
         for i in arange(1, number):
             self.lay.addWidget(self.xft[i], i - 1, 1, xft_row, xft_col)
-            if i%2==0:
+            if i % 2 == 0:
                 self.lay.addWidget(self.jt[i + 5], i - 1, 1)
             else:
-                self.lay.addWidget(self.jt[i+5],i-1,2)
+                self.lay.addWidget(self.jt[i + 5], i - 1, 2)
 
         if flag_Ser == 2:
             self.lay.addWidget(self.xft[number + 1], 0, 10 - flag_Ser)
             for i in arange(number + 2, 2 * number + 1):
                 self.lay.addWidget(self.xft[i], (i - 2) % number, 8 - flag_Ser, xft_row, xft_col)
-                if number%2==0:
+                if number % 2 == 0:
                     if i % 2 == 0:
-                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 8-flag_Ser)
+                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 8 - flag_Ser)
                     else:
-                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 9-flag_Ser)
+                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 9 - flag_Ser)
                 else:
                     if i % 2 == 0:
-                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 9-flag_Ser)
+                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 9 - flag_Ser)
                     else:
-                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 8-flag_Ser)
+                        self.lay.addWidget(self.jt[i + 3], (i - 2) % number, 8 - flag_Ser)
             if number % 2 == 0:
                 self.lay.addWidget(self.jt[4], number - 1, 7 - flag_Ser, 2, 3)
                 self.lay.addWidget(self.jt[5], number, 7 - flag_Ser, 2, 2)
@@ -269,9 +268,9 @@ class MyWindow(QMainWindow):
                 self.lay.addWidget(self.jt[2], number - 1, 7 - flag_Ser, 2, 2)
                 self.lay.addWidget(self.jt[3], number, 7 - flag_Ser, 2, 3)
                 self.lay.addWidget(self.xft[number * 2 + 1], number - 1, 9 - flag_Ser)
-            self.lay.addWidget(self.lab_yao_1, number - 2 + fjl_row, (fjl_col - 1) / 2 + 3, 1, 3)#放到此处避免窑尾被覆盖
+            self.lay.addWidget(self.lab_yao_1, number - 2 + fjl_row, (fjl_col - 1) / 2 + 3, 1, 3)  # 放到此处避免窑尾被覆盖
         self.lay.setSpacing(0)
-        self.lay.setAlignment(Qt.AlignLeft | Qt.AlignCenter)
+        self.lay.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
 
         self.widget.setLayout(self.lay)
 
@@ -337,7 +336,7 @@ class MyWindow(QMainWindow):
         number = con.getValue_number()
         flag_Ser = con.getValue_flag_Ser()
 
-        self.ratio = 0.3 * self.width / 1366  # 图片放大倍数
+        self.ratio = 0.27 * self.width / 1366  # 图片放大倍数
         self.jt = {}
         self.jt[0] = QLabel()
         self.jt[0].setPixmap(
@@ -362,7 +361,7 @@ class MyWindow(QMainWindow):
         for i in range((number - 1) * 2):
             self.jt[6 + i] = QLabel()
             self.jt[6 + i].setPixmap(
-                self.jt_xia.scaled(self.xft_dl.width() * self.ratio , self.xft_dl.height() * self.ratio ))
+                self.jt_xia.scaled(self.xft_dl.width() * self.ratio, self.xft_dl.height() * self.ratio))
         self.xft[0] = MyLabel()
         self.xft[0].setPixmap(self.xft_dl.scaled(self.xft_dl.width() * self.ratio, self.xft_dl.height() * self.ratio))
         self.xft[0].setToolTip('%d级筒A0' % 1)
@@ -554,16 +553,12 @@ class MyWindow(QMainWindow):
         if tvalue[1][28][hour] == None:
             pass
         elif tvalue[1][28][hour] > 300:
-            self.lab_yao_1 = MyLabel()
             self.lab_yao_1.setPixmap(
                 self.yao_1_d.scaled(self.xft_dl.width() * 3 * self.ratio, self.yao_1.height() * self.ratio))
-            self.lab_yao_2 = MyLabel()
             self.lab_yao_2.setPixmap(
                 self.yao_2_d.scaled(self.xft_dl.width() * 3 * self.ratio, self.yao_2.height() * self.ratio))
-            self.lab_yao_3 = MyLabel()
             self.lab_yao_3.setPixmap(
                 self.yao_3_d.scaled(self.xft_dl.width() * 3 * self.ratio, self.yao_3.height() * self.ratio))
-
 
             '''self.lab_yao.setPixmap(
                 self.yao_d.scaled(self.xft_dl.width() * 9 * self.ratio, self.yao.height() * self.ratio))
@@ -572,13 +567,10 @@ class MyWindow(QMainWindow):
         if tvalue[1][33][hour] == None:
             pass
         elif tvalue[1][33][hour] > 0:
-            self.lab_blj_1 = MyLabel()
             self.lab_blj_1.setPixmap(
                 self.blj_1_d.scaled(self.blj_1.width() * self.ratio, self.blj_1.height() * self.ratio))
-            self.lab_blj_2 = MyLabel()
             self.lab_blj_2.setPixmap(
                 self.blj_2_d.scaled(self.blj_2.width() * self.ratio, self.blj_2.height() * self.ratio))
-            self.lab_blj_3 = MyLabel()
             self.lab_blj_3.setPixmap(
                 self.blj_3_d.scaled(self.blj_3.width() * self.ratio, self.blj_3.height() * self.ratio))
             '''self.lab_blj.setPixmap(self.blj_d.scaled(self.blj.width() * self.ratio, self.blj.height() * self.ratio))
@@ -599,6 +591,7 @@ class MyWindow(QMainWindow):
             self.hourBo.addItem(str(i))
         self.hourBo.move(self.width * 0.5 + 100, self.height * 0.05)  # 组合框位置
         self.hourBo.activated[str].connect(self.getHour)  # 点击时间响应
+        self.hourBo.resize(40, self.timeBtn.height())
         self.hourBo.hide()
 
         self.timeLabel = QLabel(self.widget)
@@ -607,7 +600,7 @@ class MyWindow(QMainWindow):
         self.timeLabel.setText('日期')
 
     def getHour(self):
-        flag_Time = con.getValue_flagTime()
+        flag_Time = con.getValue_flag_Time()
         if flag_Time == 0:  # 判断在选择小时前选择日期没，若没显示先选日期
             QMessageBox.information(self, '提示', '请先选择日期', QMessageBox.Yes | QMessageBox.No)
             self.hourBo.setCurrentText('0')
@@ -633,17 +626,44 @@ class MyWindow(QMainWindow):
             self.timer.stop()'''
         pass
 
+    def keyPressEvent(self, event):
+        # 这里event.key（）显示的是按键的编码
+        #print("按下：" + str(event.key()))
+        # 举例，这里Qt.Key_A注意虽然字母大写，但按键事件对大小写不敏感
+        if (event.key() == Qt.Key_Control):
+            con.setValue_flag_Ctrl(1)
+
+
+    def keyReleaseEvent(self, event):
+        # 这里event.key（）显示的是按键的编码
+        # 举例，这里Qt.Key_A注意虽然字母大写，但按键事件对大小写不敏感
+        if (event.key() == Qt.Key_Control):
+            con.setValue_flag_Ctrl(0)
+
     # 菜单项的实现
     def warning(self):
         if con.getValue_flag_Hour() == 1:
-            self.warningDlg = dlg.MyProduceWarDlg(con.getValue_day(), con.getValue_hour(), 1)
+            self.warningWnd = dlg.MyProduceWarWnd(con.getValue_day(), con.getValue_hour(), 1)
         else:
             QMessageBox.information(self, '提示', '请先选择日期和小时!', QMessageBox.Yes | QMessageBox.No)
 
         # 数据可视化
 
     def dataVisual(self):
-        print("窑系统数据可视化")
+        con.setValue_flag_Visual(1)
+        self.hourBo.show()
+        self.updateInfor()
+
+    def dataDeviceVisual(self):
+        con.setValue_flag_Visual(0)
+        self.hourBo.hide()
+        self.updateInfor()
+
+    def singleVisual(self):
+        pass
+
+    def mulVisual(self):
+        pass
 
     # 窑系统设备配置
     def deviceSet(self):
@@ -651,46 +671,51 @@ class MyWindow(QMainWindow):
 
     # 窑系统热耗可视化
     def heatVisual(self):
-        con.setValue_flag_Visual(1)
-        self.hourBo.show()
-        self.updateInfor()
+        pass
 
     # 窑系统设备热耗可视化
     def deviceVisual(self):
-        con.setValue_flag_Visual(0)
-        self.hourBo.hide()
-        self.updateInfor()
+        pass
 
-    # 文件导入
+    # 数据导入
     def leadIn(self):
-        filepath = con.getValue_filepath()
-        fileName1, filetype = QFileDialog.getOpenFileName(self,
-                                                          "选取文件", filepath,
-                                                          "Excel Files (*.xlsx);;Excel Files (*.xls)")  # 设置文件扩展名过滤,注意用双分号间隔
-        filedir = os.path.split(fileName1)  # 获取文件所在的文件夹
-        filepath = filedir[0]  # 文件路径信息
-        filename = filedir[1]  # 文件名
-        con.setValue_filepath(filepath)
-
-        # print(filepath + '/' + filename)
-        if filename and filepath:
-            reshape_data(filepath + '/' + filename)  # 后台处理传入文件格式
+        self.dataLeadInDlg = dlg.MyDataLeadInDlg()
 
     def dataInput(self):
 
-        self.datainputDlg = dlg.MyDataInputDlg()
+        self.datainputWnd = dlg.MyDataInputWnd()
         '''if con.getValue_flag_Hour() == 1:
-            self.datainputDlg = dlg.MyDataInputDlg()
+            self.datainputDlg = dlg.MyDataInputWnd()
         else:
             QMessageBox.information(self, '提示', '请先选择日期和小时!', QMessageBox.Yes | QMessageBox.No)'''
 
+    def openFile(self):
+        self.openFileWnd = dlg.MyOpenFileWnd()
+
     def changeData(self):
-        self.changeDataDlg = dlg.MyDataReviseDlg()
+        self.changeDataWnd = dlg.MyDataReviseWnd()
+
+    def simulateData(self):
+        self.timeDlg = dlg.MyTimeDlg()
+        self.timeDlg.time_signal.connect(self.time_sig)
+
+    def time_sig(self, time):
+        # print(time)
+        self.dataSimDlg = dlg.MyDataSimDlg(time)
+
+    def sysLog(self):
+        self.sysLogDlg = dlg.MySysLogDlg()
 
     def userChange(self):
         self.close()
-        self.loginDlg=dlg.MyLoginDlg()
+        self.loginDlg = dlg.MyLoginDlg()
         self.loginDlg.show()
+
+    def dataSet(self):
+        self.YaoDlg = dlg.MyYaoDlg()
+
+    def standardSet(self):
+        self.standardValueDlg = dlg.MyStandardValueDlg()
 
     # 菜单栏
     def initMenu(self):
@@ -701,6 +726,8 @@ class MyWindow(QMainWindow):
         dataInputAct.triggered.connect(self.dataInput)
 
         openFileAct = QAction('打开数据文件', self)
+        openFileAct.setStatusTip('用户手动输入数据')
+        openFileAct.triggered.connect(self.openFile)
 
         saveFileAct = QAction('数据保存', self)
 
@@ -711,6 +738,8 @@ class MyWindow(QMainWindow):
         changeDataAct.triggered.connect(self.changeData)
 
         simulateDataAct = QAction('数据模拟', self)
+        simulateDataAct.setStatusTip('用户修改某些数据以模拟窑系统状况')
+        simulateDataAct.triggered.connect(self.simulateData)
 
         leadInAct = QAction('数据导入', self)
         leadInAct.setStatusTip('将用户选择的文件变为符合本系统格式的文件')
@@ -720,12 +749,20 @@ class MyWindow(QMainWindow):
 
         # 可视化模块
         dataVisualAct = QAction('窑系统数据可视化', self)
-        dataVisualAct.setStatusTip('数据可视化')
+        dataVisualAct.setStatusTip('实时数据可视化')
         dataVisualAct.triggered.connect(self.dataVisual)
 
+        dataDeviceVisualAct = QAction('窑系统设备数据可视化', self)
+        dataDeviceVisualAct.setStatusTip('单日数据可视化')
+        dataDeviceVisualAct.triggered.connect(self.dataDeviceVisual)
+
         singleVisualAct = QAction('独立因素热耗分析可视化', self)
+        singleVisualAct.setStatusTip('单因素分析')
+        singleVisualAct.triggered.connect(self.singleVisual)
 
         mulVisualAct = QAction('联合因素热耗分析可视化', self)
+        mulVisualAct.setStatusTip('多因素分析')
+        mulVisualAct.triggered.connect(self.mulVisual)
 
         heatVisualAct = QAction('窑系统热耗可视化', self)
         heatVisualAct.setStatusTip('窑系统10小时热耗可视化')
@@ -752,10 +789,14 @@ class MyWindow(QMainWindow):
         deviceSetAct.triggered.connect(self.deviceSet)
 
         dataSetAct = QAction('窑系统数据', self)
+        dataSetAct.setStatusTip('窑系统数据展示')
+        dataSetAct.triggered.connect(self.dataSet)
 
         userSetAct = QAction('用户设置', self)
 
         standardSetAct = QAction('生产数据标准设置', self)
+        standardSetAct.setStatusTip('窑系统数据展示')
+        standardSetAct.triggered.connect(self.standardSet)
 
         objectSetAct = QAction('可视化对象设置', self)
 
@@ -782,6 +823,8 @@ class MyWindow(QMainWindow):
         knowBackupAct = QAction('知识库备份', self)
 
         sysLogAct = QAction('系统日志', self)
+        sysLogAct.setStatusTip('系统操作日志')
+        sysLogAct.triggered.connect(self.sysLog)
 
         sysHelpAct = QAction('系统帮助', self)
 
@@ -814,12 +857,12 @@ class MyWindow(QMainWindow):
 
         visualMenu = self.menubar.addMenu('窑系统热耗分析可视化')
         visualMenu.addAction(dataVisualAct)
+        visualMenu.addAction(dataDeviceVisualAct)
         visualMenu.addSeparator()
         visualMenu.addAction(singleVisualAct)
         visualMenu.addAction(mulVisualAct)
         visualMenu.addSeparator()
         visualMenu.addAction(heatVisualAct)
-        visualMenu.addSeparator()
         visualMenu.addAction(deviceVisualAct)
 
         guideMenu = self.menubar.addMenu('窑系统生产指导')
@@ -912,7 +955,7 @@ class MyWindow(QMainWindow):
             self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.pic1.addWidget(self.fp1)
             self.pic2.addWidget(self.fp2)
-            self.change_table(index1-2, index2-2)
+            self.change_table(index1 - 2, index2 - 2)
             self.click_flag = 1
             self.updateInfor()
         elif self.click_flag == 1:
@@ -920,7 +963,7 @@ class MyWindow(QMainWindow):
             self.sp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.pic1.replaceWidget(self.fp1, self.sp1)
             self.pic2.replaceWidget(self.fp2, self.sp2)
-            self.change_table(index1-2, index2-2)
+            self.change_table(index1 - 2, index2 - 2)
             self.click_flag = 2
             self.updateInfor()
         elif self.click_flag == 2:
@@ -928,7 +971,7 @@ class MyWindow(QMainWindow):
             self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.pic1.replaceWidget(self.sp1, self.fp1)
             self.pic2.replaceWidget(self.sp2, self.fp2)
-            self.change_table(index1-2, index2-2)
+            self.change_table(index1 - 2, index2 - 2)
             self.click_flag = 1
             self.updateInfor()
 

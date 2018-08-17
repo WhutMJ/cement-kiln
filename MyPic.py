@@ -30,11 +30,10 @@ class MyLabel(QLabel):
         self.changeindex.emit(index1, index2, name)
 
     def mousePressEvent(self, e):
-        flag_Time = con.getValue_flagTime()
+        flag_Time = con.getValue_flag_Time()
 
         if flag_Time == 1:  # 判断是否选择了时间
             name = get_table_name()
-            print(self.objectName())
             if self.objectName() == '1级筒A0':
                 con.setValue_index_T(name.index('yijitwdA'))
                 con.setValue_index_P(name.index('yijityqA'))
@@ -111,7 +110,7 @@ class MyLabel(QLabel):
                 con.setValue_index_T(name.index('bilengjsdS1'))
                 con.setValue_index_P(name.index('bilengjsdI1'))
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName()=='分解炉--窑':
+            elif self.objectName() == '分解炉--窑':
                 con.setValue_index_T(0)
                 con.setValue_index_P(0)
                 self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
@@ -185,6 +184,8 @@ class MyTempMplCanvas(MyMplCanvas):
                 if count >= 1:
                     x = [i for i in range(24)]
                     y = tablevalue[1][index_T - 2]
+                    print(x)
+                    print(y)
                     self.axes.plot(x, y, 'bx-')
 
                     # self.axes.set_xticklabels(x_label)
@@ -193,7 +194,7 @@ class MyTempMplCanvas(MyMplCanvas):
                     self.axes.set_title(tablevalue[0][index_T], fontproperties=myfont)
                 else:
                     t = arange(0, 24, 1)
-                    self.axes.plot(t, tablevalue[1][index_T - 2])
+                    self.axes.plot(t, tablevalue[1][index_T - 2], 'bx-')
                     xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
                     xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
@@ -218,7 +219,7 @@ class MyTempMplCanvas(MyMplCanvas):
                     x = [i for i in range(hour + 1)]
                     y2 = y[:hour + 1]
 
-                self.axes.plot(x, y2)
+                self.axes.plot(x, y2, 'bx-')
 
                 xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
                 self.axes.xaxis.set_major_locator(xmajorLocator)
@@ -254,7 +255,7 @@ class MyPressMplCanvas(MyMplCanvas):
                     self.axes.set_title(tablevalue[0][index_P], fontproperties=myfont)
                 else:
                     t = arange(0, 24, 1)
-                    self.axes.plot(t, tablevalue[1][index_P - 2])
+                    self.axes.plot(t, tablevalue[1][index_P - 2], 'bx-')
                     xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
                     xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
@@ -280,7 +281,7 @@ class MyPressMplCanvas(MyMplCanvas):
                     x = [i for i in range(hour + 1)]
                     y2 = y[:hour + 1]
 
-                self.axes.plot(x, y2)
+                self.axes.plot(x, y2, 'bx-')
 
                 xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
                 self.axes.xaxis.set_major_locator(xmajorLocator)
