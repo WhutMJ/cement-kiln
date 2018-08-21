@@ -12,6 +12,7 @@ from numpy import arange
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib
+import time
 
 
 class MySysLogDlg(QDialog):
@@ -263,14 +264,18 @@ class MyOpenFileWnd(QMainWindow):
         fileName, filetype = QFileDialog.getOpenFileName(self,
                                                          "选取文件", filepath,
                                                          "Excel Files (*.xlsx);;Excel Files (*.xls)")  # 设置文件扩展名过滤,注意用双分号间隔
-        filedir = os.path.split(fileName)  # 获取文件所在的文件夹
-        filepath = filedir[0]  # 文件路径信息
-        self.filename = filedir[1]  # 文件名
-        con.setValue_filepath(filepath)
-        print(fileName)
-        self.name, self.data = Read_file(fileName)
-        self.initUI()
-        self.initTable()
+
+        try:
+            filedir = os.path.split(fileName)  # 获取文件所在的文件夹
+            filepath = filedir[0]  # 文件路径信息
+            self.filename = filedir[1]  # 文件名
+            con.setValue_filepath(filepath)
+            print(fileName)
+            self.name, self.data = Read_file(fileName)
+            self.initUI()
+            self.initTable()
+        except Exception:
+            print('未选择')
 
     def initUI(self):
         metric = QDesktopWidget().screenGeometry()
@@ -390,20 +395,116 @@ class MyStandardValueDlg(QDialog):
             self.close()
 
 
-class MyCheckDlg(QDialog):
+class MyRadioWnd(QMainWindow):
     check_signal = pyqtSignal(list)
 
     def __init__(self):
-        super(MyCheckDlg, self).__init__()
+        super(MyRadioWnd, self).__init__()
         metric = QDesktopWidget().screenGeometry()
-        width = metric.width()
-        height = metric.height()
-        self.setFixedSize(width * 0.368, height * 0.618)
+        self.Width = metric.width()
+        self.Height = metric.height()
+        self.flag = 0
+        self.setFixedSize(self.Width * 0.368, self.Height * 0.618)
         self.lay = QGridLayout()  # 初始化布局
-        '''number = con.getValue_number()  # 旋风筒个数
-        flag_Ser = con.getValue_flag_Ser()  # 窑系统系列'''
-        number = 5
-        flag_Ser = 2
+        number = con.getValue_number()  # 旋风筒个数
+        flag_Ser = con.getValue_flag_Ser()  # 窑系统系列
+        self.xft = {}
+        for i in range(number):
+            self.xft[i] = QRadioButton('%d级筒A' % (i + 1), self)
+            self.xft[i].setObjectName('%d级筒A' % (i + 1))
+            self.lay.addWidget(self.xft[i], i / 3, i % 3)
+        if flag_Ser == 2:
+            for i in range(number):
+                self.xft[i + number] = QRadioButton('%d级筒B' % (i + 1), self)
+                self.xft[i + number].setObjectName('%d级筒B' % (i + 1))
+                self.lay.addWidget(self.xft[i + number], (i + number) / 3, (i + number) % 3)
+
+        self.fjl = QRadioButton('分解炉')
+        self.fjl.setObjectName('分解炉')
+        self.lay.addWidget(self.fjl)
+        self.yao1 = QRadioButton('窑1')
+        self.yao1.setObjectName('窑1')
+        self.lay.addWidget(self.yao1)
+        self.yao2 = QRadioButton('窑2')
+        self.yao2.setObjectName('窑2')
+        self.lay.addWidget(self.yao2)
+        self.yao3 = QRadioButton('窑3')
+        self.yao3.setObjectName('窑3')
+        self.lay.addWidget(self.yao3)
+        self.blj1 = QRadioButton('篦冷机1')
+        self.blj1.setObjectName('篦冷机1')
+        self.lay.addWidget(self.blj1)
+        self.blj2 = QRadioButton('篦冷机2')
+        self.blj2.setObjectName('篦冷机2')
+        self.lay.addWidget(self.blj2)
+        self.blj3 = QRadioButton('篦冷机3')
+        self.blj3.setObjectName('篦冷机3')
+        self.lay.addWidget(self.blj3)
+
+        self.lay.setSpacing(40)
+        self.lay.setAlignment(Qt.AlignLeft | Qt.AlignTop)
+        self.widget = QWidget(self)
+        self.widget.setGeometry(QtCore.QRect(20, 40, self.Width * 0.36, self.Height * 0.5))
+        self.widget.setLayout(self.lay)
+
+        self.mainWidget = QWidget()
+        self.mainLay = QHBoxLayout()
+        self.mainLay.addWidget(self.widget)
+        self.mainWidget.setLayout(self.mainLay)
+        self.setCentralWidget(self.mainWidget)
+
+        self.okBtn = QPushButton('确定', self.mainWidget)
+        self.okBtn.move(self.width() * 0.7, self.height() * 0.9)
+
+        self.okBtn.clicked.connect(self.Accept)
+        self.setWindowTitle('请选择您想要的部件')
+
+        self.show()
+
+    def Accept(self):
+        children = self.findChildren(QCheckBox, )
+        check_name = []  # 被选中的部件名称
+        for child in children:
+            if child.isChecked():
+                check_name.append(child.objectName())
+        print(check_name)
+        self.addDock()
+        self.check_signal.emit(check_name)
+
+    def addDock(self):
+        if self.flag == 0:
+            dock1 = MyDockWidget('DockWidget')
+            dock1.setFeatures(QDockWidget.DockWidgetClosable)
+            dock1.setAllowedAreas(Qt.RightDockWidgetArea)
+
+            self.bar = MyHeatCanvas()
+            dock1.setFixedWidth(400)
+            dock1.setWidget(self.bar)
+            dock1.dock_signal.connect(self.change)
+            self.addDockWidget(Qt.RightDockWidgetArea, dock1)
+            self.setFixedSize(self.Width * 0.368 + 400, self.Height * 0.618)
+            self.flag = 1
+        else:
+            pass
+
+    def change(self, str):
+        self.setFixedSize(self.Width * 0.368, self.Height * 0.618)
+        self.flag = 0
+
+
+class MyCheckWnd(QMainWindow):
+    check_signal = pyqtSignal(list)
+
+    def __init__(self):
+        super(MyCheckWnd, self).__init__()
+        metric = QDesktopWidget().screenGeometry()
+        self.Width = metric.width()
+        self.Height = metric.height()
+        self.flag = 0
+        self.setFixedSize(self.Width * 0.368, self.Height * 0.618)
+        self.lay = QGridLayout()  # 初始化布局
+        number = con.getValue_number()  # 旋风筒个数
+        flag_Ser = con.getValue_flag_Ser()  # 窑系统系列
         self.xft = {}
         for i in range(number):
             self.xft[i] = QCheckBox('%d级筒A' % (i + 1), self)
@@ -415,7 +516,7 @@ class MyCheckDlg(QDialog):
                 self.xft[i + number].setObjectName('%d级筒B' % (i + 1))
                 self.lay.addWidget(self.xft[i + number], (i + number) / 3, (i + number) % 3)
 
-        self.fjl=QCheckBox('分解炉')
+        self.fjl = QCheckBox('分解炉')
         self.fjl.setObjectName('分解炉')
         self.lay.addWidget(self.fjl)
         self.yao1 = QCheckBox('窑1')
@@ -437,25 +538,36 @@ class MyCheckDlg(QDialog):
         self.blj3.setObjectName('篦冷机3')
         self.lay.addWidget(self.blj3)
 
-
         self.lay.setSpacing(40)
         self.lay.setAlignment(Qt.AlignLeft | Qt.AlignTop)
         self.widget = QWidget(self)
-        self.widget.setGeometry(QtCore.QRect(20, 40, width * 0.36, height * 0.5))
+        self.widget.setGeometry(QtCore.QRect(20, 40, self.Width * 0.36, self.Height * 0.5))
         self.widget.setLayout(self.lay)
 
-        self.btnWidget = QWidget(self)
-        self.btnLay = QVBoxLayout()
+        self.mainWidget = QWidget()
+        self.mainLay = QHBoxLayout()
+        self.mainLay.addWidget(self.widget)
+        # self.mainLay.addWidget(self.btnWidget)
+        self.mainWidget.setLayout(self.mainLay)
+        self.setCentralWidget(self.mainWidget)
 
-        self.checkAllBtn = QPushButton('全选')
-        self.btnLay.addWidget(self.checkAllBtn)
-        self.invertBtn = QPushButton('反选')
-        self.btnLay.addWidget(self.invertBtn)
-        self.okBtn = QPushButton('确定')
-        self.btnLay.addWidget(self.okBtn)
+        self.btnWidget = QWidget(self.mainWidget)
 
-        self.btnWidget.move(self.width() * 0.8, self.height() * 0.418)
-        self.btnWidget.setLayout(self.btnLay)
+        # self.btnLay = QVBoxLayout()
+
+        self.checkAllBtn = QPushButton('全选', self.mainWidget)
+        # self.btnLay.addWidget(self.checkAllBtn)
+        self.invertBtn = QPushButton('反选', self.mainWidget)
+        # self.btnLay.addWidget(self.invertBtn)
+        self.okBtn = QPushButton('确定', self.mainWidget)
+        # self.btnLay.addWidget(self.okBtn)
+        self.checkAllBtn.move(self.width() * 0.7, self.height() * 0.418)
+        self.invertBtn.move(self.width() * 0.7, self.height() * 0.418 + 40)
+        self.okBtn.move(self.width() * 0.7, self.height() * 0.418 + 80)
+
+        # self.btnWidget.move(self.width() * 0.8, self.height() * 0.418)
+        # self.btnLay.setGeometry(QtCore.QRect(self.width() * 0.8, self.height() * 0.418,100,60))
+        # self.btnWidget.setLayout(self.btnLay)
 
         self.checkAllBtn.clicked.connect(self.checkAll)
         self.invertBtn.clicked.connect(self.Invert)
@@ -481,7 +593,37 @@ class MyCheckDlg(QDialog):
             if child.isChecked():
                 check_name.append(child.objectName())
         print(check_name)
+        self.addDock()
         self.check_signal.emit(check_name)
+
+    def addDock(self):
+        if self.flag == 0:
+            dock1 = MyDockWidget('DockWidget')
+            dock1.setFeatures(QDockWidget.DockWidgetClosable)
+            dock1.setAllowedAreas(Qt.RightDockWidgetArea)
+            self.bar = MyHeatCanvas()
+            dock1.setFixedWidth(400)
+            dock1.setWidget(self.bar)
+            dock1.dock_signal.connect(self.change)
+            self.addDockWidget(Qt.RightDockWidgetArea, dock1)
+            self.setFixedSize(self.Width * 0.368 + 400, self.Height * 0.618)
+            self.flag = 1
+        else:
+            pass
+
+    def change(self, str):
+        self.setFixedSize(self.Width * 0.368, self.Height * 0.618)
+        self.flag = 0
+
+
+class MyDockWidget(QDockWidget):
+    dock_signal = pyqtSignal(str)
+
+    def __init__(self, parent=None):
+        super(MyDockWidget, self).__init__(parent)
+
+    def closeEvent(self, QCloseEvent):
+        self.dock_signal.emit('close')
 
 
 class MyYaoDlg(QDialog):
@@ -985,16 +1127,21 @@ class MyDataReviseWnd(QMainWindow):  # 数据修改功能窗口
 class MyProduceWarWnd(QMainWindow):
     def __init__(self, day, hour, number=1):
         super(MyProduceWarWnd, self).__init__()
-
+        metric = QDesktopWidget().screenGeometry()
+        self.Width = metric.width()
+        self.Height = metric.height()
         self.setWindowTitle('生产预警')
+        self.ratio_w = 0.6
+        self.ratio_h = 0.78
+        self.flag = 0
+        self.move(50,50)
         # 调整窗口显示时的大小
-        self.setMinimumWidth(800)
-        self.setMinimumHeight(600)
+        self.setFixedWidth(self.Width * self.ratio_w)
+        self.setMinimumHeight(self.Height * self.ratio_h)
 
         self.pageView = QTabWidget()
         self.tab = {}
         self.pic = {}
-
         for i in range(number):
             self.tab[i] = QLabel()
             self.pageView.addTab(self.tab[i], '%d小时' % (hour + i))
@@ -1006,28 +1153,56 @@ class MyProduceWarWnd(QMainWindow):
             self.pic[i].addWidget(Ca)
 
             self.line = QtWidgets.QFrame(self)
-            self.line.setGeometry(QtCore.QRect(0, QDesktopWidget().screenGeometry().height() * 0.73,
-                                               QDesktopWidget().screenGeometry().width(), 16))
+            self.line.setGeometry(QtCore.QRect(0, self.Height * 0.73, self.Width, 16))
             self.line.setFrameShape(QtWidgets.QFrame.HLine)
             self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
             self.pic[i].addWidget(self.line)
-
             value = Production_warning_rexiaolv(data[1])
             Effic = MyEfficMpCanvas(value)
             self.pic[i].addWidget(QLabel('热效率分析'))
             self.pic[i].addWidget(Effic)
             self.line2 = QtWidgets.QFrame(self)
-            self.line2.setGeometry(QtCore.QRect(0, QDesktopWidget().screenGeometry().height() * 0.73,
-                                                QDesktopWidget().screenGeometry().width(), 16))
+            self.line2.setGeometry(QtCore.QRect(0, self.Height * 0.73, self.Width, 16))
             self.line2.setFrameShape(QtWidgets.QFrame.HLine)
             self.line2.setFrameShadow(QtWidgets.QFrame.Sunken)
             self.pic[i].addWidget(self.line2)
             Coal = MyCoalMpCanvas(value)
             self.pic[i].addWidget(Coal)
+            self.okBtn = QPushButton('ok', self.tab[i])
+            self.okBtn.move(self.width() * 0.85, self.height() * 0.9)
+            self.okBtn.clicked.connect(self.Accept)
 
         # 设置将self.pageView为中心Widget
         self.setCentralWidget(self.pageView)
         self.show()
+
+    def Accept(self):
+        self.addDock()
+
+    def addDock(self):
+        if self.flag == 0:
+            self.flag = 1
+            dock1 = MyDockWidget('DockWidget')
+            dock1.setFeatures(QDockWidget.DockWidgetClosable)
+            dock1.setAllowedAreas(Qt.RightDockWidgetArea)
+            self.bar = MyHeatCanvas()
+            dock1.setFixedWidth(400)
+            dock1.setWidget(self.bar)
+            dock1.dock_signal.connect(self.change)
+            self.addDockWidget(Qt.RightDockWidgetArea, dock1)
+            self.setFixedWidth(self.Width * self.ratio_w + 400)
+        else:
+            pass
+
+    def change(self, str):
+        self.flag = 0
+        self.setFixedWidth(self.Width * self.ratio_w)
+
+    def resizeEvent(self, *args, **kwargs):
+        if self.flag == 0:
+            self.okBtn.move(self.width() * 0.85, self.height() * 0.9)
+        else:
+            self.okBtn.move((self.width() - 400) * 0.85, self.height() * 0.9)
 
 
 class MyMplCanvas(FigureCanvas):
@@ -1133,6 +1308,14 @@ class MyCoalMpCanvas(QWidget):
         self.setLayout(self.lay)
 
 
+class MyHeatCanvas(MyMplCanvas):
+
+    def compute_initial_figure(self):
+        x = [1, 2, 3, 4]
+        y = [5, 6, 7, 8]
+        self.axes.bar(x, y)
+
+
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     # form = MyDataSimDlg('2017012310')
@@ -1146,5 +1329,7 @@ if __name__ == "__main__":
     # form =MyOpenFileWnd()
     # form2 = MyYaoDlg()
     # form = MyOpenFileWnd()
-    form = MyCheckDlg()
+    # form = MyCheckWnd()
+    # form = MyRadioWnd()
+    form = MyProduceWarWnd(20170223, 10)
     app.exec_()

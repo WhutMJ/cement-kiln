@@ -22,7 +22,7 @@ matplotlib.rcParams["axes.unicode_minus"] = False
 
 
 class MyLabel(QLabel):
-    changeindex = pyqtSignal(list, int, str)  # 单击窑系统部件时会发出信号
+    changeindex = pyqtSignal(list, list, str)  # 单击窑系统部件时会发出信号
 
     def __init__(self, parent=None):
         super(MyLabel, self).__init__(parent)
@@ -182,7 +182,7 @@ class MyTempMplCanvas(MyMplCanvas):
     def compute_initial_figure(self):
         day = str(con.getValue_day())
         index_T = con.getValue_index_T()
-        if  index_T==[] or index_T[0] == 0:
+        if index_T == [] or index_T[0] == 0:
             pass
         else:
             if con.getValue_flag_Ctrl() == 0:
@@ -222,16 +222,13 @@ class MyTempMplCanvas(MyMplCanvas):
                         tick_x.set_fontsize(8)
                     for tick_y in self.axes.get_ymajorticklabels():
                         tick_y.set_fontsize(7)
-
                     y = tablevalue[1][index_T[0] - 2]
-
                     if hour >= 10:
                         x = [i for i in range(hour - 10, hour)]
                         y2 = y[hour - 10:hour]
                     else:
                         x = [i for i in range(hour + 1)]
                         y2 = y[:hour + 1]
-
                     self.axes.plot(x, y2, 'bx-')
 
                     xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
@@ -278,8 +275,7 @@ class MyPressMplCanvas(MyMplCanvas):
     def compute_initial_figure(self):
         day = str(con.getValue_day())
         index_P = con.getValue_index_P()
-
-        if index_P==[] or index_P[0] == 0:
+        if index_P == [] or index_P[0] == 0:
             pass
         else:
             if con.getValue_flag_Ctrl() == 0:

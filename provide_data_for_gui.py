@@ -1,18 +1,37 @@
 from pymysql import *
 import datetime
 import config as con
+import xlrd
+import xlwt
+from xlutils.copy import copy
+from openpyxl import Workbook
+from openpyxl.utils import get_column_letter
+
+
+def Build_table(head, path):
+    # 在内存中创建一个workbook对象，并且至少创建一个worksheet
+    wb = Workbook()
+
+    ws = wb.active  # 获取当前活跃的worksheet，默认是第一个sheet
+
+    for i in range(1, len(head) + 1):
+        ws.cell(1, i).value = head[i - 1]
+
+    wb.save(filename=path)
+
+
 def get_time_now():
     time_now = datetime.datetime.now().strftime('%Y%m%d%H')
     return time_now
 
 
-def Connect():      # 连接数据库
+def Connect():  # 连接数据库
     db = connect(host='localhost', user="root", password=con.password, db="Program", charset="utf8")
     cursor = db.cursor()
     return cursor
 
 
-def get_by_hour(time):      # 具体一个小时的数据
+def get_by_hour(time):  # 具体一个小时的数据
     '''
     :param time: 传入数据为字符串形式 'date + hour'
     :return:
@@ -32,7 +51,7 @@ def get_by_hour(time):      # 具体一个小时的数据
     return name, result
 
 
-def get_by_day(time):       # 数据库中有ID栏
+def get_by_day(time):  # 数据库中有ID栏
     '''
     :param time:'date'
     :return:
@@ -51,7 +70,7 @@ def get_by_day(time):       # 数据库中有ID栏
     return name, result[2:]
 
 
-def get_by_fragment_(time_now, number = 72):
+def get_by_fragment_(time_now, number=72):
     '''
     :param time_now: 'date + hour'
             number : fragment的长度
@@ -69,7 +88,7 @@ def get_by_fragment_(time_now, number = 72):
         data_now = cursor.fetchall()[0]
         id = data_now[0]
         # print(id)
-        result.append(data_now[1:])     # 添加第一个元素给result
+        result.append(data_now[1:])  # 添加第一个元素给result
         i = 1
     else:
         sql = "SELECT ID FROM all_data"
@@ -123,6 +142,22 @@ def update_data(data):
         return False
 
 
+def delete_data(data):
+    db = connect(host='localhost', user="root", password=con.password, db="Program", charset="utf8")
+    cursor = db.cursor()
+    try:
+        for x in data:
+            date = x[0]
+            hour = x[1]
+            sql = "delete from all_data where date=%s and time=%s" % (date, hour)
+            cursor.execute(sql)
+            db.commit()
+        return True
+    except Exception as msg:
+        print(msg)
+        return False
+
+
 def save_data(data):
     db = connect(host='localhost', user="root", password=con.password, db="Program", charset="utf8")
     cursor = db.cursor()
@@ -151,8 +186,8 @@ def save_data(data):
             for j in range(2, len(data[0])):
                 if data[i][j] == None or data[i][j] == '':
                     data[i][j] = 0
-                sql = "UPDATE all_data SET %s = '%lf' WHERE date = '%s' and time = '%s' and ID = '%d'"\
-                        % (Name[j], data[i][j], data[i][0], data[i][1], last_id)
+                sql = "UPDATE all_data SET %s = '%lf' WHERE date = '%s' and time = '%s' and ID = '%d'" \
+                      % (Name[j], data[i][j], data[i][0], data[i][1], last_id)
                 cursor.execute(sql)
                 db.commit()
             '''
@@ -176,10 +211,114 @@ def get_table_name():
     return name[1:]
 
 
+def get_all_date():
+    cursor = Connect()
+    sql = "SELECT date, time FROM all_data"
+    cursor.execute(sql)
+    result = cursor.fetchall()
+    return result
+
+
+def get_target_data(time):
+    cursor = Connect()
+    date = time[:8]
+    hour = time[8:]
+    sql = "SELECT * FROM target_data WHERE date = '%s' and time = '%s'" % (date, hour)
+    if cursor.execute(sql):
+        name = cursor.description
+        name = [x[0] for x in name[1:]]
+        result = cursor.fetchall()[0][1:]
+        return name, result
+    else:
+        print("There is no data")
+        return False
+
+
+def reshape_data(source_filename, target_filename='file_model\\raw_model.xlsx'):
+    '''
+    :param source_filename:
+    :param target_filename:
+    :return: True of False
+    '''
+    source_readfile = xlrd.open_workbook(source_filename)
+    sourcesheet = source_readfile.sheet_by_index(0)
+    source_table_name = sourcesheet.row_values(0, 0)  # 获取用户文件的表头
+
+    standard_file = xlrd.open_workbook(target_filename)
+    standardsheet = standard_file.sheet_by_name('Sheet1')
+    standard_table_name = standardsheet.row_values(0, 0)
+
+    new_table_value = [[] for i in range(len(standard_table_name))]
+
+    for i in range(len(standard_table_name)):
+        lable = 0
+        for j in range(len(source_table_name)):
+            if standard_table_name[i] == source_table_name[j]:
+                table_value = sourcesheet.col_values(j, 1)
+                new_table_value[i] = table_value
+                lable = 1
+                break
+        if lable == 0:
+            new_table_value[i] = ['' for x in range(len(standardsheet.col_values(0, 1)))]
+
+    new_file = xlwt.Workbook()
+    newsheet = new_file.add_sheet('Sheet1')
+    for i in range(len(standard_table_name)):
+        newsheet.write(0, i, standard_table_name[i])
+    for i in range(len(standard_table_name)):
+        for j in range(len(new_table_value[i])):
+            newsheet.write(j + 1, i, new_table_value[i][j])
+
+    length = len('model\\model')
+    new_filename = 'data' + target_filename[length:]
+    print(new_filename)
+    if new_file.save('Datafile_From_C\\' + new_filename):
+        return True
+    else:
+        return False
+
+
+def change_data_model(Username, name):
+    '''
+    :param Username: 更改该模板的用户信息
+    :param name: 更改后的表头名称
+    :return: 新模板的文件路径 or False
+    '''
+    oldfile = xlrd.open_workbook('file_model\\raw_model.xlsx')
+    newfile = copy(oldfile)
+    new_filename = 'file_model\\model_for_' + Username + '.xls'
+    new_sheet = newfile.get_sheet(0)
+    try:
+        length = len(name)
+        for i in range(length):
+            new_sheet.write(0, i, name[i])
+        newfile.save(new_filename)
+        return new_filename
+    except Exception:
+        return False
+
+
+def Read_file(path):  # 读取文件名，返回文件的所有数据
+    readfile = xlrd.open_workbook(path)
+    value = []
+    read_sheet = readfile.sheet_by_name('Sheet1')
+    table_name = read_sheet.row_values(0, 0)
+    for i in range(len(table_name)):
+        x = read_sheet.col_values(i, 1)
+        value.append(x)
+    return table_name, value
+
+
 if __name__ == "__main__":
+    old_table_name = get_table_name()
+    old_table_name.append('zhu')
+    model_name = change_data_model('moujun', old_table_name)
+    reshape_data('source.xlsx', model_name)
+    # print(get_target_data('2017012310'))
+    # get_all_date()
     # get_table_name()
     # print(get_time_now())
-    get_by_fragment()
+    # get_by_fragment()
     '''
     name1, data1 = get_by_hour('2017031507')
     name2, data2 = get_by_hour('2017031508')
@@ -193,4 +332,3 @@ if __name__ == "__main__":
     else:
         print('FALSE')
 '''
-
