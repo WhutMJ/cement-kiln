@@ -5,7 +5,6 @@ import xlrd
 import xlwt
 from xlutils.copy import copy
 from openpyxl import Workbook
-from openpyxl.utils import get_column_letter
 
 
 def Build_table(head, path):
@@ -308,6 +307,17 @@ def Read_file(path):  # 读取文件名，返回文件的所有数据
         value.append(x)
     return table_name, value
 
+
+def opreation_record(data):
+    db = connect(host='localhost', user="root", password=con.password, db="Program", charset="utf8")
+    cursor = db.cursor()
+    time_now = datetime.datetime.now().strftime('%Y%m%d-%H:%M:%S')
+    # print(time_now)
+    sql = "INSERT INTO operation_record(time, username, operation) VALUE('%s', '%s', '%s')" \
+          % (time_now, data[0], data[1])
+
+    cursor.execute(sql)
+    db.commit()
 
 if __name__ == "__main__":
     old_table_name = get_table_name()

@@ -1,10 +1,5 @@
 # 本文件为折线图显示的相关函数
-
-import os
-import config as con
-
 from provide_data_for_gui import *
-from PyQt5 import QtWidgets, QtGui, QtCore
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 import matplotlib.font_manager as fm
@@ -31,92 +26,89 @@ class MyLabel(QLabel):
         self.changeindex.emit(index1, index2, name)
 
     def mousePressEvent(self, e):
-        flag_Time = con.getValue_flag_Time()
 
-        if flag_Time == 1:  # 判断是否选择了时间
-            name = get_table_name()
-            if self.objectName() == '1级筒A0':
-                con.setValue_index_T(name.index('yijitwdA'))
-                con.setValue_index_P(name.index('yijityqA'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '1级筒A':
-                con.setValue_index_T(name.index('yijitwdA'))
-                con.setValue_index_P(name.index('yijityqA'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '1级筒B0':
-                con.setValue_index_T(name.index('yijitwdB'))
-                con.setValue_index_P(name.index('yijityqB'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '1级筒B':
-                con.setValue_index_T(name.index('yijitwdB'))
-                con.setValue_index_P(name.index('yijityqB'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '2级筒A':
-                con.setValue_index_T(name.index('erjitwdA'))
-                con.setValue_index_P(name.index('erjityqA'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '2级筒B':
-                con.setValue_index_T(name.index('erjitwdB'))
-                con.setValue_index_P(name.index('erjityqB'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '3级筒A':
-                con.setValue_index_T(name.index('sanjitwdA'))
-                con.setValue_index_P(name.index('sanjityqA'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '3级筒B':
-                con.setValue_index_T(name.index('sanjitwdB'))
-                con.setValue_index_P(name.index('sanjityqB'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '4级筒A':
-                con.setValue_index_T(name.index('sijitwdA'))
-                con.setValue_index_P(name.index('sijityqA'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '4级筒B':
-                con.setValue_index_T(name.index('sijitwdB'))
-                con.setValue_index_P(name.index('sijityqB'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '5级筒A':
-                con.setValue_index_T(name.index('wujitwdA'))
-                con.setValue_index_P(name.index('wujityqA'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '5级筒B':
-                con.setValue_index_T(name.index('wujitwdB'))
-                con.setValue_index_P(name.index('wujityqB'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '分解炉':
-                con.setValue_index_T(name.index('fenjielwd'))
-                con.setValue_index_P(name.index('fenjielyq'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '窑1':
-                con.setValue_index_T(0)
-                con.setValue_index_P(name.index('yaoweic'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '窑2':
-                con.setValue_index_T(name.index('tongtiwd'))
-                con.setValue_index_P(name.index('yaos'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '窑3':
-                con.setValue_index_T(name.index('yaotouyl'))
-                con.setValue_index_P(name.index('yaotouc'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '篦冷机1段':
-                con.setValue_index_T(name.index('bilengjydyl'))
-                con.setValue_index_P(name.index('bilengjydS1'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '篦冷机2段':
-                con.setValue_index_T(name.index('bilengjedS1'))
-                con.setValue_index_P(name.index('bilengjedI1'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '篦冷机3段':
-                con.setValue_index_T(name.index('bilengjsdS1'))
-                con.setValue_index_P(name.index('bilengjsdI1'))
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-            elif self.objectName() == '分解炉--窑':
-                con.setValue_index_T(0)
-                con.setValue_index_P(0)
-                self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
-        else:
-            self.msg()
+        name = get_table_name()
+        if self.objectName() == '1级筒A0':
+            con.setValue_index_T(name.index('yijitwdA'))
+            con.setValue_index_P(name.index('yijityqA'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '1级筒A':
+            con.setValue_index_T(name.index('yijitwdA'))
+            con.setValue_index_P(name.index('yijityqA'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '1级筒B0':
+            con.setValue_index_T(name.index('yijitwdB'))
+            con.setValue_index_P(name.index('yijityqB'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '1级筒B':
+            con.setValue_index_T(name.index('yijitwdB'))
+            con.setValue_index_P(name.index('yijityqB'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '2级筒A':
+            con.setValue_index_T(name.index('erjitwdA'))
+            con.setValue_index_P(name.index('erjityqA'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '2级筒B':
+            con.setValue_index_T(name.index('erjitwdB'))
+            con.setValue_index_P(name.index('erjityqB'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '3级筒A':
+            con.setValue_index_T(name.index('sanjitwdA'))
+            con.setValue_index_P(name.index('sanjityqA'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '3级筒B':
+            con.setValue_index_T(name.index('sanjitwdB'))
+            con.setValue_index_P(name.index('sanjityqB'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '4级筒A':
+            con.setValue_index_T(name.index('sijitwdA'))
+            con.setValue_index_P(name.index('sijityqA'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '4级筒B':
+            con.setValue_index_T(name.index('sijitwdB'))
+            con.setValue_index_P(name.index('sijityqB'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '5级筒A':
+            con.setValue_index_T(name.index('wujitwdA'))
+            con.setValue_index_P(name.index('wujityqA'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '5级筒B':
+            con.setValue_index_T(name.index('wujitwdB'))
+            con.setValue_index_P(name.index('wujityqB'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '分解炉':
+            con.setValue_index_T(name.index('fenjielwd'))
+            con.setValue_index_P(name.index('fenjielyq'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '窑1':
+            con.setValue_index_T(0)
+            con.setValue_index_P(name.index('yaoweic'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '窑2':
+            con.setValue_index_T(name.index('tongtiwd'))
+            con.setValue_index_P(name.index('yaos'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '窑3':
+            con.setValue_index_T(name.index('yaotouyl'))
+            con.setValue_index_P(name.index('yaotouc'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '篦冷机1段':
+            con.setValue_index_T(name.index('bilengjydyl'))
+            con.setValue_index_P(name.index('bilengjydS1'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '篦冷机2段':
+            con.setValue_index_T(name.index('bilengjedS1'))
+            con.setValue_index_P(name.index('bilengjedI1'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '篦冷机3段':
+            con.setValue_index_T(name.index('bilengjsdS1'))
+            con.setValue_index_P(name.index('bilengjsdI1'))
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+        elif self.objectName() == '分解炉--窑':
+            con.setValue_index_T(0)
+            con.setValue_index_P(0)
+            self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
+
 
     def msg(self):
         reply = QMessageBox.information(self, '提示', '请先选择时间', QMessageBox.Yes | QMessageBox.No)

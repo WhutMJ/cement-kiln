@@ -1,11 +1,10 @@
 '''以下为窑系统所需的全局变量的获取与设置'''
-global day, flag_Time, index_T, index_P, flag_Ser, number, filepath, flag_Visual
-#     日期， 时间选择标志，温度，压强，  单双系列标志，旋风筒数,文件路径,热耗可视化标志
+global day, index_T, index_P, flag_Ser, number, filepath, flag_Visual
+#     日期， 温度，压强，  单双系列标志，旋风筒数,文件路径,热耗可视化标志
 global hour, flag_Hour, password, username, flag_Ctrl
 #                                           判断是否按住了Ctrl键
 
 day = 0
-flag_Time = 0
 index_T = []
 index_P = []
 flag_Ser = 0
@@ -54,13 +53,13 @@ def setValue_day(value):
     day = value
 
 
-def getValue_flag_Time():
+'''def getValue_flag_Time():
     return flag_Time
 
 
 def setValue_flag_Time(value):
     global flag_Time
-    flag_Time = value
+    flag_Time = value'''
 
 
 def getValue_flag_Hour():

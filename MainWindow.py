@@ -2,12 +2,11 @@ import sys
 from MyPic import *
 import MyDialog as dlg
 from PyQt5.QtGui import *
+from PyQt5 import QtWidgets
 from Connect_to_Database import *
 
 
 class MyWindow(QMainWindow):
-    con.setValue_flag_Time(0)  # 是否选择时间的标志初始化为0
-    con.setValue_hour(0)
 
     def __init__(self, parent=None):
         super(MyWindow, self).__init__(parent)
@@ -65,29 +64,25 @@ class MyWindow(QMainWindow):
 
     def updateInfor(self):
 
-        flag_Time = con.getValue_flag_Time()
         day = con.getValue_day()
         # print(con.getValue_flag_Visual())
         if con.getValue_number() != 0:  # 判断用户是否完成了窑系统配置信息
-            if con.getValue_flag_Visual() == 1:
+            if con.getValue_flag_Visual() == 1:  # 显示小时
 
-                if flag_Time == 0:
-                    self.lab_infor.setText('\t窑系统数据可视化\t选择时间：未选择\t热耗：无数据')
-                elif self.click_flag == 0:
+                hour = str(con.getValue_hour())
+                if self.click_flag == 0:  # 判断是否点击了部件
                     day_str = str(day)
                     self.lab_infor.setText(
-                        '\t窑系统数据可视化\t选择时间：%s-%s-%s\t热耗：无数据' % (day_str[0:4], day_str[4:6], day_str[6:8]))
+                        '\t窑系统数据可视化\t选择时间：%s-%s-%s %s:00\t热耗：无数据' % (day_str[0:4], day_str[4:6], day_str[6:8], hour))
                 else:
                     day_str = str(day)
                     value = get_by_day(str(day))
                     self.lab_infor.setText(
-                        '\t窑系统数据可视化\t选择时间：%s-%s-%s\t热耗：' % (
-                            day_str[0:4], day_str[4:6], day_str[6:8]))
+                        '\t窑系统数据可视化\t选择时间：%s-%s-%s %s:00\t热耗：' % (
+                            day_str[0:4], day_str[4:6], day_str[6:8], hour))
             else:
 
-                if flag_Time == 0:
-                    self.lab_infor.setText('\t窑系统设备数据可视化\t选择时间：未选择\t热耗：无数据')
-                elif self.click_flag == 0:
+                if self.click_flag == 0:  # 判断是否点击了部件
                     day_str = str(day)
                     self.lab_infor.setText(
                         '\t窑系统设备数据可视化\t选择时间：%s-%s-%s\t热耗：无数据' % (day_str[0:4], day_str[4:6], day_str[6:8]))
@@ -105,9 +100,7 @@ class MyWindow(QMainWindow):
         self.click_flag = 0  # 折线图的切换图片标志
         con.setValue_flag_Ser(flag_Seri)
         con.setValue_number(int(num))
-        con.setValue_flag_Hour(0)
         # 设置信息显示区域
-
         self.widget = QWidget()
         self.table = QTableWidget(0, 2)  # 以表格形式显示数据
         self.table.setMinimumHeight(100)
@@ -153,14 +146,10 @@ class MyWindow(QMainWindow):
         self.mainWidget = QWidget()
         self.mainWidget.setLayout(self.main_lay)
         self.setCentralWidget(self.mainWidget)
-
         self.initInfor()  # 初始化信息栏
-
         self.update_normal_Pic()  # 重置为正常图片
         self.initPic()  # 初始化窑系统各部件
-
-        self.initBtn()  # 初始化时间选择控件
-
+        # self.initBtn()  # 初始化时间选择控件
         self.refresh()
 
     def hideW(self):
@@ -179,23 +168,8 @@ class MyWindow(QMainWindow):
             self.infor_lay.removeWidget(self.infor_lab)
             # self.btn.move(0, self.height * 0.5 - 90)
 
-    def on_click(self):  # 单击选择时间按钮
-        if self.flag_timeBtn == 0:
-            self.flag_timeBtn = 1
-            self.calendar = QCalendarWidget(self)
-            self.calendar.setMinimumDate(QDate(2002, 6, 19))
-            self.calendar.setSelectedDate(QDate(2017, 3, 15))
-            self.calendar.resize(400, 300)
-            self.calendar.move(0, 23)
-            self.calendar.show()
-            self.calendar.activated.connect(self.double_click)
-        else:
-            self.flag_timeBtn = 0
-            self.calendar.hide()
-
-    def initTime(self):
+    '''def initTime(self):
         con.setValue_flag_Time(1)
-        self.flag_timeBtn = 0  # 选择时间后单击标志归零
 
         self.update_normal_Pic()
         self.initPic()
@@ -205,11 +179,11 @@ class MyWindow(QMainWindow):
 
         con.setValue_day(int(date_input))
 
-        self.updateInfor()
+        self.updateInfor()'''
 
-    def double_click(self):  # 双击确认时间
+    '''def double_click(self):  # 双击确认时间
         con.setValue_flag_Time(1)
-        self.flag_timeBtn = 0  # 选择时间后单击标志归零
+        
 
         self.update_normal_Pic()
         self.initPic()
@@ -221,13 +195,14 @@ class MyWindow(QMainWindow):
 
         con.setValue_day(int(date_input))
 
-        self.updateInfor()
+        self.updateInfor()'''
 
     def initPic(self):  # 初始化布局
 
         # self.widget.autoFillBackground()
-        if con.getValue_flag_Time() == 0:
-            self.lay = QGridLayout()  # 初始化布局
+        # print(con.getValue_flag_Time())
+        '''if con.getValue_flag_Time() == 0:
+            self.lay = QGridLayout()  # 初始化布局'''
         xft_row = 1  # 旋风筒所占行数
         xft_col = 2  # 旋风筒所占列数
         fjl_row = 3  # 分解炉所占行数
@@ -607,42 +582,6 @@ class MyWindow(QMainWindow):
             self.lab_blj.setObjectName('篦冷机')'''
         # self.initPic()
 
-    def initBtn(self):
-        con.setValue_flag_Time(0)  # 初始化选择时间标志
-        self.click_flag = 0  # 初始化选择图片标志
-        self.flag_timeBtn = 0  # 初始化点击时间选择按钮标志，避免重复单击按钮出现的bug
-        self.timeBtn = QPushButton('双击确定', self.widget)
-        self.timeBtn.move(self.width * 0.5, self.height * 0.05)
-        self.timeBtn.clicked.connect(self.on_click)
-        # self.timeBtn.show()
-
-        self.hourBo = QComboBox(self.widget)  # 声明一个组合框hourBo
-        for i in range(24):  # 循环添加组合框的元素0-23
-            self.hourBo.addItem(str(i))
-        self.hourBo.move(self.width * 0.5 + 100, self.height * 0.05)  # 组合框位置
-        self.hourBo.activated[str].connect(self.getHour)  # 点击时间响应
-        self.hourBo.resize(40, self.timeBtn.height())
-        self.hourBo.hide()
-
-        self.timeLabel = QLabel(self.widget)
-        self.timeLabel.move(self.width * 0.5 - 30, self.height * 0.05 + 5)
-        self.timeLabel.resize(30, 20)
-        self.timeLabel.setText('日期')
-
-    def getHour(self):
-        flag_Time = con.getValue_flag_Time()
-        if flag_Time == 0:  # 判断在选择小时前选择日期没，若没显示先选日期
-            QMessageBox.information(self, '提示', '请先选择日期', QMessageBox.Yes | QMessageBox.No)
-            self.hourBo.setCurrentText('0')
-        else:
-            hour = int(self.hourBo.currentText())  # 获得用户在组合框选择的数据
-            con.setValue_hour(hour)
-            con.setValue_flag_Hour(1)
-
-            self.judgePic()  # 更换图片资源
-            self.initPic()  # 显示图片
-            self.updateInfor()
-
     def setTimer(self):
         self.timer = QTimer(self)
         self.timer.timeout.connect(self.operate)  # 触发事件
@@ -680,18 +619,32 @@ class MyWindow(QMainWindow):
     # 数据可视化
     def dataVisual(self):
         con.setValue_flag_Visual(1)
-        self.hourBo.show()
+        self.timeDlg_data = dlg.MyTimeDlg()
+        self.timeDlg_data.time_signal.connect(self.time_data)
+
+    def time_data(self, time):
+        con.setValue_day(int(time[:8]))
+        con.setValue_hour(int(time[8:]))
+        self.judgePic()  # 更换图片资源
+        self.initPic()  # 显示图片
         self.updateInfor()
 
     def dataDeviceVisual(self):
         con.setValue_flag_Visual(0)
-        self.hourBo.hide()
+        self.timeDlg_dataDevice = dlg.MyDayDlg()
+        self.timeDlg_dataDevice.time_signal.connect(self.time_dataDevice)
+
+    def time_dataDevice(self, time):
+        con.setValue_day(int(time))
+        self.judgePic()  # 更换图片资源
+        self.initPic()  # 显示图片
         self.updateInfor()
 
     def singleVisual(self):
         self.singleWnd = dlg.MyRadioWnd()
 
     def mulVisual(self):
+
         self.mulWnd = dlg.MyCheckWnd()
 
     # 窑系统设备配置
@@ -732,6 +685,9 @@ class MyWindow(QMainWindow):
         # print(time)
         self.dataSimDlg = dlg.MyDataSimDlg(time)
 
+    def userManage(self):
+        self.userManageDlg = dlg.MyUserManageDlg()
+
     def sysLog(self):
         self.sysLogDlg = dlg.MySysLogDlg()
 
@@ -742,6 +698,9 @@ class MyWindow(QMainWindow):
     def dataSet(self):
         self.YaoDlg = dlg.MyYaoDlg()
 
+    def userSet(self):
+        self.userSetDlg = dlg.MyUserSettingDlg()
+
     def standardSet(self):
         self.standardValueDlg = dlg.MyStandardValueDlg()
 
@@ -750,17 +709,12 @@ class MyWindow(QMainWindow):
         index = len(data)
         date = data[index - 1][0]
         hour = data[index - 1][1]
-        self.hourBo.setCurrentText('%s' % hour)
-        Date = date[0:4] + '-' + date[4:6] + '-' + date[6:]
-        self.timeBtn.setText('%s' % Date)
         con.setValue_day(int(date))
-        con.setValue_flag_Time(1)
         con.setValue_hour(int(hour))
         con.setValue_flag_Hour(1)
-
-        # self.judgePic()  # 更换图片资源
-        # self.initPic()  # 显示图片
-        # self.updateInfor()
+        self.judgePic()  # 更换图片资源
+        self.initPic()  # 显示图片
+        self.updateInfor()
 
     # 菜单栏
     def initMenu(self):
@@ -834,6 +788,8 @@ class MyWindow(QMainWindow):
         dataSetAct.triggered.connect(self.dataSet)
 
         userSetAct = QAction('用户设置', self)
+        userSetAct.setStatusTip('修改密码')
+        userSetAct.triggered.connect(self.userSet)
 
         standardSetAct = QAction('生产数据标准设置', self)
         standardSetAct.setStatusTip('窑系统数据展示')
@@ -856,6 +812,8 @@ class MyWindow(QMainWindow):
 
         # 维护模块
         userManageAct = QAction('用户管理', self)
+        userManageAct.setStatusTip('系统操作日志')
+        userManageAct.triggered.connect(self.userManage)
 
         dataBackupAct = QAction('数据备份', self)
 
@@ -1005,7 +963,7 @@ class MyWindow(QMainWindow):
             self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.pic1.addWidget(self.fp1)
             self.pic2.addWidget(self.fp2)
-            # self.change_table(index1 - 2, index2 - 2)
+            self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)
             self.click_flag = 1
             self.updateInfor()
         elif self.click_flag == 1:
@@ -1013,7 +971,7 @@ class MyWindow(QMainWindow):
             self.sp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.pic1.replaceWidget(self.fp1, self.sp1)
             self.pic2.replaceWidget(self.fp2, self.sp2)
-            # self.change_table(index1 - 2, index2 - 2)
+            self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)
             self.click_flag = 2
             self.updateInfor()
         elif self.click_flag == 2:
@@ -1021,7 +979,7 @@ class MyWindow(QMainWindow):
             self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.pic1.replaceWidget(self.sp1, self.fp1)
             self.pic2.replaceWidget(self.sp2, self.fp2)
-            # self.change_table(index1 - 2, index2 - 2)
+            self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)
             self.click_flag = 1
             self.updateInfor()
 
