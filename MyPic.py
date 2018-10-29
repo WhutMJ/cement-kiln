@@ -109,7 +109,6 @@ class MyLabel(QLabel):
             con.setValue_index_P(0)
             self.call_win(con.getValue_index_T(), con.getValue_index_P(), self.objectName())
 
-
     def msg(self):
         reply = QMessageBox.information(self, '提示', '请先选择时间', QMessageBox.Yes | QMessageBox.No)
 
@@ -153,6 +152,8 @@ class MyMplCanvas(FigureCanvas):
     def normalization(self, data):
         Z = data
         newdata = []
+        if Z == []:
+            return newdata
         Zmax, Zmin = max(Z), min(Z)
         if Zmax == Zmin:
             for i in Z:
@@ -177,9 +178,10 @@ class MyTempMplCanvas(MyMplCanvas):
         if index_T == [] or index_T[0] == 0:
             pass
         else:
-            if con.getValue_flag_Ctrl() == 0:
+            if con.getValue_flag_Ctrl() == 0:  # 没有按住CTRL键
                 if con.getValue_flag_Visual() == 0:  # 显示一天的图片
                     tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
+
                     count, null = self.cal_null(tablevalue[1][index_T[0] - 2])
                     self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                     self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
@@ -187,24 +189,32 @@ class MyTempMplCanvas(MyMplCanvas):
                         tick_x.set_fontsize(8)
                     for tick_y in self.axes.get_ymajorticklabels():
                         tick_y.set_fontsize(7)
-
                     if count >= 1:
                         x = [i for i in range(24)]
                         y = tablevalue[1][index_T[0] - 2]
-                        self.axes.plot(x, y, 'bx-')
+                        self.axes.plot(x, y, 'bo-')
+
+                        self.axes.plot(5,y[5],'ro-')#突出显示此危险点
 
                         # self.axes.set_xticklabels(x_label)
                         xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
                         self.axes.xaxis.set_major_locator(xmajorLocator)
-                        self.axes.set_title(tablevalue[0][index_T[0]], fontproperties=myfont)
+                        self.axes.set_title(get_chinese(tablevalue[0][index_T[0]]), fontproperties=myfont)
                     else:
                         t = arange(0, 24, 1)
-                        self.axes.plot(t, tablevalue[1][index_T[0] - 2], 'bx-')
-                        xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
-                        xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
-                        self.axes.xaxis.set_major_locator(xmajorLocator)
-                        self.axes.xaxis.set_minor_locator(xminorLocator)
-                        self.axes.set_title(tablevalue[0][index_T[0]], fontproperties=myfont)
+                        try:
+                            self.axes.plot(t, tablevalue[1][index_T[0] - 2], 'bo-')
+
+                            y=tablevalue[1][index_T[0] - 2]
+                            self.axes.plot(5, y[5], 'ro-')  # 突出显示此危险点
+
+                            xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
+                            xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
+                            self.axes.xaxis.set_major_locator(xmajorLocator)
+                            self.axes.xaxis.set_minor_locator(xminorLocator)
+                            self.axes.set_title(get_chinese(tablevalue[0][index_T[0]]), fontproperties=myfont)
+                        except Exception:
+                            pass
                 elif con.getValue_flag_Visual() == 1:  # 显示 10 小时的数据
                     tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
                     hour = con.getValue_hour()  # 显示hour之前的10小时数据(包括此hour)
@@ -221,7 +231,7 @@ class MyTempMplCanvas(MyMplCanvas):
                     else:
                         x = [i for i in range(hour + 1)]
                         y2 = y[:hour + 1]
-                    self.axes.plot(x, y2, 'bx-')
+                    self.axes.plot(x, y2, 'bo-')
 
                     xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
@@ -283,19 +293,22 @@ class MyPressMplCanvas(MyMplCanvas):
                     if count >= 1:
                         x = [i for i in range(24)]
                         y = tablevalue[1][index_P[0] - 2]
-                        self.axes.plot(x, y, 'bx-')
+                        self.axes.plot(x, y, 'bo-')
 
                         xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
                         self.axes.xaxis.set_major_locator(xmajorLocator)
                         self.axes.set_title(tablevalue[0][index_P[0]], fontproperties=myfont)
                     else:
                         t = arange(0, 24, 1)
-                        self.axes.plot(t, tablevalue[1][index_P[0] - 2], 'bx-')
-                        xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
-                        xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
-                        self.axes.xaxis.set_major_locator(xmajorLocator)
-                        self.axes.xaxis.set_minor_locator(xminorLocator)
-                        self.axes.set_title(tablevalue[0][index_P[0]], fontproperties=myfont)
+                        try:
+                            self.axes.plot(t, tablevalue[1][index_P[0] - 2], 'bo-')
+                            xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
+                            xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
+                            self.axes.xaxis.set_major_locator(xmajorLocator)
+                            self.axes.xaxis.set_minor_locator(xminorLocator)
+                            self.axes.set_title(tablevalue[0][index_P[0]], fontproperties=myfont)
+                        except Exception:
+                            pass
                 elif con.getValue_flag_Visual() == 1:  # 显示 10 小时的数据
                     tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
                     hour = con.getValue_hour()  # 显示hour之前的10小时数据(包括此hour)
@@ -316,13 +329,13 @@ class MyPressMplCanvas(MyMplCanvas):
                         x = [i for i in range(hour + 1)]
                         y2 = y[:hour + 1]
 
-                    self.axes.plot(x, y2, 'bx-')
+                    self.axes.plot(x, y2, 'bo-')
 
                     xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
                     self.axes.set_title(tablevalue[0][index_P[0]], fontproperties=myfont)
 
-            elif con.getValue_flag_Ctrl() == 1:
+            elif con.getValue_flag_Ctrl() == 1:  # 按住了CTRL键
                 tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
                 self.axes.set_ylabel('压强/MPa', verticalalignment='center', fontproperties=labelfont)
                 self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)

@@ -24,13 +24,23 @@ matplotlib.rcParams["axes.unicode_minus"] = False
 
 
 class MyAddUserDlg(QDialog):
+    AddUser_Sig = pyqtSignal(bool)
+
     def __init__(self):
         super(MyAddUserDlg, self).__init__()
-        self.setFixedSize(422, 322)
+
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
+
+        self.setFixedSize(422 * ratio_width, 322 * ratio_height)
         self.okBtn = QtWidgets.QPushButton('确认', self)
-        self.okBtn.setGeometry(QtCore.QRect(150, 240, 75, 23))
+        self.okBtn.setGeometry(QtCore.QRect(150 * ratio_width, 240 * ratio_height, 75 * ratio_width, 23 * ratio_height))
         self.EditWidget = QtWidgets.QWidget(self)
-        self.EditWidget.setGeometry(QtCore.QRect(170, 50, 160, 141))
+        self.EditWidget.setGeometry(
+            QtCore.QRect(170 * ratio_width, 50 * ratio_height, 160 * ratio_width, 141 * ratio_height))
         self.labelVerLay = QtWidgets.QVBoxLayout(self.EditWidget)
         self.labelVerLay.setContentsMargins(0, 0, 0, 0)
         self.username = QtWidgets.QLineEdit(self.EditWidget)
@@ -41,7 +51,8 @@ class MyAddUserDlg(QDialog):
         self.level.addItems(['Top_administrator', 'vip'])
         self.labelVerLay.addWidget(self.level)
         self.LabelWidget = QtWidgets.QWidget(self)
-        self.LabelWidget.setGeometry(QtCore.QRect(100, 60, 50, 121))
+        self.LabelWidget.setGeometry(
+            QtCore.QRect(100 * ratio_width, 60 * ratio_height, 50 * ratio_width, 121 * ratio_height))
         self.editVerLay = QtWidgets.QVBoxLayout(self.LabelWidget)
         self.editVerLay.setContentsMargins(0, 0, 0, 0)
         self.username_lab = QtWidgets.QLabel(self.LabelWidget)
@@ -52,7 +63,7 @@ class MyAddUserDlg(QDialog):
         self.editVerLay.addWidget(self.level_lab)
 
         self.label = QtWidgets.QLabel(self)
-        self.label.move(30, 30)
+        self.label.move(30 * ratio_width, 30 * ratio_height)
 
         self.setWindowTitle("添加用户")
         self.username_lab.setText('用户名')
@@ -68,23 +79,37 @@ class MyAddUserDlg(QDialog):
     def Accept(self):
         try:
             result = Add_User(self.username.text(), self.password.text(), self.level.currentText())
-            if result == True:
-                QMessageBox.information(self, '提示', '添加成功', QMessageBox.Yes)
-                self.close()
+            operation = '添加用户:'
+            operation = operation + self.username.text()
+            if operation_record([con.getValue_username(), operation]):
+                if result == True:
+                    QMessageBox.information(self, '提示', '添加成功', QMessageBox.Yes)
+                    self.AddUser_Sig.emit(True)
+                    self.close()
+                else:
+                    operation = operation + '失败!!!'
+                    operation_record([con.getValue_username(), operation])
+                    self.AddUser_Sig.emit(False)
             else:
                 QMessageBox.information(self, '提示', result, QMessageBox.Yes)
         except Exception:
-            self.close()
+            QMessageBox.information(self, '提示', '异常终止', QMessageBox.Yes)
 
 
 class MyUserSettingDlg(QDialog):
     def __init__(self):
         super(MyUserSettingDlg, self).__init__()
-        self.setFixedSize(422, 322)
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
+        self.setFixedSize(422 * ratio_width, 322 * ratio_height)
         self.okBtn = QtWidgets.QPushButton('确认修改', self)
-        self.okBtn.move(150, 240)
+        self.okBtn.move(150 * ratio_width, 240 * ratio_height)
         self.EditWidget = QtWidgets.QWidget(self)
-        self.EditWidget.setGeometry(QtCore.QRect(170, 50, 130, 141))
+        self.EditWidget.setGeometry(
+            QtCore.QRect(170 * ratio_width, 50 * ratio_height, 130 * ratio_width, 141 * ratio_height))
         self.labelVerLay = QtWidgets.QVBoxLayout(self.EditWidget)
         self.labelVerLay.setContentsMargins(0, 0, 0, 0)
         self.oldPassword = QtWidgets.QLineEdit(self.EditWidget)
@@ -94,7 +119,8 @@ class MyUserSettingDlg(QDialog):
         self.newPassword2 = QtWidgets.QLineEdit(self.EditWidget)
         self.labelVerLay.addWidget(self.newPassword2)
         self.LabelWidget = QtWidgets.QWidget(self)
-        self.LabelWidget.setGeometry(QtCore.QRect(70, 60, 100, 121))
+        self.LabelWidget.setGeometry(
+            QtCore.QRect(70 * ratio_width, 60 * ratio_height, 100 * ratio_width, 121 * ratio_height))
         self.editVerLay = QtWidgets.QVBoxLayout(self.LabelWidget)
         self.editVerLay.setContentsMargins(0, 0, 0, 0)
         self.oldPassword_lab = QtWidgets.QLabel(self.LabelWidget)
@@ -106,7 +132,7 @@ class MyUserSettingDlg(QDialog):
 
         self.oldPassword.setFocus()
         self.label = QtWidgets.QLabel(self)
-        self.label.move(30, 30)
+        self.label.move(30 * ratio_width, 30 * ratio_height)
 
         self.setWindowTitle("修改密码")
         self.oldPassword_lab.setText('    原密码')
@@ -136,16 +162,23 @@ class MyUserSettingDlg(QDialog):
 class MyUserManageDlg(QDialog):
     def __init__(self):
         super(MyUserManageDlg, self).__init__()
-        self.setFixedSize(465, 499)
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
+        self.setFixedSize(465 * ratio_width, 499 * ratio_height)
         self.addUserBtn = QtWidgets.QPushButton('添加用户', self)
-        self.addUserBtn.setGeometry(QtCore.QRect(60, 420, 75, 23))
+        self.addUserBtn.setGeometry(
+            QtCore.QRect(60 * ratio_width, 420 * ratio_height, 75 * ratio_width, 23 * ratio_height))
         self.deleteUserBtn = QtWidgets.QPushButton('删除用户', self)
-        self.deleteUserBtn.setGeometry(QtCore.QRect(190, 420, 75, 23))
-        self.okBtn = QtWidgets.QPushButton('OK', self)
-        self.okBtn.setGeometry(QtCore.QRect(320, 420, 75, 23))
+        self.deleteUserBtn.setGeometry(
+            QtCore.QRect(190 * ratio_width, 420 * ratio_height, 75 * ratio_width, 23 * ratio_height))
+        self.okBtn = QtWidgets.QPushButton('退出', self)
+        self.okBtn.setGeometry(QtCore.QRect(320 * ratio_width, 420 * ratio_height, 75 * ratio_width, 23 * ratio_height))
         self.initUser()
         self.label = QtWidgets.QLabel(self)
-        self.label.move(50, 30)
+        self.label.move(50 * ratio_width, 30 * ratio_height)
         self.label.setObjectName("label")
 
         self.setWindowTitle("用户管理")
@@ -159,9 +192,15 @@ class MyUserManageDlg(QDialog):
 
     def initUser(self):
         state, data = show_all_user('moujun')
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
         if state:
             self.tableWidget = QtWidgets.QTableWidget(self)
-            self.tableWidget.setGeometry(QtCore.QRect(50, 70, 371, 311))
+            self.tableWidget.setGeometry(
+                QtCore.QRect(50 * ratio_width, 70 * ratio_height, 371 * ratio_width, 311 * ratio_height))
             self.tableWidget.setColumnCount(2)
             self.tableWidget.setRowCount(len(data))
             self.tableWidget.setHorizontalHeaderLabels(['用户名', '权限'])
@@ -197,6 +236,24 @@ class MyUserManageDlg(QDialog):
 
     def AddUser(self):
         self.adduserDlg = MyAddUserDlg()
+        self.adduserDlg.AddUser_Sig.connect(self.adduser)
+
+    def adduser(self, sig):
+        if sig:
+            self.tableWidget.itemChanged[QTableWidgetItem].disconnect(self.tableItemChanged)
+            state, data = show_all_user('moujun')
+            if state:
+                self.tableWidget.setRowCount(len(data))
+                for i in range(len(data)):
+                    for j in range(2):
+                        newItem = QTableWidgetItem(str(data[i][j]))
+                        newItem.setTextAlignment(Qt.AlignCenter)
+                        self.tableWidget.setItem(i, j, newItem)
+                        self.tableWidget.item(i, 0).setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+
+                self.tableWidget.itemChanged[QTableWidgetItem].connect(self.tableItemChanged)  # 编辑单元格后字体会显示红色
+            else:
+                QMessageBox.information(self, '提示', data, QMessageBox.Yes)
 
     def tableItemChanged(self):
         try:
@@ -212,47 +269,47 @@ class MyUserManageDlg(QDialog):
                 self.tip.setText('Succeed!')
             else:
                 self.tip.setText(result)
-
             self.updateUser()
         except Exception:
             self.close()
 
-
     def DeleteUser(self):
-        try:
-            row = self.tableWidget.currentRow()
-            result = Delete_User('moujun', self.tableWidget.item(row, 0).text())
-            if result == True:
-                self.tableWidget.removeRow(row)
-                QMessageBox.information(self, '提示', '删除成功', QMessageBox.Yes)
-            else:
-                QMessageBox.information(self, '提示', result, QMessageBox.Yes)
-        except Exception:
-            self.close()
+        reply = QMessageBox.information(self, '提示', '是否确认删除该用户？', QMessageBox.Yes | QMessageBox.No)
+        if reply:
+            try:
+                row = self.tableWidget.currentRow()
+                result = Delete_User('moujun', self.tableWidget.item(row, 0).text())
+                if result == True:
+                    self.tableWidget.removeRow(row)
+                    QMessageBox.information(self, '提示', '删除成功', QMessageBox.Yes)
+                else:
+                    QMessageBox.information(self, '提示', result, QMessageBox.Yes)
+            except Exception:
+                self.close()
 
     def Accept(self):
-        try:
-            row = self.tableWidget.currentRow()
-            # print(self.tableWidget.item(row, 0).text() + self.tableWidget.item(row, 1).text())
-            # self.time_signal.emit(self.tableWidget.item(row, 0).text() + self.tableWidget.item(row, 1).text())
-            self.close()
-        except Exception:
-            self.close()
+        self.close()
 
 
 class MySysLogDlg(QDialog):
     def __init__(self):
         super(MySysLogDlg, self).__init__()
-        self.resize(500, 404)
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
+        self.resize(500 * ratio_width, 404 * ratio_height)
         self.tableWidget = QtWidgets.QTableWidget(self)
-        self.tableWidget.setGeometry(QtCore.QRect(30, 50, 440, 321))
+        self.tableWidget.setGeometry(
+            QtCore.QRect(30 * ratio_width, 50 * ratio_height, 440 * ratio_width, 321 * ratio_height))
         self.tableWidget.setRowCount(10)
         self.tableWidget.setColumnCount(4)
         self.tableWidget.setHorizontalHeaderLabels(['操作时间', '用户名', '操作', '具体内容'])
         # self.tableWidget.horizontalHeader().setDefaultSectionSize(90)
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.label = QtWidgets.QLabel(self)
-        self.label.move(30, 20)
+        self.label.move(30 * ratio_width, 20 * ratio_height)
         self.label.setObjectName("label")
         self.setWindowTitle("系统日志")
         self.label.setText("操作记录")
@@ -265,14 +322,21 @@ class MyTimeDlg(QDialog):
 
     def __init__(self):
         super(MyTimeDlg, self).__init__()
-        self.setFixedSize(260, 330)
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
+        self.setFixedSize(260 * ratio_width, 330 * ratio_height)
         self.pushButton = QtWidgets.QPushButton(self)
-        self.pushButton.setGeometry(QtCore.QRect(90, 280, 75, 23))
+        self.pushButton.setGeometry(
+            QtCore.QRect(90 * ratio_width, 280 * ratio_height, 75 * ratio_width, 23 * ratio_height))
         self.pushButton.setObjectName("pushButton")
         date = get_all_date()
 
         self.tableWidget = QtWidgets.QTableWidget(self)
-        self.tableWidget.setGeometry(QtCore.QRect(20, 50, 211, 211))
+        self.tableWidget.setGeometry(
+            QtCore.QRect(20 * ratio_width, 50 * ratio_height, 211 * ratio_width, 211 * ratio_height))
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setRowCount(len(date))
@@ -288,7 +352,7 @@ class MyTimeDlg(QDialog):
         # self.tableWidget.horizontalHeader().setDefaultSectionSize(75)  # 列宽
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.label = QtWidgets.QLabel(self)
-        self.label.setGeometry(QtCore.QRect(20, 20, 54, 12))
+        self.label.setGeometry(QtCore.QRect(20 * ratio_width, 20 * ratio_height, 54 * ratio_width, 12 * ratio_height))
         self.label.setObjectName("label")
 
         self.setWindowTitle("选择时间")
@@ -313,9 +377,15 @@ class MyDayDlg(QDialog):
 
     def __init__(self):
         super(MyDayDlg, self).__init__()
-        self.setFixedSize(260, 330)
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
+        self.setFixedSize(260 * ratio_width, 330 * ratio_height)
         self.pushButton = QtWidgets.QPushButton(self)
-        self.pushButton.setGeometry(QtCore.QRect(90, 280, 75, 23))
+        self.pushButton.setGeometry(
+            QtCore.QRect(90 * ratio_width, 280 * ratio_height, 75 * ratio_width, 23 * ratio_height))
         self.pushButton.setObjectName("pushButton")
         data = get_all_date()
         date = []
@@ -325,7 +395,8 @@ class MyDayDlg(QDialog):
         date = list(set(date))
         date.sort(key=data.index)
         self.tableWidget = QtWidgets.QTableWidget(self)
-        self.tableWidget.setGeometry(QtCore.QRect(20, 50, 211, 211))
+        self.tableWidget.setGeometry(
+            QtCore.QRect(20 * ratio_width, 50 * ratio_height, 211 * ratio_width, 211 * ratio_height))
         self.tableWidget.setColumnCount(1)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setRowCount(len(date))
@@ -342,7 +413,7 @@ class MyDayDlg(QDialog):
         # self.tableWidget.horizontalHeader().setDefaultSectionSize(75)  # 列宽
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.label = QtWidgets.QLabel(self)
-        self.label.setGeometry(QtCore.QRect(20, 20, 54, 12))
+        self.label.setGeometry(QtCore.QRect(20 * ratio_width, 20 * ratio_height, 54 * ratio_width, 12 * ratio_height))
         self.label.setObjectName("label")
 
         self.setWindowTitle("选择时间")
@@ -365,15 +436,21 @@ class MyDataSimDlg(QDialog):
     def __init__(self, time):
         super(MyDataSimDlg, self).__init__()
         name, value = get_by_hour(time)
+
         metric = QDesktopWidget().screenGeometry()
         width = metric.width()
         height = metric.height()
-        self.setFixedSize(800 * width / 1366, 600 * height / 768)
+        ratio_width = width / 1366
+        ratio_height = height / 768
+
+        self.setFixedSize(800 * ratio_width, 600 * ratio_height)
+
         self.label = QtWidgets.QLabel(self)
-        self.label.move(20, 30)
+        self.label.move(20 * ratio_width, 30 * ratio_height)
         self.label.setObjectName("label")
         self.tableWidget = QtWidgets.QTableWidget(self)
-        self.tableWidget.setGeometry(QtCore.QRect(20, 70, 321, 471))
+        self.tableWidget.setGeometry(
+            QtCore.QRect(20 * ratio_width, 70 * ratio_height, 321 * ratio_width, 471 * ratio_height))
         self.tableWidget.setColumnCount(3)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setRowCount(len(name))
@@ -398,7 +475,8 @@ class MyDataSimDlg(QDialog):
         else:
             name2, value = '', ''
         self.tableWidget_2 = QtWidgets.QTableWidget(self)
-        self.tableWidget_2.setGeometry(QtCore.QRect(430, 70, 321, 471))
+        self.tableWidget_2.setGeometry(
+            QtCore.QRect(430 * ratio_width, 70 * ratio_height, 321 * ratio_width, 471 * ratio_height))
         self.tableWidget_2.setAlternatingRowColors(False)
         self.tableWidget_2.setColumnCount(4)
         self.tableWidget_2.setObjectName("tableWidget_2")
@@ -422,14 +500,16 @@ class MyDataSimDlg(QDialog):
             self.tableWidget_2.item(i, 1).setFlags(Qt.ItemIsEnabled)
 
         self.label_2 = QtWidgets.QLabel(self)
-        self.label_2.setGeometry(QtCore.QRect(360, 270, 61, 41))
+        self.label_2.setGeometry(
+            QtCore.QRect(360 * ratio_width, 270 * ratio_height, 61 * ratio_width, 41 * ratio_height))
         self.label_2.setObjectName("label_2")
         self.label_3 = QtWidgets.QLabel(self)
 
-        self.label_3.move(430, 31)
+        self.label_3.move(430 * ratio_width, 31 * ratio_height)
         self.label_3.setObjectName("label_3")
         self.pushButton = QtWidgets.QPushButton(self)
-        self.pushButton.setGeometry(QtCore.QRect(670, 550, 75, 23))
+        self.pushButton.setGeometry(
+            QtCore.QRect(670 * ratio_width, 550 * ratio_height, 75 * ratio_width, 23 * ratio_height))
         self.pushButton.setObjectName("pushButton")
 
         self.setWindowTitle("Dialog")
@@ -459,11 +539,17 @@ class MyDataSimDlg(QDialog):
 class MyDataLeadInDlg(QDialog):  # 数据导入
     def __init__(self):
         super(MyDataLeadInDlg, self).__init__()
-        self.setFixedSize(600, 390)
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
+        self.setFixedSize(600 * ratio_width, 390 * ratio_height)
 
         self.tableWidget = QtWidgets.QTableWidget(self)
 
-        self.tableWidget.setGeometry(QtCore.QRect(10, 70, 580, 250))
+        self.tableWidget.setGeometry(
+            QtCore.QRect(10 * ratio_width, 70 * ratio_height, 580 * ratio_width, 250 * ratio_height))
         self.tableWidget.setColumnCount(5)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setRowCount(3)
@@ -472,7 +558,7 @@ class MyDataLeadInDlg(QDialog):  # 数据导入
         # self.tableWidget.resizeColumnsToContents()  # 不能放在后面，否则不起作用
         # self.tableWidget.horizontalHeader().setDefaultSectionSize(80)
         self.label = QtWidgets.QLabel(self)
-        self.label.move(20, 20)
+        self.label.move(20 * ratio_width, 20 * ratio_height)
         # self.label.setGeometry(QtCore.QRect(20, 20, 54, 12))
         self.label.setObjectName("label")
 
@@ -482,14 +568,19 @@ class MyDataLeadInDlg(QDialog):  # 数据导入
         self.lay = QHBoxLayout()
         self.pushButton = QtWidgets.QPushButton(self)
         # self.pushButton.setGeometry(QtCore.QRect(90, 280, 75, 23))
-        self.pushButton_2 = QPushButton(self)
-        self.pushButton_2.setText('Add')
-        self.pushButton.setText("OK")
+        self.pushButton.setText("另存为")
         self.pushButton.clicked.connect(self.Accept)
+        self.pushButton_2 = QPushButton(self)
+        self.pushButton_2.setText('添加')
         self.pushButton_2.clicked.connect(self.Add)
+        self.pushButton_3 = QPushButton(self)
+        self.pushButton_3.setText('选择标准表头文件')
+        self.pushButton_3.clicked.connect(self.OpenStandardFile)
         self.lay.addWidget(self.pushButton_2)
         self.lay.addWidget(self.pushButton)
-        self.lay.setGeometry(QtCore.QRect(260, 350, 175, 23))
+        self.lay.addWidget(self.pushButton_3)
+
+        self.lay.setGeometry(QtCore.QRect(150 * ratio_width, 350 * ratio_height, 300 * ratio_width, 23 * ratio_height))
         self.initTable()
         self.show()
 
@@ -509,7 +600,6 @@ class MyDataLeadInDlg(QDialog):  # 数据导入
         self.tableWidget.scrollToBottom()
 
     def Accept(self):
-
         try:
             data = []
             for row in range(self.tableWidget.rowCount()):
@@ -531,6 +621,16 @@ class MyDataLeadInDlg(QDialog):  # 数据导入
         except Exception:
             reply = QMessageBox.information(self, '提示', '创建失败', QMessageBox.Yes | QMessageBox.No)
             self.close()
+
+    def OpenStandardFile(self):
+        filepath = con.getValue_filepath()
+        fileName, filetype = QFileDialog.getOpenFileName(self,
+                                                         "文件选择", filepath,
+                                                         "Excel Files (*.xlsx);;Excel Files (*.xls)")  # 设置文件扩展名过滤,注意用双分号间隔
+        print(fileName)
+        filedir = os.path.split(fileName)  # 获取文件所在的文件夹
+        filepath = filedir[0]  # 文件路径信息
+        con.setValue_filepath(filepath)
 
 
 class MyOpenFileWnd(QMainWindow):
@@ -556,17 +656,20 @@ class MyOpenFileWnd(QMainWindow):
         metric = QDesktopWidget().screenGeometry()
         width = metric.width()
         height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
 
         self.centralwidget = QtWidgets.QWidget(self)
         self.centralwidget.setObjectName("centralwidget")
         self.tableWidget = QtWidgets.QTableWidget(self.centralwidget)
-        self.tableWidget.setGeometry(QtCore.QRect(10, 40, width - 20, height * 0.8))
+        self.tableWidget.setGeometry(
+            QtCore.QRect(10 * ratio_width, 40 * ratio_height, (width - 20) * ratio_width, height * 0.8 * ratio_height))
         self.tableWidget.setRowCount(len(self.data[0]))
         self.tableWidget.setColumnCount(len(self.name))
         self.label = QtWidgets.QLabel(self.centralwidget)
         self.label.setText(self.filename)
         self.label.setFont(QFont("Roman times", 15, QFont.Bold))
-        self.label.move(width * 0.5 - self.label.width() / 2, 10)
+        self.label.move(width * 0.5 - self.label.width() / 2, 10 * ratio_height)
         self.setCentralWidget(self.centralwidget)
         self.menubar = QtWidgets.QMenuBar(self)
         self.menu = QtWidgets.QMenu(self.menubar)
@@ -622,17 +725,24 @@ class MyOpenFileWnd(QMainWindow):
         pass  # 另存为
 
 
-class MyStandardValueDlg(QDialog):
+class MyStandardValueDlg(QDialog):  # 生产数据标准设置窗口
     def __init__(self):
         super(MyStandardValueDlg, self).__init__()
-        self.setFixedSize(260, 330)
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
+        self.setFixedSize(260 * ratio_width, 330 * ratio_height)
         self.pushButton = QtWidgets.QPushButton(self)
-        self.pushButton.setGeometry(QtCore.QRect(90, 280, 75, 23))
+        self.pushButton.setGeometry(
+            QtCore.QRect(90 * ratio_width, 280 * ratio_height, 75 * ratio_width, 23 * ratio_height))
         self.pushButton.setObjectName("pushButton")
 
         self.name = get_table_name()
         self.tableWidget = QtWidgets.QTableWidget(self)
-        self.tableWidget.setGeometry(QtCore.QRect(20, 50, 211, 211))
+        self.tableWidget.setGeometry(
+            QtCore.QRect(20 * ratio_width, 50 * ratio_height, 211 * ratio_width, 211 * ratio_height))
         self.tableWidget.setColumnCount(2)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setRowCount(len(self.name))
@@ -646,7 +756,7 @@ class MyStandardValueDlg(QDialog):
         # self.tableWidget.horizontalHeader().setDefaultSectionSize(80)  # 列宽
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
         self.label = QtWidgets.QLabel(self)
-        self.label.move(20, 10)
+        self.label.move(20 * ratio_width, 10 * ratio_height)
         self.setWindowTitle("生产数据标准设置")
         self.pushButton.setText("OK")
         self.label.setText("生产数据标准设置")
@@ -898,13 +1008,15 @@ class MyYaoDlg(QDialog):
         metric = QDesktopWidget().screenGeometry()
         width = metric.width()
         height = metric.height()
+        self.ratio_width = width / 1366
+        self.ratio_height = height / 768
         self.setFixedSize(width * 0.6, height * 0.6)
 
         self.tableWidget = QtWidgets.QTableWidget(self)
         self.tableWidget.setGeometry(QtCore.QRect(10, 10, width * 0.58, height * 0.55))
         self.tableWidget.setColumnCount(4)
         self.tableWidget.setObjectName("tableWidget")
-        self.tableWidget.setRowCount(4)
+        self.tableWidget.setRowCount(5)
         self.tableWidget.verticalHeader().setVisible(False)
         self.tableWidget.setHorizontalHeaderLabels(['设备', '名称', '描述', '数据'])
         # self.tableWidget.horizontalHeader().setDefaultSectionSize(120)
@@ -913,21 +1025,65 @@ class MyYaoDlg(QDialog):
         self.loadPic()
         self.loadTable()
         self.setWindowTitle("窑系统数据")
-
         self.show()
 
     def loadPic(self):
         self.xft = QPixmap('picture\\xft_dl.png')
+        self.blj = QPixmap('picture\\blj.png')
+        self.yao = QPixmap('picture\\yao.png')
+        self.fjl = QPixmap('picture\\fjl.png')
+        self.fjl_yao = QPixmap('picture\\fjl_yao.png')
 
     def loadTable(self):
         self.lay1 = QHBoxLayout()
         self.item1 = QLabel()
-        self.item1.setPixmap(self.xft.scaled(120, 120, aspectRatioMode=Qt.KeepAspectRatio))
+        self.item1.setPixmap(
+            self.xft.scaled(120 * self.ratio_width, 120 * self.ratio_height, aspectRatioMode=Qt.KeepAspectRatio))
         self.lay1.addWidget(self.item1)
         self.lay1.setAlignment(Qt.AlignCenter)
         widget = QWidget()
         widget.setLayout(self.lay1)
         self.tableWidget.setCellWidget(0, 0, widget)
+
+        self.lay2 = QHBoxLayout()
+        self.item2 = QLabel()
+        self.item2.setPixmap(
+            self.blj.scaled(120 * self.ratio_width, 120 * self.ratio_height, aspectRatioMode=Qt.KeepAspectRatio))
+        self.lay2.addWidget(self.item2)
+        self.lay2.setAlignment(Qt.AlignCenter)
+        widget2 = QWidget()
+        widget2.setLayout(self.lay2)
+        self.tableWidget.setCellWidget(1, 0, widget2)
+
+        self.lay3 = QHBoxLayout()
+        self.item3 = QLabel()
+        self.item3.setPixmap(
+            self.yao.scaled(120 * self.ratio_width, 120 * self.ratio_height, aspectRatioMode=Qt.KeepAspectRatio))
+        self.lay3.addWidget(self.item3)
+        self.lay3.setAlignment(Qt.AlignCenter)
+        widget3 = QWidget()
+        widget3.setLayout(self.lay3)
+        self.tableWidget.setCellWidget(2, 0, widget3)
+
+        self.lay4 = QHBoxLayout()
+        self.item4 = QLabel()
+        self.item4.setPixmap(
+            self.fjl.scaled(120 * self.ratio_width, 120 * self.ratio_height, aspectRatioMode=Qt.KeepAspectRatio))
+        self.lay4.addWidget(self.item4)
+        self.lay4.setAlignment(Qt.AlignCenter)
+        widget4 = QWidget()
+        widget4.setLayout(self.lay4)
+        self.tableWidget.setCellWidget(3, 0, widget4)
+
+        self.lay5 = QHBoxLayout()
+        self.item5 = QLabel()
+        self.item5.setPixmap(
+            self.fjl_yao.scaled(120 * self.ratio_width, 120 * self.ratio_height, aspectRatioMode=Qt.KeepAspectRatio))
+        self.lay5.addWidget(self.item5)
+        self.lay5.setAlignment(Qt.AlignCenter)
+        widget5 = QWidget()
+        widget5.setLayout(self.lay5)
+        self.tableWidget.setCellWidget(4, 0, widget5)
 
 
 class MyLoginDlg(QDialog):
@@ -938,106 +1094,120 @@ class MyLoginDlg(QDialog):
         metric = QDesktopWidget().screenGeometry()
         width = metric.width()
         height = metric.height()
-        self.setFixedSize(400 * width / 1366, 300 * height / 768)
+        ratio_width = width / 1366
+        ratio_height = height / 768
+        self.setFixedSize(400 * ratio_width, 300 * ratio_height)
         self.setWindowTitle('Login')
         self.buttonBox = QtWidgets.QDialogButtonBox(self)
-        self.buttonBox.setGeometry(QtCore.QRect(-60 * width / 1366, 240 * height / 768, 341, 32))
+        self.buttonBox.setGeometry(
+            QtCore.QRect(-60 * ratio_width, 240 * ratio_height, 341 * ratio_width, 32 * ratio_height))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
-        self.buttonBox.setObjectName("buttonBox")
+        # self.buttonBox.setObjectName("buttonBox")
+
         self.horizontalLayoutWidget = QtWidgets.QWidget(self)
-        self.horizontalLayoutWidget.setGeometry(QtCore.QRect(80 * width / 1366, 90 * height / 768, 270, 81))
-        self.horizontalLayoutWidget.setObjectName("horizontalLayoutWidget")
+        self.horizontalLayoutWidget.setGeometry(
+            QtCore.QRect(80 * ratio_width, 90 * ratio_height, 260 * ratio_width, 81 * ratio_height))
         self.horizontalLayout = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget)
         self.horizontalLayout.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout.setObjectName("horizontalLayout")
-        self.label = QtWidgets.QLabel(self.horizontalLayoutWidget)
-        self.label.setObjectName("label")
-        self.horizontalLayout.addWidget(self.label)
-        self.lineEdit = QtWidgets.QLineEdit(self.horizontalLayoutWidget)
-
-        self.lineEdit.setFocus()
-        self.horizontalLayout.addWidget(self.lineEdit)
-
-        self.horizontalLayoutWidget_2 = QtWidgets.QWidget(self)
-        self.horizontalLayoutWidget_2.setGeometry(QtCore.QRect(80 * width / 1366, 140 * height / 768, 189, 81))
-        self.horizontalLayoutWidget_2.setObjectName("horizontalLayoutWidget_2")
-        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_2)
-        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
-        self.horizontalLayout_2.setObjectName("horizontalLayout_2")
-        self.label_2 = QtWidgets.QLabel(self.horizontalLayoutWidget_2)
-        self.label_2.setObjectName("label_2")
-        self.horizontalLayout_2.addWidget(self.label_2)
-        self.lineEdit_2 = QtWidgets.QLineEdit(self.horizontalLayoutWidget_2)
-        self.lineEdit_2.setObjectName("lineEdit_2")
-        self.lineEdit_2.setEchoMode(QLineEdit.Password)
-        self.horizontalLayout_2.addWidget(self.lineEdit_2)
-        self.label_3 = QtWidgets.QLabel(self)
-
-        self.label_3.setGeometry(QtCore.QRect(80 * width / 1366, 20 * height / 768, 231, 51))
-        self.label_3.setPixmap(QPixmap('picture\\logo.png').scaled(231, 50, aspectRatioMode=Qt.KeepAspectRatio))
-        self.label_3.setObjectName("label_3")
-
+        self.label_username = QtWidgets.QLabel(self.horizontalLayoutWidget)
+        self.label_username.setFixedWidth(60 * ratio_width)
+        self.horizontalLayout.addWidget(self.label_username)
+        self.Edt_username = QtWidgets.QLineEdit(self.horizontalLayoutWidget)
+        self.Edt_username.setFocus()
+        self.Edt_username.setFixedWidth(90 * ratio_width)
+        self.horizontalLayout.addWidget(self.Edt_username)
         self.registBtn = QPushButton()
         self.registBtn.setText('注册用户')
+        self.registBtn.setFixedWidth(80 * ratio_width)
         self.horizontalLayout.addWidget(self.registBtn)
+
+        self.horizontalLayoutWidget_2 = QtWidgets.QWidget(self)
+        self.horizontalLayoutWidget_2.setGeometry(
+            QtCore.QRect(80 * ratio_width, 140 * ratio_height, 170 * ratio_width, 81 * ratio_height))
+        self.horizontalLayout_2 = QtWidgets.QHBoxLayout(self.horizontalLayoutWidget_2)
+        self.horizontalLayout_2.setContentsMargins(0, 0, 0, 0)
+        self.label_pwd = QtWidgets.QLabel(self.horizontalLayoutWidget_2)
+        self.label_pwd.setFixedWidth(60 * ratio_width)
+        self.horizontalLayout_2.addWidget(self.label_pwd)
+        self.lineEdit_2 = QtWidgets.QLineEdit(self.horizontalLayoutWidget_2)
+        self.lineEdit_2.setEchoMode(QLineEdit.Password)
+        self.lineEdit_2.setFixedWidth(90 * ratio_width)
+        self.horizontalLayout_2.addWidget(self.lineEdit_2)
+
+        self.label_brand = QtWidgets.QLabel(self)  # 商标
+        self.label_brand.setGeometry(
+            QtCore.QRect(80 * ratio_width, 20 * ratio_height, 231 * ratio_width, 50 * ratio_height))
+        self.label_brand.setPixmap(QPixmap('picture\\logo.png').scaled(231 * ratio_width, 50 * ratio_height,
+                                                                       aspectRatioMode=Qt.KeepAspectRatio))
 
         self.buttonBox.accepted.connect(self.accept)
         self.buttonBox.rejected.connect(self.reject)
         self.registBtn.clicked.connect(self.registe)
-        self.label.setText("用户名：")
-        self.label_2.setText("密码：  ")
-        self.lineEdit.setText('moujun')
+        self.label_username.setText("用户名：")
+        self.label_pwd.setText("密码：  ")
+        self.Edt_username.setText('moujun')
         self.lineEdit_2.setText('123456')
 
     def registe(self):
         print('123')
 
     def accept(self):
-        self.login_signal.emit(self.lineEdit.text(), self.lineEdit_2.text())
+        self.login_signal.emit(self.Edt_username.text(), self.lineEdit_2.text())
 
     def reject(self):
         qApp.quit()
 
 
-class MyDeviceDlg(QDialog):
+class MyDeviceDlg(QDialog):  # 初始化设备参数窗口
     yao_par_signal = pyqtSignal(int, str)
 
     def __init__(self):
         super(MyDeviceDlg, self).__init__()
-
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
         self.setWindowTitle('配置设备')
-        self.resize(400, 300)
+        self.resize(400 * ratio_width, 300 * ratio_height)
         self.setWindowFlags(Qt.WindowMinimizeButtonHint | Qt.WindowCloseButtonHint)  # 禁止窗口最大化
         self.setFixedSize(self.width(), self.height())  # 禁止拉伸窗口
         self.lay_ser = QHBoxLayout()
         self.lay_xft = QHBoxLayout()
         self.lay_main = QVBoxLayout()
         self.buttonBox = QtWidgets.QDialogButtonBox(self)
-        self.buttonBox.setGeometry(QtCore.QRect(30, 240, 341, 32))
+        self.buttonBox.setGeometry(
+            QtCore.QRect(30 * ratio_width, 240 * ratio_height, 341 * ratio_width, 32 * ratio_height))
         self.buttonBox.setOrientation(QtCore.Qt.Horizontal)
         self.buttonBox.setStandardButtons(QtWidgets.QDialogButtonBox.Cancel | QtWidgets.QDialogButtonBox.Ok)
         self.buttonBox.setObjectName("buttonBox")
 
         self.groupBox = QtWidgets.QGroupBox(self)
-        self.groupBox.setGeometry(QtCore.QRect(30, 20, 291, 78))
+        self.groupBox.setGeometry(
+            QtCore.QRect(30 * ratio_width, 20 * ratio_height, 291 * ratio_width, 78 * ratio_height))
         self.groupBox.setObjectName("groupBox")
         self.groupBox.setTitle('窑系统类型')
 
         self.serial_sin = QRadioButton('单系列', self.groupBox)
-        self.serial_sin.setGeometry(QtCore.QRect(50, 30, 106, 16))
+        self.serial_sin.setGeometry(
+            QtCore.QRect(50 * ratio_width, 30 * ratio_height, 106 * ratio_width, 16 * ratio_height))
         self.serial_dou = QRadioButton('双系列', self.groupBox)
-        self.serial_dou.setGeometry(QtCore.QRect(170, 30, 161, 16))
+        self.serial_dou.setGeometry(
+            QtCore.QRect(170 * ratio_width, 30 * ratio_height, 161 * ratio_width, 16 * ratio_height))
         self.serial_dou.setChecked(True)
 
         self.groupBox_2 = QtWidgets.QGroupBox(self)
-        self.groupBox_2.setGeometry(QtCore.QRect(30, 110, 291, 101))
+        self.groupBox_2.setGeometry(
+            QtCore.QRect(30 * ratio_width, 110 * ratio_height, 291 * ratio_width, 101 * ratio_height))
         self.groupBox_2.setTitle('旋风筒参数')
         self.xft_num = QtWidgets.QComboBox(self.groupBox_2)
-        self.xft_num.setGeometry(QtCore.QRect(150, 40, 69, 22))
+        self.xft_num.setGeometry(
+            QtCore.QRect(150 * ratio_width, 40 * ratio_height, 69 * ratio_width, 22 * ratio_height))
         self.xft_num.setObjectName("comboBox")
         self.label_xft = QLabel('旋风筒个数', self.groupBox_2)
-        self.label_xft.setGeometry(QtCore.QRect(63, 42, 61, 20))
+        self.label_xft.setGeometry(
+            QtCore.QRect(63 * ratio_width, 42 * ratio_height, 61 * ratio_width, 20 * ratio_height))
         self.num = ['2', '3', '4', '5', '6', '7', '8', '9']
         for i in self.num:
             self.xft_num.addItem(i)
@@ -1056,6 +1226,7 @@ class MyDeviceDlg(QDialog):
             # con.setValue_flag_Ser(2)
         # con.setValue_number(int(self.xft_num.currentText()))
         self.yao_par_signal.emit(flag, self.xft_num.currentText())
+
         self.close()
 
     def Reject(self):
@@ -1068,6 +1239,8 @@ class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
         metric = QDesktopWidget().screenGeometry()
         width = metric.width()
         height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
         self.setObjectName("数据输入")
         self.BtnAddData = QPushButton('录入一行', self)
         self.BtnOk = QPushButton('确认', self)
@@ -1079,14 +1252,14 @@ class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
         self.Btn_layout.addWidget(self.BtnAddData)
         self.Btn_layout.addWidget(self.BtnOk)
         self.Btn_layout.addWidget(self.BtnCancle)
-        self.Btn_layout.setGeometry(QtCore.QRect(width * 0.7, height * 0.85, 341, 32))
+        self.Btn_layout.setGeometry(QtCore.QRect(width * 0.7, height * 0.85, 341 * ratio_width, 32 * ratio_height))
         exitAction = QAction('Exit', self)
         exitAction.setShortcut('Ctrl+Q')
         exitAction.triggered.connect(qApp.quit)
         self.toolbar = self.addToolBar('Exit')
         self.toolbar.addAction(exitAction)
         self.line = QtWidgets.QFrame(self)
-        self.line.setGeometry(QtCore.QRect(0, height * 0.73, width, 16))
+        self.line.setGeometry(QtCore.QRect(0, height * 0.73, width * ratio_width, 16 * ratio_height))
         self.line.setFrameShape(QtWidgets.QFrame.HLine)
         self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
         self.line.setObjectName("line")
@@ -1218,16 +1391,13 @@ class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
 
     def accept(self):
         self.addRowData()
-        print(self.new_data)
-        if save_data(self.new_data):
-            print(get_time_now())
-            print(con.getValue_username())
-            print('数据输入')
-            print('%d条数据' % len(self.new_data))
+        operation = '输入数据:'
+        for x in self.new_data:
+            operation = operation + str(x[0]) + ',' + str(x[1]) + ';'
+        if operation_record([con.getValue_username(), operation]) and save_data(self.new_data):
             reply = QMessageBox.information(self, '提示', '最新数据已经导入，是否自动生成生产预警', QMessageBox.Yes | QMessageBox.No)
             if reply == QMessageBox.Yes:
                 self.warningDlg = MyProduceWarWnd(con.getValue_day(), con.getValue_hour(), 1)
-
                 self.close()
             else:
                 self.close()
@@ -1237,6 +1407,7 @@ class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
     def reject(self):
         reply = QMessageBox.information(self, '提示', '确认放弃上传？', QMessageBox.Yes | QMessageBox.No)
         if reply == QMessageBox.Yes:
+
             self.close()
         else:
             pass
@@ -1248,7 +1419,9 @@ class MyDataReviseWnd(QMainWindow):  # 数据修改功能窗口
         metric = QDesktopWidget().screenGeometry()
         width = metric.width()
         height = metric.height()
-
+        ratio_width = width / 1366
+        ratio_height = height / 768
+        self.revise_flag = 0  # 数据修改标志
         self.setObjectName("数据修改")
         self.BtnOk = QPushButton('确认', self)
         self.BtnCancle = QPushButton('取消', self)
@@ -1262,11 +1435,11 @@ class MyDataReviseWnd(QMainWindow):  # 数据修改功能窗口
         self.Btndelete.clicked.connect(self.Delete)
         self.Btn_layout.addWidget(self.Btndelete)
 
-        self.Btn_layout.setGeometry(QtCore.QRect(width * 0.7, height * 0.85, 341, 32))
+        self.Btn_layout.setGeometry(QtCore.QRect(width * 0.7, height * 0.85, 341 * ratio_width, 32 * ratio_height))
 
         exitAction = QAction('Exit', self)
         exitAction.setShortcut('Ctrl+Q')
-        exitAction.triggered.connect(qApp.quit)
+        exitAction.triggered.connect(self.close)
 
         self.toolbar = self.addToolBar('Exit')
         self.toolbar.addAction(exitAction)
@@ -1314,6 +1487,7 @@ class MyDataReviseWnd(QMainWindow):  # 数据修改功能窗口
         self.showMaximized()
 
     def tableItemChanged(self):
+        self.revise_flag = 1
         self.tableWidget.currentItem().setForeground(QBrush(QColor(255, 0, 0)))
         self.row_changed.append(self.tableWidget.currentRow())
 
@@ -1326,69 +1500,85 @@ class MyDataReviseWnd(QMainWindow):  # 数据修改功能窗口
         rows = list(Rows)
         rows.sort()
         # print(rows)
-        for i in rows:
-            self.tableWidget.removeRow(i)
-
-        print(get_time_now())
-        print(con.getValue_username())
-        print('数据修改')
-        print('删除%d条数据' % len(rows))
-
-        pass
-        '''row_dedata = []
-        for row in list(set(self.row_delete)):
-            row_data = []
-            for col in range(2):
-                item = self.tableWidget.item(row, col)
-                row_data.append(str(item.text()))
-            row_dedata.append(row_data)
-        if delete_data(row_dedata):
-            reply = QMessageBox.information(self, '提示', '删除成功，是否继续操作?', QMessageBox.Yes | QMessageBox.No)
-            if reply == QMessageBox.Yes:
-                self.close()
-                self.__init__()
-                pass
+        reply = QMessageBox.information(self, '提示', '是否确认删除%d条数据' % len(rows), QMessageBox.Yes | QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            rows_data = []
+            for row in rows:
+                row_data = []
+                for col in range(2):
+                    item = self.tableWidget.item(row, col)
+                    print(item.text())
+                    row_data.append(str(item.text()))
+                rows_data.append(row_data)
+            operation = '删除数据:'
+            for x in rows_data:
+                operation = operation + x[0] + ',' + x[1] + ';'
+            if operation_record([con.getValue_username(), operation]):
+                delete_data(rows_data)
+                for i in rows:
+                    self.tableWidget.removeRow(i)
+                reply = QMessageBox.information(self, '提示', '删除成功，是否继续操作?', QMessageBox.Yes | QMessageBox.No)
+                if reply == QMessageBox.Yes:
+                    pass
+                else:
+                    self.close()
             else:
-                self.close()
+                QMessageBox.information(self, '提示', '删除失败', QMessageBox.Yes)
         else:
-            QMessageBox.information(self, '提示', '删除失败', QMessageBox.Yes)'''
+            pass
 
     def accept(self):
 
-        for row in list(set(self.row_changed)):
-            row_data = []
-            for col in range(2):
-                item = self.tableWidget.item(row, col)
-                try:
-                    row_data.append(int(item.text()))
-                except Exception:
-                    row_data.append('')
-            for col in arange(2, self.tableWidget.columnCount()):
-                item = self.tableWidget.item(row, col)
-                try:
-                    row_data.append(float(item.text()))
-                except Exception:
-                    row_data.append(None)
-            self.new_data.append(row_data)
-        if update_data(self.new_data):
+        reply = QMessageBox.information(self, '提示', '是否确认保存修改', QMessageBox.Yes | QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            for row in list(set(self.row_changed)):
+                row_data = []
+                for col in range(2):
+                    item = self.tableWidget.item(row, col)
+                    try:
+                        row_data.append(int(item.text()))
+                    except Exception:
+                        row_data.append('')
+                for col in arange(2, self.tableWidget.columnCount()):
+                    item = self.tableWidget.item(row, col)
+                    try:
+                        row_data.append(float(item.text()))
+                    except Exception:
+                        row_data.append(None)
+                self.new_data.append(row_data)
+            if update_data(self.new_data):
 
-            print(get_time_now())
-            print(con.getValue_username())
-            print('数据修改')
-            print('%d条数据' % len(self.new_data))
+                print(get_time_now())
+                print(con.getValue_username())
+                print('数据修改')
+                print('%d条数据' % len(self.new_data))
 
-            reply = QMessageBox.information(self, '提示', '修改成功', QMessageBox.Yes)
-            if reply == QMessageBox.Yes:
-                self.close()
-        else:
-            QMessageBox.information(self, '提示', '修改失败', QMessageBox.Yes)
+                reply = QMessageBox.information(self, '提示', '修改成功', QMessageBox.Yes)
+                if reply == QMessageBox.Yes:
+                    self.revise_flag = 0
+                    self.close()
+            else:
+                QMessageBox.information(self, '提示', '修改失败', QMessageBox.Yes)
 
     def reject(self):
         reply = QMessageBox.information(self, '提示', '确认放弃修改？', QMessageBox.Yes | QMessageBox.No)
         if reply == QMessageBox.Yes:
+            self.revise_flag = 0
             self.close()
         else:
             pass
+
+    def closeEvent(self, *args, **kwargs):
+        if self.revise_flag == 1:
+            reply = QMessageBox.information(self, '提示', '您尚未保存数据，是否保存修改', QMessageBox.Yes | QMessageBox.No)
+            if reply == QMessageBox.Yes:
+                self.revise_flag = 0
+                self.accept()
+            elif reply == QMessageBox.No:
+                self.revise_flag = 0
+                self.close()
+        else:
+            self.close()
 
 
 class MyProduceWarWnd(QMainWindow):
