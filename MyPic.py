@@ -143,7 +143,7 @@ class MyMplCanvas(FigureCanvas):
         null = []
         count = 0
         for i in range(len(str)):
-            if str[i] == None:
+            if str[i] == None or str[i] == "":
                 count += 1
             else:
                 null.append(i)  # 记录数据不为空的下标
@@ -181,8 +181,9 @@ class MyTempMplCanvas(MyMplCanvas):
             if con.getValue_flag_Ctrl() == 0:  # 没有按住CTRL键
                 if con.getValue_flag_Visual() == 0:  # 显示一天的图片
                     tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
-
-                    count, null = self.cal_null(tablevalue[1][index_T[0] - 2])
+                    count, null = self.cal_null(tablevalue[1][index_T[0] - 2])  # null为数据不为空的下标列表，空数据应当为None而不是
+                    # 若：null = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
+                    # 则意为0~23全由数据，若缺失，则为缺失的数字的小时没有数据
                     self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                     self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
                     for tick_x in self.axes.get_xmajorticklabels():
@@ -193,9 +194,8 @@ class MyTempMplCanvas(MyMplCanvas):
                         x = [i for i in range(24)]
                         y = tablevalue[1][index_T[0] - 2]
                         self.axes.plot(x, y, 'bo-')
-
-                        self.axes.plot(5,y[5],'ro-')#突出显示此危险点
-
+                        if y[5]!=None:
+                            self.axes.plot(5, y[5], 'ro-')  # 突出显示此危险点
                         # self.axes.set_xticklabels(x_label)
                         xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
                         self.axes.xaxis.set_major_locator(xmajorLocator)
@@ -203,13 +203,12 @@ class MyTempMplCanvas(MyMplCanvas):
                     else:
                         t = arange(0, 24, 1)
                         try:
-                            print(tablevalue)
-                            print(index_T)
-                            print(tablevalue[1][index_T[0]-2])
-                            self.axes.plot(t, tablevalue[1][index_T[0] - 2], 'bo-')
+                            self.axes.plot(t, tablevalue[1][index_T[0] - 2], 'bo-')#如果t和tablevalue长度不一致会报错
+                            #                                                   但是全为None不会报错
 
-                            y=tablevalue[1][index_T[0] - 2]
-                            self.axes.plot(5, y[5], 'ro-')  # 突出显示此危险点
+                            y = tablevalue[1][index_T[0] - 2]
+                            if y[5]!=None:
+                                self.axes.plot(5, y[5], 'ro-')  # 突出显示此危险点
 
                             xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
                             xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
@@ -228,9 +227,11 @@ class MyTempMplCanvas(MyMplCanvas):
                     for tick_y in self.axes.get_ymajorticklabels():
                         tick_y.set_fontsize(7)
                     y = tablevalue[1][index_T[0] - 2]
+
                     if hour >= 10:
                         x = [i for i in range(hour - 10, hour)]
                         y2 = y[hour - 10:hour]
+
                     else:
                         x = [i for i in range(hour + 1)]
                         y2 = y[:hour + 1]
@@ -240,7 +241,7 @@ class MyTempMplCanvas(MyMplCanvas):
                     self.axes.xaxis.set_major_locator(xmajorLocator)
                     self.axes.set_title(tablevalue[0][index_T[0]], fontproperties=myfont)
 
-            elif con.getValue_flag_Ctrl() == 1:
+            elif con.getValue_flag_Ctrl() == 1:#按住了Ctrl键
                 tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
                 self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                 self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
@@ -297,6 +298,8 @@ class MyPressMplCanvas(MyMplCanvas):
                         x = [i for i in range(24)]
                         y = tablevalue[1][index_P[0] - 2]
                         self.axes.plot(x, y, 'bo-')
+                        if y[5] != None:
+                            self.axes.plot(5, y[5], 'ro-')  # 突出显示此危险点
 
                         xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
                         self.axes.xaxis.set_major_locator(xmajorLocator)
@@ -305,6 +308,10 @@ class MyPressMplCanvas(MyMplCanvas):
                         t = arange(0, 24, 1)
                         try:
                             self.axes.plot(t, tablevalue[1][index_P[0] - 2], 'bo-')
+                            y = tablevalue[1][index_P[0] - 2]
+                            if y[5] != None:
+                                self.axes.plot(5, y[5], 'ro-')  # 突出显示此危险点
+
                             xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
                             xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
                             self.axes.xaxis.set_major_locator(xmajorLocator)

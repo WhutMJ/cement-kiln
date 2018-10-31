@@ -77,15 +77,18 @@ def get_by_day(time):  # 数据库中有ID栏
     return name, result
 
 
-def get_by_fragment_(time_now, number=72):
+def get_by_fragment_(time_now=get_time_now(), number=72):
     '''
     :param time_now: 'date + hour'
             number : fragment的长度
     :return:
     '''
     db, cursor = Connect()
+    '''
     date = time_now[:8]
     hour = int(time_now[8:]) - 1
+    '''
+    '''
     sql = "SELECT * FROM all_data WHERE date = '%s' and time = '%s' and state = 1" % (date, hour)
     result = []
     if cursor.execute(sql):
@@ -115,7 +118,23 @@ def get_by_fragment_(time_now, number=72):
     T_result = [[] for i in range(length)]
     for i in range(length):
         T_result[length - i - 1] = result[i]
-    return T_result, name
+    '''
+    sql = 'SELECT * FROM all_data WHERE state=1 ORDER BY id DESC LIMIT 72'
+    try:
+        cursor.execute(sql)
+        result = cursor.fetchall()
+        result = [x[1:-1] for x in result]
+        length = len(result)
+        T_result = [[] for i in range(length)]
+        for i in range(length):
+            T_result[length - i - 1] = result[i]
+        name = get_table_name()
+        print(T_result)
+        return T_result, name
+    except Exception as msg:
+        print(msg)
+        return False, False
+    # return T_result, name
     # print(result)
 
 
@@ -225,7 +244,7 @@ def get_table_name():
 
 def get_all_date():
     db, cursor = Connect()
-    sql = "SELECT date, time FROM all_data"
+    sql = "SELECT date, time FROM all_data WHERE state = 1"
     cursor.execute(sql)
     result = cursor.fetchall()
     return result
@@ -377,7 +396,8 @@ def get_chinese(table_name):
 
 
 if __name__ == "__main__":
-    Data_Output_from_Database()
+    # Data_Output_from_Database()
+    get_by_fragment_()
     '''
     old_table_name = get_table_name()
     old_table_name.append('zhu')

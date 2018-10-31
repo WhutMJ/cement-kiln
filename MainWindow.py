@@ -591,6 +591,8 @@ class MyWindow(QMainWindow):
                     self.blj_3_d.scaled(self.blj_3.width() * self.ratio, self.blj_3.height() * self.ratio))
                 '''self.lab_blj.setPixmap(self.blj_d.scaled(self.blj.width() * self.ratio, self.blj.height() * self.ratio))
                 self.lab_blj.setObjectName('篦冷机')'''
+        else:
+            QMessageBox.information(self, '提示', '数据不全', QMessageBox.Yes)
             # self.initPic()
 
     def setTimer(self):
@@ -732,6 +734,7 @@ class MyWindow(QMainWindow):
         self.standardValueDlg = dlg.MyStandardValueDlg()
 
     def refresh(self):
+        '''
         data = get_all_date()
         index = len(data)
         date = data[index - 1][0]
@@ -739,11 +742,22 @@ class MyWindow(QMainWindow):
         for i in range(len(data)):
             if date == data[i][0]:
                 hour.append(data[i][1])  # hour--array
-        print(hour)
+        # print(hour)
+        i = -1
+        while get_by_hour(date+hour[-1])[0] == False:
+            i -= 1
+        '''
+        newest_data = get_by_fragment()[0][-1]
+        date = newest_data[0]
+        hour = newest_data[1]
+        all_date = get_all_date()
+        hours = []
+        for i in range(len(all_date)):
+            if date == all_date[i][0]:
+                hours.append(int(all_date[i][1]))  # hour--array
         con.setValue_day(int(date))
-        con.setValue_hour(int(hour[-1]))  # 这一天最后一条数据的hour
-        hour_to_int = [int(x) for x in hour]
-        con.setValue_hours(hour_to_int)
+        con.setValue_hour(int(hour))  # 这一天最后一条数据的hour
+        con.setValue_hours(hours)
         con.setValue_flag_Hour(1)
         self.judgePic()  # 更换图片资源
         self.initPic()  # 显示图片
@@ -975,7 +989,8 @@ class MyWindow(QMainWindow):
                 self.table.setItem(i, 0, newItem)
                 newItem = QTableWidgetItem(str(col2[i][hour]))
                 self.table.setItem(i, 1, newItem)
-        self.table.item(5,0).setForeground(QBrush(QColor(255, 0, 0)))
+        self.table.item(5,0).setForeground(QBrush(QColor(255, 0, 0)))#改变主界面单元格字体颜色
+        self.table.item(5,1).setForeground(QBrush(QColor(255, 0, 0)))
 
     def selectLab(self, name):
         children = self.findChildren(MyLabel, )
