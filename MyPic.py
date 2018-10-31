@@ -203,6 +203,9 @@ class MyTempMplCanvas(MyMplCanvas):
                     else:
                         t = arange(0, 24, 1)
                         try:
+                            print(tablevalue)
+                            print(index_T)
+                            print(tablevalue[1][index_T[0]-2])
                             self.axes.plot(t, tablevalue[1][index_T[0] - 2], 'bo-')
 
                             y=tablevalue[1][index_T[0] - 2]

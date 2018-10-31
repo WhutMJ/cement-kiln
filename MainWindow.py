@@ -282,7 +282,7 @@ class MyWindow(QMainWindow):
                 self.lay.addWidget(self.xft[number * 2 + 1], number - 1, 9 - flag_Ser)
             self.lay.addWidget(self.lab_yao_1, number - 2 + fjl_row, (fjl_col - 1) / 2 + 3, 1, 3)  # 放到此处避免窑尾被覆盖
         self.lay.setSpacing(0)
-        self.lay.setAlignment(Qt.AlignLeft | Qt.AlignBottom)
+        self.lay.setAlignment(Qt.AlignLeft | Qt.AlignVCenter)
 
         self.widget.setLayout(self.lay)
 
