@@ -35,7 +35,7 @@ class MyWindow(QMainWindow):
         self.width = metric.width()  # 图片宽度
         self.height = metric.height()  # 图片高度
         self.setFixedSize(self.width, self.height - 72 * self.height / 768)  # 72为win10任务栏高度
-        left = -9
+        left = -9#为了使窗口能够位于左上角
         self.move(left, 0)
         self.show()
         # self.showMaximized()
@@ -971,7 +971,7 @@ class MyWindow(QMainWindow):
         day = str(con.getValue_day())
         col1, col2 = get_by_day(day)  # 返回值为[[],[[],[],[],[]]],col1为名称，col2为参数
         col1 = col1[2:]
-        if con.getValue_flag_Visual() == 0:
+        if con.getValue_flag_Visual() == 0:#小时
             self.table.setRowCount(len(col2[index1]))
             self.table.setHorizontalHeaderLabels([get_chinese(col1[index1]), get_chinese(col1[index2])])
             for i in range(len(col2[index1])):
@@ -989,8 +989,11 @@ class MyWindow(QMainWindow):
                 self.table.setItem(i, 0, newItem)
                 newItem = QTableWidgetItem(str(col2[i][hour]))
                 self.table.setItem(i, 1, newItem)
-        self.table.item(5,0).setForeground(QBrush(QColor(255, 0, 0)))#改变主界面单元格字体颜色
-        self.table.item(5,1).setForeground(QBrush(QColor(255, 0, 0)))
+
+        if self.table.item(5,0)!=None:
+            self.table.item(5,0).setForeground(QBrush(QColor(255, 0, 0)))#改变主界面表格单元格字体颜色
+        if self.table.item(5,1)!=None:
+            self.table.item(5,1).setForeground(QBrush(QColor(255, 0, 0)))
 
     def selectLab(self, name):
         children = self.findChildren(MyLabel, )
@@ -1010,11 +1013,18 @@ class MyWindow(QMainWindow):
     def change_pic(self, index1, index2, name):  # 接收从标签传过来的温度和压强的下标及部件名称
         self.selectLab(name)
         if self.click_flag == 0:
+            print(1231456)
             self.fp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
+            print(1231456)
             self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
+            print(1234566)
             self.pic1.addWidget(self.fp1)
+            print(789789)
             self.pic2.addWidget(self.fp2)
-            self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)
+            print(789789)
+            print(index1)
+            self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)#
+            print(789789)
             self.click_flag = 1
             self.updateInfor()
 
