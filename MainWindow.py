@@ -636,15 +636,14 @@ class MyWindow(QMainWindow):
         self.timeDlg_data.time_signal.connect(self.time_data)
 
     def time_data(self, time):
-        # print(1)
         con.setValue_day(int(time[:8]))
         con.setValue_hour(int(time[8:]))
         day_date = get_all_date()
         # print(day_date)
         hours = []
         for x in day_date:
-            hours.append(int(x[1]))
-        # print(hours)
+            hours.append(int(x[1]))#获取所有的小时
+        #print(hours)
         con.setValue_hours(hours)
         self.judgePic()  # 更换图片资源
         self.initPic()  # 显示图片
@@ -656,8 +655,9 @@ class MyWindow(QMainWindow):
         self.timeDlg_dataDevice.time_signal.connect(self.time_dataDevice)
 
     def time_dataDevice(self, time):  # 一天的情况下重置设备信息
-        con.setValue_day(int(time))
-
+        #con.setValue_day(int(time))
+        con.setValue_day(int(time[:8]))
+        con.setValue_hour(int(time[8:]))
         # self.judgePic()  # 更换图片资源
         self.update_normal_Pic()
         self.initPic()  # 显示图片
@@ -667,7 +667,6 @@ class MyWindow(QMainWindow):
         self.singleWnd = dlg.MyRadioWnd()
 
     def mulVisual(self):
-
         self.mulWnd = dlg.MyCheckWnd()
 
     # 窑系统设备配置
@@ -970,16 +969,22 @@ class MyWindow(QMainWindow):
     def change_table(self, index1, index2):  # 单击部件时刷新表格数据
         day = str(con.getValue_day())
         col1, col2 = get_by_day(day)  # 返回值为[[],[[],[],[],[]]],col1为名称，col2为参数
+        #此处应该改为获取指定日期、小时的前24条数据
+        print(col1)
         col1 = col1[2:]
-        if con.getValue_flag_Visual() == 0:#小时
+        if con.getValue_flag_Visual() == 0:#24小时
             self.table.setRowCount(len(col2[index1]))
             self.table.setHorizontalHeaderLabels([get_chinese(col1[index1]), get_chinese(col1[index2])])
+            '''hours=con.get
+            self.table.setVerticalHeaderLabels(col2)'''
             for i in range(len(col2[index1])):
                 newItem = QTableWidgetItem(str(col2[index1][i]))
                 self.table.setItem(i, 0, newItem)
                 newItem = QTableWidgetItem(str(col2[index2][i]))
                 self.table.setItem(i, 1, newItem)
         else:
+            print(col1)
+            print(123)
             self.table.setRowCount(len(col1))
             self.table.setHorizontalHeaderLabels(['名称', '数值'])
             hour = con.getValue_hour()
@@ -1013,18 +1018,11 @@ class MyWindow(QMainWindow):
     def change_pic(self, index1, index2, name):  # 接收从标签传过来的温度和压强的下标及部件名称
         self.selectLab(name)
         if self.click_flag == 0:
-            print(1231456)
             self.fp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
-            print(1231456)
             self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
-            print(1234566)
             self.pic1.addWidget(self.fp1)
-            print(789789)
             self.pic2.addWidget(self.fp2)
-            print(789789)
-            print(index1)
             self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)#
-            print(789789)
             self.click_flag = 1
             self.updateInfor()
 

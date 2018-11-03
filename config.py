@@ -1,7 +1,9 @@
 '''以下为窑系统所需的全局变量的获取与设置'''
+from PyQt5.QtWidgets import QDesktopWidget
+
 global day, index_T, index_P, flag_Ser, number, filepath, flag_Visual
 #     日期， 温度，压强，  单双系列标志，旋风筒数,文件路径,热耗可视化标志
-global hour, flag_Hour, password, username, flag_Ctrl
+global hour, flag_Hour, password, username, flag_Ctrl, metric, hours
 #                                           判断是否按住了Ctrl键
 
 day = 0
@@ -12,6 +14,7 @@ number = 0
 filepath = ''
 flag_Visual = 0  # 为 0 则表示以天显示，为 1 则以小时显示
 hour = 0
+hours = []      #存储一天所有有数据的hour的集合
 flag_Hour = 0
 password = '123456'
 flag_Ctrl = 0  # 没有按下
@@ -78,7 +81,7 @@ def getValue_index_T():
 def setValue_index_T(value):
     global index_T
     if getValue_flag_Ctrl() == 0:
-        index_T=[]
+        index_T = []
         index_T.append(value)
     else:
         if value in index_T:
@@ -94,13 +97,14 @@ def getValue_index_P():
 def setValue_index_P(value):
     global index_P
     if getValue_flag_Ctrl() == 0:
-        index_P=[]
+        index_P = []
         index_P.append(value)
     else:
         if value in index_P:
             index_P.remove(value)
         else:
             index_P.append(value)
+
 
 def getValue_flag_Ser():
     return flag_Ser
@@ -136,3 +140,11 @@ def getValue_hour():
 def setValue_hour(value):
     global hour
     hour = value
+
+def getValue_hours():
+    return hours
+
+
+def setValue_hours(value):
+    global hours
+    hours = value

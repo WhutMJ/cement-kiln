@@ -181,6 +181,7 @@ class MyTempMplCanvas(MyMplCanvas):
             if con.getValue_flag_Ctrl() == 0:  # 没有按住CTRL键
                 if con.getValue_flag_Visual() == 0:  # 显示一天的图片
                     tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
+                    #此处应该改为获取指定日期、小时的前24条数据
                     count, null = self.cal_null(tablevalue[1][index_T[0] - 2])  # null为数据不为空的下标列表，空数据应当为None而不是
                     # 若：null = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
                     # 则意为0~23全由数据，若缺失，则为缺失的数字的小时没有数据
