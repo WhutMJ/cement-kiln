@@ -983,8 +983,7 @@ class MyWindow(QMainWindow):
                 newItem = QTableWidgetItem(str(col2[index2][i]))
                 self.table.setItem(i, 1, newItem)
         else:
-            print(col1)
-            print(123)
+
             self.table.setRowCount(len(col1))
             self.table.setHorizontalHeaderLabels(['名称', '数值'])
             hour = con.getValue_hour()
@@ -1034,6 +1033,7 @@ class MyWindow(QMainWindow):
             self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)
             self.click_flag = 2
             self.updateInfor()
+
         elif self.click_flag == 2:
             self.fp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
             self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)

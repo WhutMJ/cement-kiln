@@ -378,6 +378,7 @@ def Data_Output_from_Database():        #  从数据库中导出数据
     except Exception as msg:
         print(msg)
         return False
+
 def get_chinese(table_name):
     '''
     :param table_name:

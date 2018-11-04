@@ -921,7 +921,7 @@ class MyCheckWnd(QMainWindow):
         self.Height = metric.height()
         self.flag = 0
         self.setFixedSize(self.Width * 0.618, self.Height * 0.618)
-        self.move(50,(self.Height-self.height())/2)
+        self.move(50, (self.Height - self.height()) / 2)
         self.mainlay = QGridLayout()  # 选项主布局
 
         tablename = get_table_name()  # 获取所有因素
@@ -1030,9 +1030,6 @@ class MyCheckWnd(QMainWindow):
         groupBox7.setLayout(layout7)
         self.mainlay.addWidget(groupBox7)
 
-
-
-
         '''row = (len(tablename) + 1) / 3
         self.element = {}
         self.lay.addWidget(QLabel('勾选你需要的因素'), 0, 0)
@@ -1065,16 +1062,16 @@ class MyCheckWnd(QMainWindow):
         for i in range(len(date)):
             self.timeBox.addItem(date[i][0] + ' ' + date[i][1])
         self.timeBox.setCurrentIndex(6)
-        buttonBox=QGroupBox('')
+        buttonBox = QGroupBox('')
         buttonBox.setFlat(False)
-        layoutBtn=QVBoxLayout()
+        layoutBtn = QVBoxLayout()
         layoutBtn.addWidget(self.timeBox)
         layoutBtn.addWidget(self.checkAllBtn)
         layoutBtn.addWidget(self.invertBtn)
         layoutBtn.addWidget(self.okBtn)
         buttonBox.setLayout(layoutBtn)
         # buttonBox.setGeometry(QtCore.QRect(self.width()*0.7,self.height()*0.418,self.width()*0.1,self.height()*0.3))
-        self.mainlay.addWidget(buttonBox,0,4,2,1)
+        self.mainlay.addWidget(buttonBox, 0, 4, 2, 1)
         '''self.timeBox.move(self.width() * 0.7, self.height() * 0.418 - 40)
         self.checkAllBtn.move(self.width() * 0.7, self.height() * 0.418)
         self.invertBtn.move(self.width() * 0.7, self.height() * 0.418 + 40)
@@ -1090,7 +1087,6 @@ class MyCheckWnd(QMainWindow):
         self.setWindowTitle('请勾选您想要的部件')
 
         self.show()
-
 
     def checkAll(self):
         children = self.findChildren(QCheckBox, )
@@ -1384,6 +1380,31 @@ class MyDeviceDlg(QDialog):  # 初始化设备参数窗口
 class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
     def __init__(self):
         super(MyDataInputWnd, self).__init__()
+
+        #self.connect(self.MyTable, pyqtSignal("itemClicked (QTableWidgetItem*)"), self.outSelect)
+        #重载双击函数
+        # 通过实现
+        # itemClicked(QTableWidgetItem *)
+        # 信号的槽函数，就可以获得鼠标单击到的单元格指针，进而获得其中的文字信息
+        #
+        # 首先在__init()
+        # __函数中加入
+        #
+        # self.connect(self.MyTable, SIGNAL("itemClicked (QTableWidgetItem*)"),
+        #              self.outSelect)   # 将itemClicked信号与函数outSelect绑定
+        #
+        #  
+        #
+        # 然后实现一个outSelect函数，如下：
+        #
+        #    
+        #
+        # def outSelect(self, Item=None):
+        #             if Item == None:
+        #                     return       
+        #             print(Item.text())
+        #
+        #     运行程序后，单击一个单元格，即可获得其中的字符了
         metric = QDesktopWidget().screenGeometry()
         width = metric.width()
         height = metric.height()
@@ -1560,6 +1581,8 @@ class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
         else:
             pass
 
+    def outSelect(self, *args, **kwargs):
+        print('双击')
 
 class MyDataReviseWnd(QMainWindow):  # 数据修改功能窗口
     def __init__(self):
@@ -1947,7 +1970,7 @@ class MyHeatCanvas(MyMplCanvas):
 if __name__ == "__main__":
     app = QApplication(sys.argv)
     # form = MyDataSimDlg('2017012310')
-    # form = MyDataInputWnd()
+    form = MyDataInputWnd()
     # form = MyDataLeadInDlg()
     # form = MySysLogDlg()
     # print(filepath + '/' + filename)
@@ -1957,7 +1980,7 @@ if __name__ == "__main__":
     # form =MyOpenFileWnd()
     # form2 = MyYaoDlg()
     # form = MyOpenFileWnd()
-    form = MyCheckWnd()
+    # form = MyCheckWnd()
     # form = MyRadioWnd()
     # form = MyProduceWarWnd(20170223, 10)
     # form=MyDataReviseWnd()
