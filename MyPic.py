@@ -240,7 +240,7 @@ class MyTempMplCanvas(MyMplCanvas):
 
                     xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
-                    self.axes.set_title(tablevalue[0][index_T[0]], fontproperties=myfont)
+                    self.axes.set_title(get_chinese(tablevalue[0][index_T[0]]), fontproperties=myfont)
 
             elif con.getValue_flag_Ctrl() == 1:#按住了Ctrl键
                 tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
@@ -304,7 +304,7 @@ class MyPressMplCanvas(MyMplCanvas):
 
                         xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
                         self.axes.xaxis.set_major_locator(xmajorLocator)
-                        self.axes.set_title(tablevalue[0][index_P[0]], fontproperties=myfont)
+                        self.axes.set_title(get_chinese(tablevalue[0][index_P[0]]), fontproperties=myfont)
                     else:
                         t = arange(0, 24, 1)
                         try:
@@ -317,7 +317,7 @@ class MyPressMplCanvas(MyMplCanvas):
                             xminorLocator = MultipleLocator(1)  # 将x轴次刻度标签设置为1的倍数
                             self.axes.xaxis.set_major_locator(xmajorLocator)
                             self.axes.xaxis.set_minor_locator(xminorLocator)
-                            self.axes.set_title(tablevalue[0][index_P[0]], fontproperties=myfont)
+                            self.axes.set_title(get_chinese(tablevalue[0][index_P[0]]), fontproperties=myfont)
                         except Exception:
                             pass
                 elif con.getValue_flag_Visual() == 1:  # 显示 10 小时的数据
@@ -344,7 +344,7 @@ class MyPressMplCanvas(MyMplCanvas):
 
                     xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
-                    self.axes.set_title(tablevalue[0][index_P[0]], fontproperties=myfont)
+                    self.axes.set_title(get_chinese(tablevalue[0][index_P[0]]), fontproperties=myfont)
 
             elif con.getValue_flag_Ctrl() == 1:  # 按住了CTRL键
                 tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据

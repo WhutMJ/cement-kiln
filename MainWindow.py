@@ -989,7 +989,7 @@ class MyWindow(QMainWindow):
             hour = con.getValue_hour()
 
             for i in range(len(col1)):
-                newItem = QTableWidgetItem(col1[i])
+                newItem = QTableWidgetItem(get_chinese(col1[i]))
                 self.table.setItem(i, 0, newItem)
                 newItem = QTableWidgetItem(str(col2[i][hour]))
                 self.table.setItem(i, 1, newItem)
