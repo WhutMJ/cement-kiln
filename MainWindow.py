@@ -4,6 +4,10 @@ import MyDialog as dlg
 from PyQt5.QtGui import *
 from PyQt5 import QtWidgets
 from Connect_to_Database import *
+from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
+from matplotlib.figure import Figure
+from matplotlib.animation import FuncAnimation
+import numpy as np
 
 
 class MyWindow(QMainWindow):
@@ -14,7 +18,7 @@ class MyWindow(QMainWindow):
         self.loginDlg.show()
         self.loginDlg.login_signal.connect(self.login)
         self.Flag_login = 0
-        self.font_label=QFont()
+        self.font_label = QFont()
         self.font_label.setPointSize(12)
 
     def login(self, user, password):
@@ -35,7 +39,7 @@ class MyWindow(QMainWindow):
         self.width = metric.width()  # 图片宽度
         self.height = metric.height()  # 图片高度
         self.setFixedSize(self.width, self.height - 72 * self.height / 768)  # 72为win10任务栏高度
-        left = -9#为了使窗口能够位于左上角
+        left = -9  # 为了使窗口能够位于左上角
         self.move(left, 0)
         self.show()
         # self.showMaximized()
@@ -48,7 +52,6 @@ class MyWindow(QMainWindow):
         self.setWindowTitle("Cement Kiln--%s" % con.getValue_username())  # 设置主窗口标题
         self.initMenu()  # 初始化菜单栏
         self.updatePic()  # 加载图片资源
-        self.setTimer()  # 设定计时器，稍后会摆在正确位置
         self.xft = {}  # 旋风筒初始化
 
         self.deviceDlg = dlg.MyDeviceDlg()  # 初始化对话框
@@ -70,31 +73,32 @@ class MyWindow(QMainWindow):
         day = con.getValue_day()
         # print(con.getValue_flag_Visual())
         if con.getValue_number() != 0:  # 判断用户是否完成了窑系统配置信息
-            if con.getValue_flag_Visual() == 1:  # 显示小时
+            # if con.getValue_flag_Visual() == 1:  # 显示小时
 
-                hour = str(con.getValue_hour())
-                if self.click_flag == 0:  # 判断是否点击了部件
-                    day_str = str(day)
-                    self.lab_infor.setText(
-                        '  窑系统数据可视化(小时)\t选择时间：%s-%s-%s %s:00\t热耗：无数据' % (day_str[0:4], day_str[4:6], day_str[6:8], hour))
-                else:
-                    day_str = str(day)
-                    value = get_by_day(str(day))
-                    self.lab_infor.setText(
-                        '  窑系统数据可视化(小时)\t选择时间：%s-%s-%s %s:00\t热耗：' % (
-                            day_str[0:4], day_str[4:6], day_str[6:8], hour))
+            hour = str(con.getValue_hour())
+            if self.click_flag == 0:  # 判断是否点击了部件
+                day_str = str(day)
+                self.lab_infor.setText(
+                    '  窑系统数据可视化(小时)\t选择时间：%s-%s-%s %s:00\t热耗：无数据' % (
+                        day_str[0:4], day_str[4:6], day_str[6:8], hour))
             else:
+                day_str = str(day)
+                value = get_by_day(str(day))
+                self.lab_infor.setText(
+                    '  窑系统数据可视化(小时)\t选择时间：%s-%s-%s %s:00\t热耗：' % (
+                        day_str[0:4], day_str[4:6], day_str[6:8], hour))
+            # else:
 
-                if self.click_flag == 0:  # 判断是否点击了部件
-                    day_str = str(day)
-                    self.lab_infor.setText(
-                        '  窑系统设备数据可视化(天)\t选择时间：%s-%s-%s\t热耗：无数据' % (day_str[0:4], day_str[4:6], day_str[6:8]))
-                else:
-                    value = get_by_day(str(day))
-                    day_str = str(day)
-                    self.lab_infor.setText(
-                        '  窑系统设备数据可视化(天)\t选择时间：%s-%s-%s\t热耗：' % (
-                            day_str[0:4], day_str[4:6], day_str[6:8]))
+            # if self.click_flag == 0:  # 判断是否点击了部件
+            #     day_str = str(day)
+            #     self.lab_infor.setText(
+            #         '  窑系统设备数据可视化(天)\t选择时间：%s-%s-%s\t热耗：无数据' % (day_str[0:4], day_str[4:6], day_str[6:8]))
+            # else:
+            #     value = get_by_day(str(day))
+            #     day_str = str(day)
+            #     self.lab_infor.setText(
+            #         '  窑系统设备数据可视化(天)\t选择时间：%s-%s-%s\t热耗：' % (
+            #             day_str[0:4], day_str[4:6], day_str[6:8]))
 
     def initDevice(self, flag_Seri, num):
         con.setValue_flag_Visual(0)
@@ -115,6 +119,7 @@ class MyWindow(QMainWindow):
 
         self.tab0 = QLabel()
         self.messageView.addTab(self.tab0, '热耗')
+        self.pic0 = QVBoxLayout(self.tab0)
 
         self.messageLay = QVBoxLayout()
         self.messageLay.addWidget(self.messageView)
@@ -496,8 +501,9 @@ class MyWindow(QMainWindow):
         index = hours.index(hour)
         number = con.getValue_number()
         flag_Ser = con.getValue_flag_Ser()
+
         # 后面的代码为比较数据是否异常
-        if tvalue[1] != []:#只有当数据不为空时才能比较，否则闪退
+        if tvalue[1] != []:  # 只有当数据不为空时才能比较，否则闪退
             if tvalue[1][8][index] == None:
                 pass
             elif tvalue[1][8][index] > 300:
@@ -595,19 +601,6 @@ class MyWindow(QMainWindow):
             QMessageBox.information(self, '提示', '数据不全', QMessageBox.Yes)
             # self.initPic()
 
-    def setTimer(self):
-        self.timer = QTimer(self)
-        self.timer.timeout.connect(self.operate)  # 触发事件
-        self.timer.start(1000)  # 触发间隔
-
-    def operate(self):  # 刷新一天的部件信息
-        '''global hour
-        print(hour)
-        hour = (hour + 1) % 24
-        if hour == 0:
-            self.timer.stop()'''
-        pass
-
     def keyPressEvent(self, event):
         # 这里event.key（）显示的是按键的编码
         # print("按下：" + str(event.key()))
@@ -639,15 +632,37 @@ class MyWindow(QMainWindow):
         con.setValue_day(int(time[:8]))
         con.setValue_hour(int(time[8:]))
         day_date = get_all_date()
-        # print(day_date)
-        hours = []
-        for x in day_date:
-            hours.append(int(x[1]))#获取所有的小时
-        #print(hours)
-        con.setValue_hours(hours)
-        self.judgePic()  # 更换图片资源
-        self.initPic()  # 显示图片
-        self.updateInfor()
+
+        if (time[:8], time[8:]) in day_date:
+            hours = []
+            for x in day_date:
+                hours.append(int(x[1]))  # 获取所有的小时
+            # print(hours)
+            con.setValue_hours(hours)
+            self.judgePic()  # 更换图片资源
+            self.initPic()  # 显示图片
+            self.updateInfor()
+
+            # 以下代码为刷新表格数据
+            day = str(con.getValue_day())
+            col1, col2 = get_by_day(day)  # 返回值为[[],[[],[],[],[]]],col1为名称，col2为参数
+            # 此处应该改为获取指定日期、小时的前24条数据
+            col1 = col1[2:]
+            self.table.setRowCount(len(col1))
+            self.table.setHorizontalHeaderLabels(['名称', '数值'])
+            hour = con.getValue_hour()
+
+            for i in range(len(col1)):
+                newItem = QTableWidgetItem(get_chinese(col1[i]))
+                self.table.setItem(i, 0, newItem)
+                newItem = QTableWidgetItem(str(col2[i][hour]))
+                self.table.setItem(i, 1, newItem)
+            if self.table.item(5, 0) != None:
+                self.table.item(5, 0).setForeground(QBrush(QColor(255, 0, 0)))  # 改变主界面表格单元格字体颜色
+            if self.table.item(5, 1) != None:
+                self.table.item(5, 1).setForeground(QBrush(QColor(255, 0, 0)))
+        else:
+            pass
 
     def dataDeviceVisual(self):
         con.setValue_flag_Visual(0)
@@ -655,7 +670,7 @@ class MyWindow(QMainWindow):
         self.timeDlg_dataDevice.time_signal.connect(self.time_dataDevice)
 
     def time_dataDevice(self, time):  # 一天的情况下重置设备信息
-        #con.setValue_day(int(time))
+        # con.setValue_day(int(time))
         con.setValue_day(int(time[:8]))
         con.setValue_hour(int(time[8:]))
         # self.judgePic()  # 更换图片资源
@@ -675,7 +690,129 @@ class MyWindow(QMainWindow):
 
     # 窑系统热耗可视化
     def heatVisual(self):
-        pass
+        con.setValue_flag_Visual(-1)
+        self.timeDlg_data = dlg.MyTimeDlg()
+        self.timeDlg_data.time_signal.connect(self.time_heat)
+
+    def time_heat(self, time):
+        con.setValue_day(int(time[:8]))
+        con.setValue_hour(int(time[8:]))
+        con.setValue_rehao_day(int(time[:8]))
+        con.setValue_rehao_hour(int(time[8:]))  # 刷新热耗折线图要用，其他地方不需要
+
+        day_date = get_all_date()
+        # print(day_date)
+        hours = []
+        for x in day_date:
+            hours.append(int(x[1]))  # 获取所有的小时
+        # print(hours)
+        con.setValue_hours(hours)
+        self.judgePic()  # 更换图片资源
+        self.initPic()  # 显示图片
+        self.updateInfor()
+
+        # 以下代码为刷新表格数据
+        day = str(con.getValue_day())
+        col1, col2 = get_by_day(day)  # 返回值为[[],[[],[],[],[]]],col1为名称，col2为参数
+        # 此处应该改为获取指定日期、小时的前24条数据
+        col1 = col1[2:]
+        self.table.setRowCount(len(col1))
+        self.table.setHorizontalHeaderLabels(['名称', '数值'])
+        hour = con.getValue_hour()
+
+        for i in range(len(col1)):
+            newItem = QTableWidgetItem(get_chinese(col1[i]))
+            self.table.setItem(i, 0, newItem)
+            newItem = QTableWidgetItem(str(col2[i][hour]))
+            self.table.setItem(i, 1, newItem)
+        if self.table.item(5, 0) != None:
+            self.table.item(5, 0).setForeground(QBrush(QColor(255, 0, 0)))  # 改变主界面表格单元格字体颜色
+        if self.table.item(5, 1) != None:
+            self.table.item(5, 1).setForeground(QBrush(QColor(255, 0, 0)))
+
+        self.rehao_canvas = MyRehaoCanvas(MyMplCanvas(self, width=5, height=4, dpi=100))
+        self.rehao_x = [con.getValue_rehao_hour()]
+        self.rehao_xlabel=['',str(con.getValue_rehao_hour())]
+        data = get_by_hour(str(con.getValue_rehao_day()) + str(con.getValue_rehao_hour()))
+        self.rehao_y = [data[1][-1]]
+        self.rehao_canvas.axes.plot(self.rehao_x, self.rehao_y, 'bo-')
+        self.rehao_canvas.axes.set_xticklabels(self.rehao_xlabel)
+        xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
+        self.rehao_canvas.axes.xaxis.set_major_locator(xmajorLocator)
+        self.rehao_canvas.axes.set_title('热耗情况', fontproperties=myfont)
+        for tick_x in self.rehao_canvas.axes.get_xmajorticklabels():
+            tick_x.set_fontsize(8)
+        for tick_y in self.rehao_canvas.axes.get_ymajorticklabels():
+            tick_y.set_fontsize(7)
+
+        self.pic0.addWidget(self.rehao_canvas)
+        self.setTimer()
+
+    def setTimer(self):
+        self.timer = QTimer(self)
+        self.timer.timeout.connect(self.update_rehao)  # 触发事件
+        self.timer.start(2000)  # 触发间隔
+        self.time_count = 0
+
+    def update_rehao(self):  # 每2秒刷新一次小时数据
+        self.time_count += 1
+        if self.time_count <= 20:  # 显示20条数据
+            hour = con.getValue_hour()
+            day = con.getValue_day()
+            hour += 1
+            if hour > 23:
+                day += 1
+                self.time_data(str(day) + str(0))  # 此条语句之后时间自动更新
+            else:
+                self.time_data(str(day) + str(hour))
+            print(con.getValue_hour())
+            self.rehao_xlabel.append(str(con.getValue_hour()))
+            self.rehao_x.append(con.getValue_rehao_hour()+self.time_count)
+            data = get_by_hour(str(con.getValue_day()) + str(con.getValue_hour()))
+            # 此处数据库传来的数据应当不为空
+            self.rehao_y.append(data[1][-1])
+            if len(self.rehao_x) > 8:
+                self.rehao_x = self.rehao_x[1:]
+                self.rehao_y = self.rehao_y[1:]
+                self.rehao_xlabel=self.rehao_xlabel[1:]
+            if self.time_count % 3 == 1:
+                self.rehao_canvas2 = MyMplCanvas(self, width=5, height=4, dpi=100)
+                self.rehao_canvas2.axes.plot(self.rehao_x, self.rehao_y, 'bo-')
+                self.rehao_canvas2.axes.set_xticklabels(self.rehao_xlabel)
+                xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
+                self.rehao_canvas2.axes.xaxis.set_major_locator(xmajorLocator)
+                self.rehao_canvas2.axes.set_title('热耗情况', fontproperties=myfont)
+                for tick_x in self.rehao_canvas2.axes.get_xmajorticklabels():
+                    tick_x.set_fontsize(8)
+                for tick_y in self.rehao_canvas2.axes.get_ymajorticklabels():
+                    tick_y.set_fontsize(7)
+                self.pic0.replaceWidget(self.rehao_canvas, self.rehao_canvas2)
+            elif self.time_count % 3 == 2:
+                self.rehao_canvas3 = MyMplCanvas(self, width=5, height=4, dpi=100)
+                self.rehao_canvas3.axes.plot(self.rehao_x, self.rehao_y, 'bo-')
+                self.rehao_canvas3.axes.set_xticklabels(self.rehao_xlabel)
+                xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
+                self.rehao_canvas3.axes.xaxis.set_major_locator(xmajorLocator)
+                self.rehao_canvas3.axes.set_title('热耗情况', fontproperties=myfont)
+                for tick_x in self.rehao_canvas3.axes.get_xmajorticklabels():
+                    tick_x.set_fontsize(8)
+                for tick_y in self.rehao_canvas3.axes.get_ymajorticklabels():
+                    tick_y.set_fontsize(7)
+                self.pic0.replaceWidget(self.rehao_canvas2, self.rehao_canvas3)
+            else:
+                self.rehao_canvas = MyMplCanvas(self, width=5, height=4, dpi=100)
+                self.rehao_canvas.axes.plot(self.rehao_x, self.rehao_y, 'bo-')
+                self.rehao_canvas.axes.set_xticklabels(self.rehao_xlabel)
+                xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
+                self.rehao_canvas.axes.xaxis.set_major_locator(xmajorLocator)
+                self.rehao_canvas.axes.set_title('热耗情况', fontproperties=myfont)
+                for tick_x in self.rehao_canvas.axes.get_xmajorticklabels():
+                    tick_x.set_fontsize(8)
+                for tick_y in self.rehao_canvas.axes.get_ymajorticklabels():
+                    tick_y.set_fontsize(7)
+                self.pic0.replaceWidget(self.rehao_canvas3, self.rehao_canvas)
+        else:
+            self.timer.stop()
 
     # 窑系统设备热耗可视化
     def deviceVisual(self):
@@ -969,10 +1106,9 @@ class MyWindow(QMainWindow):
     def change_table(self, index1, index2):  # 单击部件时刷新表格数据
         day = str(con.getValue_day())
         col1, col2 = get_by_day(day)  # 返回值为[[],[[],[],[],[]]],col1为名称，col2为参数
-        #此处应该改为获取指定日期、小时的前24条数据
-        print(col1)
+        # 此处应该改为获取指定日期、小时的前24条数据
         col1 = col1[2:]
-        if con.getValue_flag_Visual() == 0:#24小时
+        if con.getValue_flag_Visual() == 0:  # 24小时
             self.table.setRowCount(len(col2[index1]))
             self.table.setHorizontalHeaderLabels([get_chinese(col1[index1]), get_chinese(col1[index2])])
             '''hours=con.get
@@ -983,27 +1119,22 @@ class MyWindow(QMainWindow):
                 newItem = QTableWidgetItem(str(col2[index2][i]))
                 self.table.setItem(i, 1, newItem)
         else:
-
-            self.table.setRowCount(len(col1))
-            self.table.setHorizontalHeaderLabels(['名称', '数值'])
-            hour = con.getValue_hour()
-
-            for i in range(len(col1)):
-                newItem = QTableWidgetItem(get_chinese(col1[i]))
-                self.table.setItem(i, 0, newItem)
-                newItem = QTableWidgetItem(str(col2[i][hour]))
-                self.table.setItem(i, 1, newItem)
-
-        if self.table.item(5,0)!=None:
-            self.table.item(5,0).setForeground(QBrush(QColor(255, 0, 0)))#改变主界面表格单元格字体颜色
-        if self.table.item(5,1)!=None:
-            self.table.item(5,1).setForeground(QBrush(QColor(255, 0, 0)))
+            pass
+            # self.table.setRowCount(len(col1))
+            # self.table.setHorizontalHeaderLabels(['名称', '数值'])
+            # hour = con.getValue_hour()
+            #
+            # for i in range(len(col1)):
+            #     newItem = QTableWidgetItem(get_chinese(col1[i]))
+            #     self.table.setItem(i, 0, newItem)
+            #     newItem = QTableWidgetItem(str(col2[i][hour]))
+            #     self.table.setItem(i, 1, newItem)
 
     def selectLab(self, name):
         children = self.findChildren(MyLabel, )
         for child in children:
             child.setStyleSheet('border:0px solid red;')
-        child = self.findChild(MyLabel, name)#找到此时点击的部件
+        child = self.findChild(MyLabel, name)  # 找到此时点击的部件
         child.setStyleSheet('border:1px solid red;')
 
         if self.messageView.count() == 1:
@@ -1015,34 +1146,37 @@ class MyWindow(QMainWindow):
             self.pic2 = QVBoxLayout(self.tab2)
 
     def change_pic(self, index1, index2, name):  # 接收从标签传过来的温度和压强的下标及部件名称
-        self.selectLab(name)
-        if self.click_flag == 0:
-            self.fp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
-            self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
-            self.pic1.addWidget(self.fp1)
-            self.pic2.addWidget(self.fp2)
-            self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)#
-            self.click_flag = 1
-            self.updateInfor()
+        if con.getValue_flag_Visual() != -1:  # 不为热耗可视化
+            self.selectLab(name)
+            if self.click_flag == 0:
+                self.fp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
 
-        elif self.click_flag == 1:
-            self.sp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
-            self.sp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
-            self.pic1.replaceWidget(self.fp1, self.sp1)
-            self.pic2.replaceWidget(self.fp2, self.sp2)
-            self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)
-            self.click_flag = 2
-            self.updateInfor()
+                self.pic1.addWidget(self.fp1)
+                self.pic2.addWidget(self.fp2)
+                self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)
+                self.click_flag = 1
+                self.updateInfor()
 
-        elif self.click_flag == 2:
-            self.fp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
-            self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
-            self.pic1.replaceWidget(self.sp1, self.fp1)
-            self.pic2.replaceWidget(self.sp2, self.fp2)
-            self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)
-            self.click_flag = 1
-            self.updateInfor()
+            elif self.click_flag == 1:
+                self.sp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.sp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.pic1.replaceWidget(self.fp1, self.sp1)
+                self.pic2.replaceWidget(self.fp2, self.sp2)
+                self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)
+                self.click_flag = 2
+                self.updateInfor()
 
+            elif self.click_flag == 2:
+                self.fp1 = MyTempMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.fp2 = MyPressMplCanvas(self.messageView, width=4, height=3, dpi=100)
+                self.pic1.replaceWidget(self.sp1, self.fp1)
+                self.pic2.replaceWidget(self.sp2, self.fp2)
+                self.change_table(index1[len(index1) - 1] - 2, index2[len(index2) - 1] - 2)
+                self.click_flag = 1
+                self.updateInfor()
+        else:
+            pass
 
     def closeEvent(self, event):
         reply = QtWidgets.QMessageBox.question(self,

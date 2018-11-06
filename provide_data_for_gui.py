@@ -129,7 +129,7 @@ def get_by_fragment_(time_now=get_time_now(), number=72):
         for i in range(length):
             T_result[length - i - 1] = result[i]
         name = get_table_name()
-        print(T_result)
+        #print(T_result)
         return T_result, name
     except Exception as msg:
         print(msg)

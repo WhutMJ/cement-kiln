@@ -3,7 +3,7 @@ from PyQt5.QtWidgets import QDesktopWidget
 
 global day, index_T, index_P, flag_Ser, number, filepath, flag_Visual
 #     日期， 温度，压强，  单双系列标志，旋风筒数,文件路径,热耗可视化标志
-global hour, flag_Hour, password, username, flag_Ctrl, metric, hours
+global hour, flag_Hour, password, username, flag_Ctrl, metric, hours,rehao_day,rehao_hour
 #                                           判断是否按住了Ctrl键
 
 day = 0
@@ -18,7 +18,25 @@ hours = []      #存储一天所有有数据的hour的集合
 flag_Hour = 0
 password = '123456'
 flag_Ctrl = 0  # 没有按下
+rehao_day=0
+rehao_hour=0
 
+
+def getValue_rehao_day():
+    return rehao_day
+
+
+def setValue_rehao_day(value):
+    global rehao_day
+    rehao_day = value
+
+def getValue_rehao_hour():
+    return rehao_hour
+
+
+def setValue_rehao_hour(value):
+    global rehao_hour
+    rehao_hour = value
 
 def getValue_flag_Ctrl():
     return flag_Ctrl

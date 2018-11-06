@@ -172,16 +172,28 @@ class MyMplCanvas(FigureCanvas):
 class MyTempMplCanvas(MyMplCanvas):
     """温度画布"""
 
+    # def update_pic(self):
+    #     self.hour += 1
+    #
+    #     if self.hour >= 10:
+    #         x = [i for i in range(self.hour - 10, self.hour)]
+    #         y2 = self.y[self.hour - 10:self.hour]
+    #     else:
+    #         x = [i for i in range(self.hour + 1)]
+    #         y2 = self.y[:self.hour + 1]
+    #     self.line.set_ydata[y2]
+
     def compute_initial_figure(self):
         day = str(con.getValue_day())
         index_T = con.getValue_index_T()
+
         if index_T == [] or index_T[0] == 0:
             pass
         else:
             if con.getValue_flag_Ctrl() == 0:  # 没有按住CTRL键
                 if con.getValue_flag_Visual() == 0:  # 显示一天的图片
                     tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
-                    #此处应该改为获取指定日期、小时的前24条数据
+                    # 此处应该改为获取指定日期、小时的前24条数据
                     count, null = self.cal_null(tablevalue[1][index_T[0] - 2])  # null为数据不为空的下标列表，空数据应当为None而不是
                     # 若：null = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23]
                     # 则意为0~23全由数据，若缺失，则为缺失的数字的小时没有数据
@@ -195,7 +207,7 @@ class MyTempMplCanvas(MyMplCanvas):
                         x = [i for i in range(24)]
                         y = tablevalue[1][index_T[0] - 2]
                         self.axes.plot(x, y, 'bo-')
-                        if y[5]!=None:
+                        if y[5] != None:
                             self.axes.plot(5, y[5], 'ro-')  # 突出显示此危险点
                         # self.axes.set_xticklabels(x_label)
                         xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
@@ -204,11 +216,11 @@ class MyTempMplCanvas(MyMplCanvas):
                     else:
                         t = arange(0, 24, 1)
                         try:
-                            self.axes.plot(t, tablevalue[1][index_T[0] - 2], 'bo-')#如果t和tablevalue长度不一致会报错
+                            self.axes.plot(t, tablevalue[1][index_T[0] - 2], 'bo-')  # 如果t和tablevalue长度不一致会报错
                             #                                                   但是全为None不会报错
 
                             y = tablevalue[1][index_T[0] - 2]
-                            if y[5]!=None:
+                            if y[5] != None:
                                 self.axes.plot(5, y[5], 'ro-')  # 突出显示此危险点
 
                             xmajorLocator = MultipleLocator(5)  # 将x主刻度标签设置为5的倍数
@@ -221,6 +233,9 @@ class MyTempMplCanvas(MyMplCanvas):
                 elif con.getValue_flag_Visual() == 1:  # 显示 10 小时的数据
                     tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
                     hour = con.getValue_hour()  # 显示hour之前的10小时数据(包括此hour)
+
+                    # self.hour = hour
+
                     self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
                     self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
                     for tick_x in self.axes.get_xmajorticklabels():
@@ -229,6 +244,8 @@ class MyTempMplCanvas(MyMplCanvas):
                         tick_y.set_fontsize(7)
                     y = tablevalue[1][index_T[0] - 2]
 
+                    # self.y = y
+
                     if hour >= 10:
                         x = [i for i in range(hour - 10, hour)]
                         y2 = y[hour - 10:hour]
@@ -236,44 +253,48 @@ class MyTempMplCanvas(MyMplCanvas):
                     else:
                         x = [i for i in range(hour + 1)]
                         y2 = y[:hour + 1]
-                    self.axes.plot(x, y2, 'bo-')
+                    # self.x=x
+                    self.line = self.axes.plot(x, y2, 'bo-')
 
                     xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
                     self.axes.set_title(get_chinese(tablevalue[0][index_T[0]]), fontproperties=myfont)
+                else:
+                    pass
 
-            elif con.getValue_flag_Ctrl() == 1:#按住了Ctrl键
-                tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
-                self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
-                self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
-                for tick_x in self.axes.get_xmajorticklabels():
-                    tick_x.set_fontsize(8)
-                for tick_y in self.axes.get_ymajorticklabels():
-                    tick_y.set_fontsize(7)
+            elif con.getValue_flag_Ctrl() == 1:  # 按住了Ctrl键
+                if con.getValue_flag_Visual() != -1:
+                    tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
+                    self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
+                    self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+                    for tick_x in self.axes.get_xmajorticklabels():
+                        tick_x.set_fontsize(8)
+                    for tick_y in self.axes.get_ymajorticklabels():
+                        tick_y.set_fontsize(7)
 
-                x = [i for i in range(24)]
-                p = [None for i in range(len(index_T))]
-                line = []
-                index = 0
-                for i in index_T:
-                    count, null = self.cal_null(tablevalue[1][i - 2])
-                    line.append(tablevalue[0][i - 2])
-                    y = tablevalue[1][i - 2]
-                    z = []
-                    for i in null:
-                        z.append(y[i])
-                    z = self.normalization(z)
-                    j = 0
-                    for i in null:
-                        y[i] = z[j]
-                        j += 1
-                    p[index], = self.axes.plot(x, y)
-                    index += 1
-                self.axes.legend(p, line, loc='upper right', prop=legendFont)
+                    x = [i for i in range(24)]
+                    p = [None for i in range(len(index_T))]
+                    line = []
+                    index = 0
+                    for i in index_T:
+                        count, null = self.cal_null(tablevalue[1][i - 2])
+                        line.append(tablevalue[0][i - 2])
+                        y = tablevalue[1][i - 2]
+                        z = []
+                        for i in null:
+                            z.append(y[i])
+                        z = self.normalization(z)
+                        j = 0
+                        for i in null:
+                            y[i] = z[j]
+                            j += 1
+                        p[index], = self.axes.plot(x, y)
+                        index += 1
+                    self.axes.legend(p, line, loc='upper right', prop=legendFont)
 
-                xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
-                self.axes.xaxis.set_major_locator(xmajorLocator)
-                self.axes.set_title('趋势走向', fontproperties=myfont)
+                    xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
+                    self.axes.xaxis.set_major_locator(xmajorLocator)
+                    self.axes.set_title('趋势走向', fontproperties=myfont)
 
 
 class MyPressMplCanvas(MyMplCanvas):
@@ -345,39 +366,42 @@ class MyPressMplCanvas(MyMplCanvas):
                     xmajorLocator = MultipleLocator(1)  # 将x主刻度标签设置为1的倍数
                     self.axes.xaxis.set_major_locator(xmajorLocator)
                     self.axes.set_title(get_chinese(tablevalue[0][index_P[0]]), fontproperties=myfont)
+                else:
+                    pass
 
             elif con.getValue_flag_Ctrl() == 1:  # 按住了CTRL键
-                tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
-                self.axes.set_ylabel('压强/MPa', verticalalignment='center', fontproperties=labelfont)
-                self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
-                for tick_x in self.axes.get_xmajorticklabels():
-                    tick_x.set_fontsize(8)
-                for tick_y in self.axes.get_ymajorticklabels():
-                    tick_y.set_fontsize(7)
+                if con.getValue_flag_Visual()!=-1:
+                    tablevalue = get_by_day(day)  # tablevalue[0]是标题，tablevalue[1]是各部件当天数据
+                    self.axes.set_ylabel('压强/MPa', verticalalignment='center', fontproperties=labelfont)
+                    self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+                    for tick_x in self.axes.get_xmajorticklabels():
+                        tick_x.set_fontsize(8)
+                    for tick_y in self.axes.get_ymajorticklabels():
+                        tick_y.set_fontsize(7)
 
-                x = [i for i in range(24)]
-                p = [None for i in range(len(index_P))]
-                line = []
-                index = 0
-                for i in index_P:
-                    count, null = self.cal_null(tablevalue[1][i - 2])
-                    line.append(tablevalue[0][i - 2])
-                    y = tablevalue[1][i - 2]
-                    z = []
-                    for i in null:
-                        z.append(y[i])
-                    z = self.normalization(z)
-                    j = 0
-                    for i in null:
-                        y[i] = z[j]
-                        j += 1
-                    p[index], = self.axes.plot(x, y)
-                    index += 1
-                self.axes.legend(p, line, loc='upper right', prop=legendFont)
+                    x = [i for i in range(24)]
+                    p = [None for i in range(len(index_P))]
+                    line = []
+                    index = 0
+                    for i in index_P:
+                        count, null = self.cal_null(tablevalue[1][i - 2])
+                        line.append(tablevalue[0][i - 2])
+                        y = tablevalue[1][i - 2]
+                        z = []
+                        for i in null:
+                            z.append(y[i])
+                        z = self.normalization(z)
+                        j = 0
+                        for i in null:
+                            y[i] = z[j]
+                            j += 1
+                        p[index], = self.axes.plot(x, y)
+                        index += 1
+                    self.axes.legend(p, line, loc='upper right', prop=legendFont)
 
-                xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
-                self.axes.xaxis.set_major_locator(xmajorLocator)
-                self.axes.set_title('趋势走向', fontproperties=myfont)
+                    xmajorLocator = MultipleLocator(2)  # 将x主刻度标签设置为2的倍数
+                    self.axes.xaxis.set_major_locator(xmajorLocator)
+                    self.axes.set_title('趋势走向', fontproperties=myfont)
 
     '''def __init__(self, *args, **kwargs):
         MyMplCanvas.__init__(self, *args, **kwargs)
@@ -394,3 +418,16 @@ class MyPressMplCanvas(MyMplCanvas):
 
         self.axes.plot([0, 1, 2, 3], l, 'r')
         self.draw()'''
+
+class MyRehaoCanvas(FigureCanvas):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
+        fig = Figure(figsize=(width, height), dpi=dpi)
+        self.axes = fig.add_subplot(111)
+        # We want the axes cleared every time plot() is called
+        self.axes.hold(False)
+        self.compute_initial_figure()
+        FigureCanvas.__init__(self, fig)
+        self.setParent(parent)
+
+    def compute_initial_figure(self):
+        pass
