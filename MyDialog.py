@@ -362,7 +362,10 @@ class MyTimeDlg(QDialog):  # 选择10小时的
         self.label.setGeometry(QtCore.QRect(20 * ratio_width, 20 * ratio_height, 54 * ratio_width, 12 * ratio_height))
         self.label.setObjectName("label")
 
-        self.setWindowTitle("选择时间（10小时的数据）")
+        if con.getValue_flag_Visual() == -1:
+            self.setWindowTitle("选择窑系统数据可视化的初始时间")
+        else:
+            self.setWindowTitle("选择时间")
         self.pushButton.setText("OK")
         self.label.setText("选择时间")
 
@@ -379,6 +382,7 @@ class MyTimeDlg(QDialog):  # 选择10小时的
             self.close()
 
 
+# 以后此类可以被MyTimeDlg替换掉
 class MyDayDlg(QDialog):  # 选择24小时的
     time_signal = pyqtSignal(str)
 
@@ -461,7 +465,7 @@ class MyDayDlg(QDialog):  # 选择24小时的
     def Accept(self):
         try:
             row = self.tableWidget.currentRow()
-            print(self.tableWidget.item(row, 0).text() + self.tableWidget.item(row, 1).text())
+            # print(self.tableWidget.item(row, 0).text() + self.tableWidget.item(row, 1).text())
             self.time_signal.emit(self.tableWidget.item(row, 0).text() + self.tableWidget.item(row, 1).text())
             self.close()
         except Exception:
@@ -663,7 +667,7 @@ class MyDataLeadInDlg(QDialog):  # 数据导入
         fileName, filetype = QFileDialog.getOpenFileName(self,
                                                          "文件选择", filepath,
                                                          "Excel Files (*.xlsx);;Excel Files (*.xls)")  # 设置文件扩展名过滤,注意用双分号间隔
-        print(fileName)
+        # print(fileName)
         filedir = os.path.split(fileName)  # 获取文件所在的文件夹
         filepath = filedir[0]  # 文件路径信息
         con.setValue_filepath(filepath)
@@ -929,7 +933,7 @@ class MyCheckWnd(QMainWindow):
         tablename.remove('time')
         tablename.remove('youlig')
         tablename.remove('rehao')  # 去除不需要的
-        print(tablename)
+        # print(tablename)
 
         class1 = ['ruyaomfhf', 'ruyaomfsf', 'ruyaomfhff', 'reyaomfrz', 'ruyaomfgdt']
         class2 = ['chumoslKH', 'chumoslSM', 'chumoslIM', 'ruyaoslCaO', 'ruyaoslFe2O3', 'ruyaoslKH', 'ruyaoslSM',
@@ -1380,31 +1384,6 @@ class MyDeviceDlg(QDialog):  # 初始化设备参数窗口
 class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
     def __init__(self):
         super(MyDataInputWnd, self).__init__()
-
-        #self.connect(self.MyTable, pyqtSignal("itemClicked (QTableWidgetItem*)"), self.outSelect)
-        #重载双击函数
-        # 通过实现
-        # itemClicked(QTableWidgetItem *)
-        # 信号的槽函数，就可以获得鼠标单击到的单元格指针，进而获得其中的文字信息
-        #
-        # 首先在__init()
-        # __函数中加入
-        #
-        # self.connect(self.MyTable, SIGNAL("itemClicked (QTableWidgetItem*)"),
-        #              self.outSelect)   # 将itemClicked信号与函数outSelect绑定
-        #
-        #  
-        #
-        # 然后实现一个outSelect函数，如下：
-        #
-        #    
-        #
-        # def outSelect(self, Item=None):
-        #             if Item == None:
-        #                     return       
-        #             print(Item.text())
-        #
-        #     运行程序后，单击一个单元格，即可获得其中的字符了
         metric = QDesktopWidget().screenGeometry()
         width = metric.width()
         height = metric.height()
@@ -1450,13 +1429,13 @@ class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
         self.tableWidget.setRowCount(len(value) + 1)
         col_label = []
         for i in range(self.col_num):
-            col_label.append(name[i])
+            col_label.append(get_chinese(name[i]))
         self.new_data = []
 
         self.tableWidget.setHorizontalHeaderLabels(col_label)
         for i in range(len(value)):
             for j in range(self.col_num):
-                newItem = QTableWidgetItem(str(value[i][j]))
+                newItem = QTableWidgetItem((str(value[i][j])))
                 self.tableWidget.setItem(i, j, newItem)
                 self.tableWidget.item(i, j).setFlags(Qt.ItemIsEnabled)
                 self.tableWidget.item(i, j).setToolTip(str(value[i][j]))
@@ -1496,6 +1475,7 @@ class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
             self.tableWidget.item(self.tableWidget.rowCount() - 1, i).setBackground(
                 QBrush(QColor(self.red, self.green, self.blue)))
         self.tableWidget.scrollToBottom()
+        self.tableWidget.itemDoubleClicked[QTableWidgetItem].connect(self.tableItemDoubleClicked)
         self.showMaximized()
 
     def delFirstRow(self):  # 删除第一行
@@ -1524,7 +1504,6 @@ class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
             except Exception:
                 new_row.append(None)
                 self.tableWidget.setItem(self.row_num - 1, col, QTableWidgetItem(''))  # 单元格为None无法设置不可编辑
-
             self.tableWidget.item(self.row_num - 1, col).setFlags(Qt.ItemIsEnabled)
 
         self.addRow()
@@ -1581,8 +1560,91 @@ class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
         else:
             pass
 
-    def outSelect(self, *args, **kwargs):
-        print('双击')
+    def tableItemDoubleClicked(self):
+        if self.tableWidget.currentRow() == self.tableWidget.rowCount() - 1:
+            new_row = []
+            for col in range(2):
+                item = self.tableWidget.item(self.tableWidget.rowCount() - 1, col)
+                try:
+                    new_row.append(int(item.text()))
+                except Exception:
+                    new_row.append(None)
+            for col in range(2, self.tableWidget.columnCount()):
+                item = self.tableWidget.item(self.tableWidget.rowCount() - 1, col)
+                try:
+                    new_row.append(float(item.text()))
+                except Exception:
+                    new_row.append(None)
+            self.rowdataDlg = MyRowdataInput(new_row)
+            self.rowdataDlg.row_data_signal.connect(self.updateRowData)
+
+    def updateRowData(self, value):
+        for i in range(len(value)):
+            newItem = QTableWidgetItem(value[i])
+            self.tableWidget.setItem(self.tableWidget.rowCount() - 1, i, newItem)
+            self.tableWidget.item(self.tableWidget.rowCount() - 1, i).setBackground(
+                QBrush(QColor(self.red, self.green, self.blue)))
+
+class MyRowdataInput(QDialog):  # 双击单元格时弹出来的对话框
+    row_data_signal = pyqtSignal(list)
+
+    def __init__(self, row_data):
+        super(MyRowdataInput, self).__init__()
+        # print(row_data)#上一行的单元格数据
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        ratio_width = width / 1366
+        ratio_height = height / 768
+        self.setFixedSize(260 * ratio_width, 330 * ratio_height)
+        self.pushButton = QtWidgets.QPushButton(self)
+        self.pushButton.setGeometry(
+            QtCore.QRect(90 * ratio_width, 280 * ratio_height, 75 * ratio_width, 23 * ratio_height))
+        self.pushButton.setObjectName("pushButton")
+
+        self.name = get_table_name()
+        self.tableWidget = QtWidgets.QTableWidget(self)
+        self.tableWidget.setGeometry(
+            QtCore.QRect(20 * ratio_width, 50 * ratio_height, 211 * ratio_width, 211 * ratio_height))
+        self.tableWidget.setColumnCount(2)
+        self.tableWidget.setRowCount(len(self.name) - 3)
+        self.tableWidget.setHorizontalHeaderLabels(['名称', '输入值'])
+        for i in range(len(self.name) - 3):
+            newItem = QTableWidgetItem(get_chinese(str(self.name[i])))
+            self.tableWidget.setItem(i, 0, newItem)
+            self.tableWidget.item(i, 0).setFlags(Qt.ItemIsEnabled | Qt.ItemIsSelectable)
+            self.tableWidget.item(i, 0).setToolTip(str(self.name[i]))
+            if row_data[i] == None:
+                newItem = QTableWidgetItem('')
+            else:
+                newItem = QTableWidgetItem(str(row_data[i]))
+            self.tableWidget.setItem(i, 1, newItem)
+        # self.tableWidget.horizontalHeader().setDefaultSectionSize(80)  # 列宽
+        self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
+        self.label = QtWidgets.QLabel(self)
+        self.label.move(20 * ratio_width, 10 * ratio_height)
+        self.setWindowTitle("单行数据输入")
+        self.pushButton.setText("OK")
+        self.label.setText("单行数据输入")
+        self.label.setFont(QFont("Roman times", 15, QFont.Bold))
+        self.pushButton.clicked.connect(self.Accept)
+
+        self.setModal(True)
+        self.show()
+
+    def Accept(self):
+        try:
+            value = []
+            for i in range(len(self.name) - 3):
+                if self.tableWidget.item(i, 1) == None:
+                    value.append('')
+                else:
+                    value.append(self.tableWidget.item(i, 1).text())
+            self.row_data_signal.emit(value)
+            self.close()
+        except Exception:
+            QMessageBox.information(self, '提示', '程序出错', QMessageBox.Yes)
+
 
 class MyDataReviseWnd(QMainWindow):  # 数据修改功能窗口
     def __init__(self):
