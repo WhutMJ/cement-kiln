@@ -119,7 +119,7 @@ def get_by_fragment_(time_now=get_time_now(), number=72):
     for i in range(length):
         T_result[length - i - 1] = result[i]
     '''
-    sql = 'SELECT * FROM all_data WHERE state=1 ORDER BY id DESC LIMIT 72'
+    sql = 'SELECT * FROM all_data WHERE state=1 and date<=%s and time<=%s ORDER BY id DESC LIMIT %d' % (time_now[:8], time_now[8:], number)
     try:
         cursor.execute(sql)
         result = cursor.fetchall()
@@ -145,6 +145,15 @@ def get_by_fragment():
     '''
     time_now = get_time_now()
     T_result, name = get_by_fragment_(time_now)
+    return T_result, name
+
+
+def get_by_fragment2(time, number):
+    '''
+    自己设定起始时间，获取前number个小时的数据
+    :return:
+    '''
+    T_result, name = get_by_fragment_(time, number)
     return T_result, name
 
 

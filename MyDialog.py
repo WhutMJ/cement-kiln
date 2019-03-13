@@ -1,9 +1,11 @@
+from Production_warning import *
 from provide_data_for_gui import *
 from Connect_to_Database import *
 import config as con
 import sys
 
 import os
+from MyPic import *
 from youlg_predict import *
 from rexiaolv_model import *
 from cent_svm_predict import *
@@ -16,7 +18,7 @@ from numpy import arange
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib
-
+import re
 import matplotlib.font_manager as fm
 
 myfont = fm.FontProperties(fname="C:\\Windows\\Fonts\\simsun.ttc", size=14)  # 设置字体，实现显示中文
@@ -329,6 +331,7 @@ class MyTimeDlg(QDialog):  # 选择10小时的
 
     def __init__(self):
         super(MyTimeDlg, self).__init__()
+        self.setWindowFlags(Qt.WindowCloseButtonHint)
         metric = QDesktopWidget().screenGeometry()
         width = metric.width()
         height = metric.height()
@@ -388,6 +391,7 @@ class MyDayDlg(QDialog):  # 选择24小时的
 
     def __init__(self):
         super(MyDayDlg, self).__init__()
+        self.setWindowFlags(Qt.WindowCloseButtonHint)
         metric = QDesktopWidget().screenGeometry()
         width = metric.width()
         height = metric.height()
@@ -494,7 +498,7 @@ class MyDataSimDlg(QDialog):
         self.tableWidget.setColumnCount(3)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setRowCount(len(name))
-        self.tableWidget.setHorizontalHeaderLabels(['表头', '原数据', '模拟数据'])
+        self.tableWidget.setHorizontalHeaderLabels(['表头', '原数据', '模拟数据(可修改)'])
         # self.tableWidget.horizontalHeader().setDefaultSectionSize(90)  # 列宽
         self.tableWidget.horizontalHeader().setSectionResizeMode(QHeaderView.Stretch)
 
@@ -504,10 +508,14 @@ class MyDataSimDlg(QDialog):
             self.tableWidget.item(i, 0).setToolTip(str(name[i]))
             if value[i] == None:
                 newItem = QTableWidgetItem('')
+                newItem2 = QTableWidgetItem('')
             else:
                 newItem = QTableWidgetItem(str(value[i]))
+                newItem2 = QTableWidgetItem(str(value[i]))
             self.tableWidget.setItem(i, 1, newItem)
+            self.tableWidget.setItem(i, 2, newItem2)
             self.tableWidget.item(i, 1).setToolTip(str(value[i]))
+            self.tableWidget.item(i, 2).setToolTip(str(value[i]))
             self.tableWidget.item(i, 0).setFlags(Qt.ItemIsEnabled)
             self.tableWidget.item(i, 1).setFlags(Qt.ItemIsEnabled)
         if get_target_data(time) != False:
@@ -603,7 +611,7 @@ class MyDataLeadInDlg(QDialog):  # 数据导入
         self.label.setObjectName("label")
 
         self.setWindowTitle("设置标准表头")
-        self.label.setText("从左至右，自上而下按顺序添加表头")
+        self.label.setText("从左至右，自上而下按顺序添加表头，一行不够请点击添加按钮")
         self.label.setFont(QFont("Roman times", 15, QFont.Bold))
         self.lay = QHBoxLayout()
         self.pushButton = QtWidgets.QPushButton(self)
@@ -773,20 +781,20 @@ class MyStandardValueDlg(QDialog):  # 生产数据标准设置窗口
         height = metric.height()
         ratio_width = width / 1366
         ratio_height = height / 768
-        self.setFixedSize(260 * ratio_width, 330 * ratio_height)
+        self.setFixedSize(320 * ratio_width, 521 * ratio_height)
         self.pushButton = QtWidgets.QPushButton(self)
         self.pushButton.setGeometry(
-            QtCore.QRect(90 * ratio_width, 280 * ratio_height, 75 * ratio_width, 23 * ratio_height))
+            QtCore.QRect(120 * ratio_width, 480 * ratio_height, 75 * ratio_width, 23 * ratio_height))
         self.pushButton.setObjectName("pushButton")
 
         self.name = get_table_name()
         self.tableWidget = QtWidgets.QTableWidget(self)
         self.tableWidget.setGeometry(
-            QtCore.QRect(20 * ratio_width, 50 * ratio_height, 211 * ratio_width, 211 * ratio_height))
-        self.tableWidget.setColumnCount(2)
+            QtCore.QRect(20 * ratio_width, 50 * ratio_height, 270 * ratio_width, 400 * ratio_height))
+        self.tableWidget.setColumnCount(3)
         self.tableWidget.setObjectName("tableWidget")
         self.tableWidget.setRowCount(len(self.name))
-        self.tableWidget.setHorizontalHeaderLabels(['名称', '标准值'])
+        self.tableWidget.setHorizontalHeaderLabels(['名称', '最小值', '最大值'])
 
         for i in range(len(self.name)):
             newItem = QTableWidgetItem(str(self.name[i]))
@@ -798,7 +806,7 @@ class MyStandardValueDlg(QDialog):  # 生产数据标准设置窗口
         self.label = QtWidgets.QLabel(self)
         self.label.move(20 * ratio_width, 10 * ratio_height)
         self.setWindowTitle("生产数据标准设置")
-        self.pushButton.setText("OK")
+        self.pushButton.setText("确定")
         self.label.setText("生产数据标准设置")
         self.label.setFont(QFont("Roman times", 15, QFont.Bold))
         self.pushButton.clicked.connect(self.Accept)
@@ -807,15 +815,22 @@ class MyStandardValueDlg(QDialog):  # 生产数据标准设置窗口
 
     def Accept(self):
         try:
-            value = []
+            min = []
+            max = []
             for i in range(len(self.name)):
                 if self.tableWidget.item(i, 1) == None:
-                    value.append('')
+                    min.append('')
                 else:
-                    value.append(self.tableWidget.item(i, 1).text())
+                    min.append(self.tableWidget.item(i, 1).text())
+                if self.tableWidget.item(i, 2) == None:
+                    max.append('')
+                else:
+                    max.append(self.tableWidget.item(i, 2).text())
+            print(min)
+            print(max)
             self.close()
         except Exception:
-            print('不能为空值')
+            print('异常')
             self.close()
 
 
@@ -830,6 +845,7 @@ class MyRadioWnd(QMainWindow):
         self.flag = 0
         self.setFixedSize(self.Width * 0.368, self.Height * 0.618)
         self.lay = QGridLayout()  # 初始化布局
+
         number = con.getValue_number()  # 旋风筒个数
         flag_Ser = con.getValue_flag_Ser()  # 窑系统系列
         self.xft = {}
@@ -886,27 +902,31 @@ class MyRadioWnd(QMainWindow):
         self.show()
 
     def Accept(self):
-        children = self.findChildren(QCheckBox, )
+        children = self.findChildren(QRadioButton, )
         check_name = []  # 被选中的部件名称
         for child in children:
             if child.isChecked():
                 check_name.append(child.objectName())
+                print(child.objectName())
         self.addDock()
         self.check_signal.emit(check_name)
 
     def addDock(self):
+        print(777)
         if self.flag == 0:
-            dock1 = MyDockWidget('DockWidget')
+            dock1 = MyDockWidget('')
             dock1.setFeatures(QDockWidget.DockWidgetClosable)
             dock1.setAllowedAreas(Qt.RightDockWidgetArea)
-
-            self.bar = MyHeatCanvas()
-            dock1.setFixedWidth(400)
-            dock1.setWidget(self.bar)
+            print(8888)
+            # self.bar = MyHeatCanvas()  # 此处应该有value
+            # dock1.setFixedWidth(400)
+            # dock1.setWidget(self.bar)
+            print(789)
             dock1.dock_signal.connect(self.change)
             self.addDockWidget(Qt.RightDockWidgetArea, dock1)
             self.setFixedSize(self.Width * 0.368 + 400, self.Height * 0.618)
             self.flag = 1
+            print(789)
         else:
             pass
 
@@ -1173,6 +1193,7 @@ class MyYaoDlg(QDialog):
         self.loadPic()
         self.loadTable()
         self.setWindowTitle("窑系统数据")
+        self.setWindowFlags(Qt.WindowCloseButtonHint)
         self.show()
 
     def loadPic(self):
@@ -1232,6 +1253,114 @@ class MyYaoDlg(QDialog):
         widget5 = QWidget()
         widget5.setLayout(self.lay5)
         self.tableWidget.setCellWidget(4, 0, widget5)
+
+
+class MyVisualDlg(QDialog):  # 可视化对象设置窗口，目前还未完成，还需要将文件路径保存至全局变量config文件中
+    def __init__(self):
+        super(MyVisualDlg, self).__init__()
+        metric = QDesktopWidget().screenGeometry()
+        width = metric.width()
+        height = metric.height()
+        self.ratio_width = width / 1366
+        self.ratio_height = height / 768
+        self.setFixedSize(width * 0.6, height * 0.6)
+        self.mainWidget = QWidget(self)
+        self.mainWidget.setGeometry(50, 50, width * 0.4, height * 0.4)
+        self.loadPic()
+        self.loadLable()
+        self.loadLayout()
+
+        self.setWindowTitle("可视化对象设置")
+        self.show()
+
+    def loadPic(self):
+        self.xft = QPixmap('picture\\xft_dl.png')
+        self.blj = QPixmap('picture\\blj.png')
+        self.yao = QPixmap('picture\\yao.png')
+        self.fjl = QPixmap('picture\\fjl.png')
+        self.fjl_yao = QPixmap('picture\\fjl_yao.png')
+
+    def loadLable(self):
+        self.lab_xft = MyVisualLabel()
+        self.lab_xft.setToolTip('旋风筒')
+        self.lab_xft.setObjectName('旋风筒')
+        self.lab_xft.setPixmap(self.xft.scaled(231 * self.ratio_width, 50 * self.ratio_height,
+                                               aspectRatioMode=Qt.KeepAspectRatio))
+        self.lab_xft.index.connect(self.change_pic)
+        self.lab_xft.setStyleSheet('border:1px solid red;')
+        self.lab_xft.setAlignment(Qt.AlignCenter)
+
+        self.lab_blj = MyVisualLabel()
+        self.lab_blj.setToolTip('篦冷机')
+        self.lab_blj.setObjectName('篦冷机')
+        self.lab_blj.setPixmap(self.blj.scaled(231 * self.ratio_width, 50 * self.ratio_height,
+                                               aspectRatioMode=Qt.KeepAspectRatio))
+        self.lab_blj.index.connect(self.change_pic)
+        self.lab_blj.setStyleSheet('border:1px solid red;')
+        self.lab_blj.setAlignment(Qt.AlignCenter)
+
+        self.lab_yao = MyVisualLabel()
+        self.lab_yao.setToolTip('窑')
+        self.lab_yao.setObjectName('窑')
+        self.lab_yao.setPixmap(self.yao.scaled(231 * self.ratio_width, 50 * self.ratio_height,
+                                               aspectRatioMode=Qt.KeepAspectRatio))
+        self.lab_yao.index.connect(self.change_pic)
+        self.lab_yao.setStyleSheet('border:1px solid red;')
+        self.lab_yao.setAlignment(Qt.AlignCenter)
+
+        self.lab_fjl = MyVisualLabel()
+        self.lab_fjl.setToolTip('分解炉')
+        self.lab_fjl.setObjectName('分解炉')
+        self.lab_fjl.setPixmap(self.fjl.scaled(231 * self.ratio_width, 50 * self.ratio_height,
+                                               aspectRatioMode=Qt.KeepAspectRatio))
+        self.lab_fjl.index.connect(self.change_pic)
+        self.lab_fjl.setStyleSheet('border:1px solid red;')
+        self.lab_fjl.setAlignment(Qt.AlignCenter)
+
+        self.lab_fjl_yao = MyVisualLabel()
+        self.lab_fjl_yao.setToolTip('分解炉--窑')
+        self.lab_fjl_yao.setObjectName('分解炉--窑')
+        self.lab_fjl_yao.setPixmap(self.fjl_yao.scaled(231 * self.ratio_width, 50 * self.ratio_height,
+                                                       aspectRatioMode=Qt.KeepAspectRatio))
+        self.lab_fjl_yao.index.connect(self.change_pic)
+        self.lab_fjl_yao.setStyleSheet('border:1px solid red;')
+        self.lab_fjl_yao.setAlignment(Qt.AlignCenter)
+
+    def loadLayout(self):
+
+        self.mainLay = QGridLayout(self.mainWidget)
+        self.mainLay.addWidget(self.lab_xft, 0, 0)
+        self.mainLay.addWidget(self.lab_blj, 0, 1)
+        self.mainLay.addWidget(self.lab_yao, 0, 2)
+        self.mainLay.addWidget(self.lab_fjl, 1, 0)
+        self.mainLay.addWidget(self.lab_fjl_yao, 1, 1)
+
+        self.mainWidget.setLayout(self.mainLay)
+
+    def change_pic(self, objName, filepath):
+        print(objName)
+        print(filepath)
+        if filepath != '':
+            if objName == '旋风筒':
+                self.xft = QPixmap(filepath)
+                self.lab_xft.setPixmap(self.xft.scaled(231 * self.ratio_width, 50 * self.ratio_height,
+                                                       aspectRatioMode=Qt.KeepAspectRatio))
+            elif objName == '篦冷机':
+                self.blj = QPixmap(filepath)
+                self.lab_blj.setPixmap(self.blj.scaled(231 * self.ratio_width, 50 * self.ratio_height,
+                                                       aspectRatioMode=Qt.KeepAspectRatio))
+            elif objName == '窑':
+                self.yao = QPixmap(filepath)
+                self.lab_yao.setPixmap(self.yao.scaled(231 * self.ratio_width, 50 * self.ratio_height,
+                                                       aspectRatioMode=Qt.KeepAspectRatio))
+            elif objName == '分解炉':
+                self.fjl = QPixmap(filepath)
+                self.lab_fjl.setPixmap(self.fjl.scaled(231 * self.ratio_width, 50 * self.ratio_height,
+                                                       aspectRatioMode=Qt.KeepAspectRatio))
+            elif objName == '分解炉--窑':
+                self.fjl_yao = QPixmap(filepath)
+                self.lab_fjl_yao.setPixmap(self.fjl_yao.scaled(231 * self.ratio_width, 50 * self.ratio_height,
+                                                               aspectRatioMode=Qt.KeepAspectRatio))
 
 
 class MyLoginDlg(QDialog):
@@ -1585,6 +1714,7 @@ class MyDataInputWnd(QMainWindow):  # 数据输入功能窗口
             self.tableWidget.item(self.tableWidget.rowCount() - 1, i).setBackground(
                 QBrush(QColor(self.red, self.green, self.blue)))
 
+
 class MyRowdataInput(QDialog):  # 双击单元格时弹出来的对话框
     row_data_signal = pyqtSignal(list)
 
@@ -1633,15 +1763,25 @@ class MyRowdataInput(QDialog):  # 双击单元格时弹出来的对话框
         self.show()
 
     def Accept(self):
+
         try:
             value = []
+            flag = True  # 如果数据都合法，则传数据给下一层，否则提示
             for i in range(len(self.name) - 3):
                 if self.tableWidget.item(i, 1) == None:
                     value.append('')
-                else:
+                elif self.tableWidget.item(i, 1).text() == '':
+                    value.append('')
+                elif re.compile(r'^[-+]?[0-9]+\.?[0-9]*$').match(self.tableWidget.item(i, 1).text()):
                     value.append(self.tableWidget.item(i, 1).text())
-            self.row_data_signal.emit(value)
-            self.close()
+                else:
+                    # print(i)
+                    flag = False
+            if flag:
+                self.row_data_signal.emit(value)
+                self.close()
+            else:
+                QMessageBox.information(self, '提示', '有数据包含非法字符,请修改', QMessageBox.Yes)
         except Exception:
             QMessageBox.information(self, '提示', '程序出错', QMessageBox.Yes)
 
@@ -1821,7 +1961,7 @@ class MyDataReviseWnd(QMainWindow):  # 数据修改功能窗口
 
 
 class MyProduceWarWnd(QMainWindow):
-    def __init__(self, day, hour, number=1):
+    def __init__(self, day, hour, number=1):  # number为条数，暂且只预测一个时间点
         super(MyProduceWarWnd, self).__init__()
         metric = QDesktopWidget().screenGeometry()
         self.Width = metric.width()
@@ -1830,10 +1970,22 @@ class MyProduceWarWnd(QMainWindow):
         self.ratio_w = 0.6
         self.ratio_h = 0.78
         self.flag = 0
-        self.move(50, 50)
-        # 调整窗口显示时的大小
-        self.setFixedWidth(self.Width * self.ratio_w)
-        self.setMinimumHeight(self.Height * self.ratio_h)
+        # self.setStyleSheet("background-color: rgb(225,255,255)")
+        output, real = production_warning(str(day), str(hour))
+        data, name = get_by_fragment2(str(day) + str(hour), 5)
+        # print(data)
+        time = ['']
+        for element in data:
+            time.append(element[0][4:6] + '/' + element[0][6:] + ' ' + element[1])
+        print(time)
+        # self.move(50, 50)
+        # # 调整窗口显示时的大小
+        # self.setFixedWidth(self.Width * self.ratio_w)
+        # self.setMinimumHeight(self.Height * self.ratio_h)
+
+        left = -9  # 为了使窗口能够位于左上角
+        self.move(left, 0)
+        self.setFixedSize(self.Width, self.Height - 72 * self.Height / 768)  # 72为win10任务栏高度
 
         self.pageView = QTabWidget()
         self.tab = {}
@@ -1841,67 +1993,271 @@ class MyProduceWarWnd(QMainWindow):
         for i in range(number):
             self.tab[i] = QLabel()
             self.pageView.addTab(self.tab[i], '%d小时' % (hour + i))
-            self.pic[i] = QVBoxLayout(self.tab[i])
+            self.pic[i] = QGridLayout(self.tab[i])
             data = get_by_hour(str(day) + str(hour))
-            value = Production_warning_youligai(data[1])
-            Ca = MyCaMplCanvas(value)
-            self.pic[i].addWidget(QLabel('游离钙合格比'))
-            self.pic[i].addWidget(Ca)
 
-            self.line = QtWidgets.QFrame(self)
-            self.line.setGeometry(QtCore.QRect(0, self.Height * 0.73, self.Width, 16))
-            self.line.setFrameShape(QtWidgets.QFrame.HLine)
-            self.line.setFrameShadow(QtWidgets.QFrame.Sunken)
-            self.pic[i].addWidget(self.line)
-            value = Production_warning_rexiaolv(data[1])
-            Effic = MyEfficMpCanvas(value)
-            self.pic[i].addWidget(QLabel('热效率分析'))
-            self.pic[i].addWidget(Effic)
+            three_VWidget = QWidget()
+            three_VLayout = QVBoxLayout(three_VWidget)
+            three_VWidget.setLayout(three_VLayout)
+
+            title = QLabel('熟料三率值预测')
+            title.setAlignment(Qt.AlignCenter)
+            title.setFont(QFont('Timers', 15, QFont.Fantasy))
+            three_VLayout.addWidget(title)
+
+            three_HWidget = QWidget()
+            three_HLayout = QHBoxLayout(three_HWidget)
+            three_HWidget.setLayout(three_HLayout)
+            three_VLayout.addWidget(three_HWidget)
+
+            one = QWidget()
+            one_Layout = QHBoxLayout()
+            one.setLayout(one_Layout)
+            KH = QLabel(str(output['sanlvz']['KH']))
+            KH.setAlignment(Qt.AlignCenter)
+            KH.setFixedSize(100, 100)
+            if output['sanlvz']['KH'] <= 0.92 and output['sanlvz']['KH'] >= 0.88:
+                KH.setStyleSheet(
+                    "border-color: rgb(0,255,0);font-size: 20px;border-width: 3px 3px 3px 3px;border-style: solid;border-radius:50px; ")
+            elif output['sanlvz']['KH'] > 0.96 and output['sanlvz']['KH'] < 0.87:
+                KH.setStyleSheet(
+                    "border-color: rgb(255,0,0);font-size: 20px;border-width: 3px 3px 3px 3px;border-style: solid;border-radius:50px; ")
+            else:
+                KH.setStyleSheet(
+                    "border-color: rgb(238,118,33);font-size: 20px;border-width: 3px 3px 3px 3px;border-style: solid;border-radius:50px; ")
+            KH_VLayout = QVBoxLayout()
+            KH_title = QLabel('KH')
+            KH_title.setAlignment(Qt.AlignHCenter)
+            KH_title.setFont(QFont('Timers', 10, QFont.Fantasy))
+            KH_VLayout.addWidget(KH_title)
+            one_Layout.addWidget(KH)
+            KH_VLayout.addWidget(one)
+            KH_des = QLabel('KH表示熟料中SiO₂被CaO饱和成A矿\n的程度')
+            KH_VLayout.addWidget(KH_des)
+            KH_VWidget = QWidget()
+            KH_VWidget.setLayout(KH_VLayout)
+            three_HLayout.addWidget(KH_VWidget)
+
+            two = QWidget()
+            two_Layout = QHBoxLayout()
+            two.setLayout(two_Layout)
+            IM = QLabel(str(output['sanlvz']['IM']))
+            IM.setAlignment(Qt.AlignCenter)
+            IM.setFixedSize(100, 100)
+            if output['sanlvz']['IM'] <= 1.5 and output['sanlvz']['IM'] >= 1.1:
+                IM.setStyleSheet(
+                    "border-color: rgb(0,255,0);font-size: 20px;border-width: 3px 3px 3px 3px;border-style: solid;border-radius:50px; ")
+            elif output['sanlvz']['IM'] < 0.9 and output['sanlvz']['IM'] > 1.7:
+                IM.setStyleSheet(
+                    "border-color: rgb(255,0,0);font-size: 20px;border-width: 3px 3px 3px 3px;border-style: solid;border-radius:50px; ")
+            else:
+                IM.setStyleSheet(
+                    "border-color: rgb(238,118,33);font-size: 20px;border-width: 3px 3px 3px 3px;border-style: solid;border-radius:50px; ")
+            IM_VLayout = QVBoxLayout()
+            IM_title = QLabel('IM')
+            IM_title.setAlignment(Qt.AlignHCenter)
+            IM_title.setFont(QFont('Timers', 10, QFont.Fantasy))
+            IM_VLayout.addWidget(IM_title)
+            two_Layout.addWidget(IM)
+            IM_VLayout.addWidget(two)
+            IM_des = QLabel('IM表示熟料中Al₂O₃与Fe₂O₃含量\n之比')
+            IM_VLayout.addWidget(IM_des)
+            IM_VWidget = QWidget()
+            IM_VWidget.setLayout(IM_VLayout)
+            three_HLayout.addWidget(IM_VWidget)
+
+            three = QWidget()
+            three_Layout = QHBoxLayout()
+            three.setLayout(three_Layout)
+            SM = QLabel(str(output['sanlvz']['SM']))
+            SM.setAlignment(Qt.AlignCenter)
+            SM.setFixedSize(100, 100)
+            if output['sanlvz']['SM'] <= 2.2 and output['sanlvz']['SM'] >= 1.8:
+                SM.setStyleSheet(
+                    "border-color: rgb(0,255,0);font-size: 20px;border-width: 3px 3px 3px 3px;border-style: solid;border-radius:50px; ")
+            elif output['sanlvz']['SM'] < 1.7 and output['sanlvz']['SM'] > 2.5:
+                SM.setStyleSheet(
+                    "border-color: rgb(255,0,0);font-size: 20px;border-width: 3px 3px 3px 3px;border-style: solid;border-radius:50px; ")
+            else:
+                SM.setStyleSheet(
+                    "border-color: rgb(238,118,33);font-size: 20px;border-width: 3px 3px 3px 3px;border-style: solid;border-radius:50px; ")
+            SM_VLayout = QVBoxLayout()
+            SM_title = QLabel('SM')
+            SM_title.setAlignment(Qt.AlignHCenter)
+            SM_title.setFont(QFont('Timers', 10, QFont.Fantasy))
+            SM_VLayout.addWidget(SM_title)
+            three_Layout.addWidget(SM)
+            SM_VLayout.addWidget(three)
+            SM_des = QLabel('IM表示熟料中SiO₂含量与Al₂O₃、\nFe₂O₃之和的比')
+            SM_VLayout.addWidget(SM_des)
+            SM_VWidget = QWidget()
+            SM_VWidget.setLayout(SM_VLayout)
+            three_HLayout.addWidget(SM_VWidget)
+            three_HLayout.setSpacing(0)
+            self.pic[i].addWidget(three_VWidget, 0, 0, 1, 2)
+
+            self.line0 = QtWidgets.QFrame(self)
+            self.line0.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+            self.line0.setFrameShape(QtWidgets.QFrame.VLine)
+            self.line0.setFrameShadow(QtWidgets.QFrame.Sunken)
+            self.pic[i].addWidget(self.line0, 0, 1)
+
+            Effic_Widget = QWidget()
+            Effic_VLayout = QVBoxLayout()
+            Effic_Widget.setLayout(Effic_VLayout)
+
+            try:
+                value = Production_warning_rexiaolv(data[1])
+                Effic_title = QLabel('分解炉热效率')
+                Effic_title.setFixedWidth(250)
+                Effic_title.setFont(QFont('Timers', 15, QFont.Fantasy))
+                Effic_title.setAlignment(Qt.AlignCenter)
+                Effic_VLayout.addWidget(Effic_title)
+                rexiaol_Widget = QWidget()
+                rexiaol_Layout = QHBoxLayout()
+                rexiaol_Widget.setLayout(rexiaol_Layout)
+                Effic = QLabel(str(output['rexfiaol']['rexiaol'] * 100)[:4] + '%')
+                Effic.setAlignment(Qt.AlignCenter)
+                Effic.setFixedSize(100, 100)
+                Effic.setStyleSheet(
+                    "font-size: 20px;border-width: 3px 3px 3px 3px;border-style: solid;border-color: rgb(0,255,0);border-radius:50px; ")
+                rexiaol_Layout.addWidget(Effic)
+                Effic_VLayout.addWidget(rexiaol_Widget)
+                Effic_VLayout.addWidget(QLabel('热效率表示有效输出的能量与输入的能量之比'))
+                self.pic[i].addWidget(Effic_Widget, 0, 2)
+            except Exception:
+                QMessageBox.information(self, '提示', '热效率数据出错', QMessageBox.Yes)
+
+            self.line1 = QtWidgets.QFrame(self)
+            self.line1.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+            self.line1.setFrameShape(QtWidgets.QFrame.VLine)
+            self.line1.setFrameShadow(QtWidgets.QFrame.Sunken)
+            self.pic[i].addWidget(self.line1, 0, 3)
+
+            Ca_Widget = QWidget()
+            Ca_VLayout = QVBoxLayout()
+            Ca_Widget.setLayout(Ca_VLayout)
+
+            try:
+                value = output['youlig']['youlig']
+                Ca = MyCaMplCanvas(value)
+                Ca_title = QLabel('熟料游离钙合格预测')
+                Ca_title.setAlignment(Qt.AlignCenter)
+                Ca_title.setFont(QFont('Timers', 15, QFont.Fantasy))
+                Ca_VLayout.addWidget(Ca_title)
+                Ca_VLayout.addWidget(Ca)
+                self.pic[i].addWidget(Ca_Widget, 0, 4)
+            except Exception:
+                QMessageBox.information(self, '提示', '游离钙数据出错', QMessageBox.Yes)
+
             self.line2 = QtWidgets.QFrame(self)
-            self.line2.setGeometry(QtCore.QRect(0, self.Height * 0.73, self.Width, 16))
+            self.line2.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
             self.line2.setFrameShape(QtWidgets.QFrame.HLine)
             self.line2.setFrameShadow(QtWidgets.QFrame.Sunken)
-            self.pic[i].addWidget(self.line2)
-            value = Production_warning_fenjielu(data[1])
-            self.guide = '生产预警指导'
-            Coal = MyCoalMpCanvas(value)
-            self.pic[i].addWidget(Coal)
-            self.okBtn = QPushButton('ok', self.tab[i])
-            self.okBtn.move(self.width() * 0.85, self.height() * 0.9)
-            self.okBtn.clicked.connect(self.Accept)
+            self.pic[i].addWidget(self.line2, 1, 0, 1, 5)
+
+            yijitong_VWidget = QWidget()
+            yijitong_VLayout = QVBoxLayout()
+            yijitong_VWidget.setLayout(yijitong_VLayout)
+            yijitong_HWidget = QWidget()
+            yijitong_HLayout = QHBoxLayout()
+            yijitong_HWidget.setLayout(yijitong_HLayout)
+
+            try:
+                value = output['yijit']
+
+                yijitwdA = MyYijitongMplCanvas(value['yijitwdA'], real['yijit']['yijitwdA'], 0, time)
+                yijityqA = MyYijitongMplCanvas(value['yijityqA'], real['yijit']['yijityqA'], 1, time)
+                yijitwdB = MyYijitongMplCanvas(value['yijitwdB'], real['yijit']['yijitwdB'], 2, time)
+                yijityqB = MyYijitongMplCanvas(value['yijityqB'], real['yijit']['yijityqB'], 3, time)
+                # yijitong_title = QLabel('一级筒指标预测')
+                # yijitong_title.setAlignment(Qt.AlignLeft)
+                # yijitong_VLayout.addWidget(yijitong_title)
+                yijitong_HLayout.addWidget(yijitwdA)
+                yijitong_HLayout.addWidget(yijityqA)
+                yijitong_HLayout.addWidget(yijitwdB)
+                yijitong_HLayout.addWidget(yijityqB)
+                yijitong_VLayout.addWidget(yijitong_HWidget)
+                self.pic[i].addWidget(yijitong_VWidget, 2, 0, 1, 5)
+            except Exception:
+                QMessageBox.information(self, '提示', '一级筒指标数据出错', QMessageBox.Yes)
+
+            self.line3 = QtWidgets.QFrame(self)
+            self.line3.setGeometry(QtCore.QRect(0, self.Height * 0.73, self.Width, 16))
+            self.line3.setFrameShape(QtWidgets.QFrame.HLine)
+            self.line3.setFrameShadow(QtWidgets.QFrame.Sunken)
+            self.pic[i].addWidget(self.line3, 3, 0, 1, 5)
+
+            yao_HWidget = QWidget()
+            yao_HLayout = QHBoxLayout()
+            yao_HWidget.setLayout(yao_HLayout)
+
+            try:
+                value_yaotouc = output['yaotou_yaoweic']['yaotouc']
+                value_yaoweic = output['yaotou_yaoweic']['yaoweic']
+                yao_touc = MyYaoMplCanvas(value_yaotouc, real['yaotou_yaoweic']['yaotouc'], 0, time)
+                yao_weic = MyYaoMplCanvas(value_yaoweic, real['yaotou_yaoweic']['yaoweic'], 1, time)
+                yao_HLayout.addWidget(yao_touc)
+                yao_HLayout.addWidget(yao_weic)
+                self.pic[i].addWidget(yao_HWidget, 4, 0)
+            except Exception:
+                QMessageBox.information(self, '提示', '窑指标数据出错', QMessageBox.Yes)
+
+            try:
+                value = real['rehao'][:4]
+                # print(123)
+                # print(value)
+                value.append(output['rehao']['rehao'])
+                # print(value)
+                heat = MyHeatCanvas(value, time)  # 柱状图
+                self.pic[i].addWidget(heat, 4, 2, 1, 3)
+            except Exception:
+                QMessageBox.information(self, '提示', '分解炉热耗数据出错', QMessageBox.Yes)
+
+            # self.guide = '生产预警指导'
+            # self.okBtn = QPushButton('ok', self.tab[i])#这里注释掉后记得把相关函数也注释掉，否则会闪退
+            # self.okBtn.move(self.width() * 0.85, self.height() * 0.9)
+            # self.okBtn.clicked.connect(self.Accept)
 
         # 设置将self.pageView为中心Widget
         self.setCentralWidget(self.pageView)
         self.show()
 
-    def Accept(self):
-        self.addDock()
+    #
+    # def Accept(self):
+    #     self.addDock()
+    #
+    # def addDock(self):
+    #     if self.flag == 0:
+    #         self.flag = 1
+    #         dock1 = MyDockWidget('DockWidget')
+    #         dock1.setFeatures(QDockWidget.DockWidgetClosable)
+    #         dock1.setAllowedAreas(Qt.RightDockWidgetArea)
+    #         # try:
+    #         #     self.bar = MyHeatCanvas()  # 柱状图
+    #         # except Exception:
+    #         #     QMessageBox.information(self,'提示','添加柱状图失败',QMessageBox.Yes)
+    #
+    #         self.label = QLabel(self.guide)
+    #         dock1.setFixedWidth(400)
+    #         dock1.setWidget(self.label)
+    #         dock1.dock_signal.connect(self.change)
+    #         self.addDockWidget(Qt.RightDockWidgetArea, dock1)
+    #         self.setFixedWidth(self.Width)
+    #     else:
+    #         pass
+    #
+    # def change(self, str):  # 关闭浮动窗口时重新改变窗口大小
+    #     self.flag = 0
+    #     self.setFixedWidth(self.Width)
 
-    def addDock(self):
-        if self.flag == 0:
-            self.flag = 1
-            dock1 = MyDockWidget('DockWidget')
-            dock1.setFeatures(QDockWidget.DockWidgetClosable)
-            dock1.setAllowedAreas(Qt.RightDockWidgetArea)
-            self.bar = MyHeatCanvas()  # 柱状图
-            self.label = QLabel(self.guide)
-            dock1.setFixedWidth(400)
-            dock1.setWidget(self.label)
-            dock1.dock_signal.connect(self.change)
-            self.addDockWidget(Qt.RightDockWidgetArea, dock1)
-            self.setFixedWidth(self.Width * self.ratio_w + 400)
-        else:
-            pass
-
-    def change(self, str):
-        self.flag = 0
-        self.setFixedWidth(self.Width * self.ratio_w)
-
-    def resizeEvent(self, *args, **kwargs):
-        if self.flag == 0:
-            self.okBtn.move(self.width() * 0.85, self.height() * 0.9)
-        else:
-            self.okBtn.move((self.width() - 400) * 0.85, self.height() * 0.9)
+    # def resizeEvent(self, *args, **kwargs):
+    #     if self.flag == 0:
+    #         self.okBtn.move(self.width() * 0.85, self.height() * 0.9)
+    #     else:
+    #         self.okBtn.move((self.width() - 400) * 0.85, self.height() * 0.9)
+    def getHeat(self):
+        pass
 
 
 class MyMplCanvas(FigureCanvas):
@@ -1941,18 +2297,27 @@ class MyCaMplCanvas(MyMplCanvas):
         # data是选中的那一行的数据，利用data来将合格、不合格的数据求出来，存在Percentage的列表中
 
         # Percentage
-        Percentage = [30, 70]  # 前者为合格，后者为不合格
-        Percentage[0] = self.value[1] * 100
-        Percentage[1] = self.value[0] * 100
-        self.axes.barh(range(2), Percentage, height=0.7, color='steelblue', alpha=0.8)
-        self.axes.set_yticks(range(2))
-        self.axes.set_yticklabels(['合格', '不合格'])
-        self.axes.set_xlim(0, 100)
-        self.axes.set_xlabel('百分比 %')
-        self.axes.set_title('游离钙是否合格的百分比')
+        Percentage = self.value  # 前者为不合格，后者为合格
+        Percentage[0] = self.value[0] * 100
+        Percentage[1] = self.value[1] * 100
 
-        for x, y, in zip(Percentage, range(2)):
-            self.axes.text(x + 5, y, '%.2f' % x, ha='right', va='center', fontsize=10)
+        label_list = ['不合格', '合格']
+        color = ['red', 'yellow']
+        explode = [0, 0]
+        self.axes.pie(Percentage, explode=explode, colors=color, labels=label_list, labeldistance=1.1,
+                      autopct="%1.2f%%", shadow=False, startangle=90, pctdistance=0.6)
+        self.axes.axis("equal")  # 设置横轴和纵轴大小相等，这样饼才是圆的
+        self.axes.set_title('游离钙')
+        self.axes.legend()
+        # self.axes.barh(range(2), Percentage, height=0.7, color='steelblue', alpha=0.8)
+        # self.axes.set_yticks(range(2))
+        # self.axes.set_yticklabels(['合格', '不合格'])
+        # self.axes.set_xlim(0, 100)
+        # self.axes.set_xlabel('百分比 %')
+        # self.axes.set_title('游离钙是否合格的百分比')
+
+        # for x, y, in zip(Percentage, range(2)):
+        #     self.axes.text(x + 5, y, '%.2f' % x, ha='right', va='center', fontsize=10)
 
 
 class MyEfficMpCanvas(MyMplCanvas):
@@ -2007,32 +2372,115 @@ class MyCoalMpCanvas(QWidget):
 
 class MyHeatCanvas(MyMplCanvas):
 
-    def __init__(self, value):
+    def __init__(self, value, time):
         self.value = value
+        self.x_ticklabels = time
         super(MyHeatCanvas, self).__init__()
 
     def compute_initial_figure(self):
         matplotlib.rcParams['font.sans-serif'] = ['SimHei']
         matplotlib.rcParams['axes.unicode_minus'] = False
-        x1 = range(3)
-        y1 = self.value[:3]
-        self.axes.bar(x1, y1, color='blue')
+        x1 = range(5)
+        y1 = self.value[:5]
+        self.axes.bar(x1[:-1], y1[:-1], color='blue')
+        self.axes.bar(x1[-1], y1[-1], color='red')
         for a, b in zip(x1, y1):
             self.axes.text(a, b + 0.05, '%.2f' % b, ha='center', va='bottom', fontsize=11)
-        self.axes.set_ylabel('kJ/kg')
-        y2 = self.value[3] * 100
-        self.axes2 = self.axes.twinx()
-        self.axes2.set_ylim(0, 100)
-        self.axes2.bar(3, y2, color='red')
-        self.axes2.text(3, y2 + 0.05, '%.2f' % y2, ha='center', va='bottom', fontsize=11)
-        self.axes2.set_xticklabels(['', '热耗', '分解炉', '窑头', '热效率'])
-        self.axes2.set_ylabel('百分比%')
+        self.axes.set_ylabel('标煤耗 (kJ/kg)')
+        self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
+        # y2 = self.value[3] * 100
+        # self.axes2 = self.axes.twinx()
+        # self.axes2.set_ylim(0, 100)
+        # self.axes2.bar(3, y2, color='red')
+        # self.axes2.text(3, y2 + 0.05, '%.2f' % y2, ha='center', va='bottom', fontsize=11)
+        # self.axes2.set_xticklabels(['', '热耗', '分解炉', '窑头', '热效率'])
+        # self.axes2.set_ylabel('百分比%')
+
+
+class MyYijitongMplCanvas(MyMplCanvas):
+    def __init__(self, value, real, flag, x_ticklabels):
+        self.value = value
+        self.real = real
+        self.flag = flag
+        self.x_ticklabels = x_ticklabels
+
+        super(MyYijitongMplCanvas, self).__init__()
+
+    def compute_initial_figure(self):
+        # data = MyMplCanvas.find_data(self.day, self.hour)
+
+        matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+        matplotlib.rcParams['axes.unicode_minus'] = False
+
+        x = [0, 1, 2, 3, 4]
+        y = self.real
+        y1 = self.value
+        self.axes.plot(x, y, label='weight changes', linewidth=1, color='r', marker='o',
+                       markerfacecolor='blue', markersize=5)
+        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='o',
+                       markerfacecolor='blue', markersize=5, linestyle="--")
+
+        self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
+        if self.flag == 0:
+            self.axes.set_title('一级筒A温度')
+            self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
+        elif self.flag == 1:
+            self.axes.set_title('一级筒A压强')
+            self.axes.set_ylabel('压强/kPa', verticalalignment='center', fontproperties=labelfont)
+        elif self.flag == 2:
+            self.axes.set_title('一级筒B温度')
+            self.axes.set_ylabel('温度/℃', verticalalignment='center', fontproperties=labelfont)
+        elif self.flag == 3:
+            self.axes.set_title('一级筒B压强')
+            self.axes.set_ylabel('压强/kPa', verticalalignment='center', fontproperties=labelfont)
+
+        # self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+        for a, b in zip(x, y):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+        for a, b in zip(x, y1):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+
+
+class MyYaoMplCanvas(MyMplCanvas):
+    def __init__(self, value, real, flag, x_ticklabels):
+        self.value = value
+        self.real = real
+        self.flag = flag
+        self.x_ticklabels = x_ticklabels
+        super(MyYaoMplCanvas, self).__init__()
+
+    def compute_initial_figure(self):
+        # data = MyMplCanvas.find_data(self.day, self.hour)
+
+        matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+        matplotlib.rcParams['axes.unicode_minus'] = False
+
+        x = [0, 1, 2, 3, 4]
+        y = self.real
+        y1 = self.value
+        self.axes.plot(x, y, label='weight changes', linewidth=1, color='r', marker='o',
+                       markerfacecolor='blue', markersize=5)
+        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='o',
+                       markerfacecolor='blue', markersize=5, linestyle="--")
+
+        self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
+        if self.flag == 0:
+            self.axes.set_title('窑头秤')
+        elif self.flag == 1:
+            self.axes.set_title('窑尾秤')
+        self.axes.set_ylabel('t/h', verticalalignment='center', fontproperties=labelfont)
+        # self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+        for a, b in zip(x, y):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+        for a, b in zip(x, y1):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
 
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
+    # form = MyVisualDlg()
     # form = MyDataSimDlg('2017012310')
-    form = MyDataInputWnd()
+    # form = MyDataInputWnd()
     # form = MyDataLeadInDlg()
     # form = MySysLogDlg()
     # print(filepath + '/' + filename)
@@ -2044,7 +2492,7 @@ if __name__ == "__main__":
     # form = MyOpenFileWnd()
     # form = MyCheckWnd()
     # form = MyRadioWnd()
-    # form = MyProduceWarWnd(20170223, 10)
+    form = MyProduceWarWnd(20170223, 10)
     # form=MyDataReviseWnd()
     # form = MyUserManageDlg()
     # form = MyUserSettingDlg()
