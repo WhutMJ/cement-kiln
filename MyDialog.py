@@ -2690,7 +2690,7 @@ class MyProduceSimWnd(QMainWindow):
         Ca_Widget.setObjectName('CaWidget')
         self.fillLay.addWidget(Ca_Widget, 0, 15, 2, 1)
 
-    def replaceThreeValueWidget(self, data):
+    def replaceThreeValueWidget(self, old,new):
         ThreeValueWidget = QWidget(self.filler)
         ThreeValueHLayout = QHBoxLayout()
         ThreeValueWidget.setLayout(ThreeValueHLayout)
@@ -2706,9 +2706,9 @@ class MyProduceSimWnd(QMainWindow):
 
         try:
             value = self.output['youlig']['youlig']
-            KH = MyThreeValueLineGraph(value, self.time, 0)
-            SM = MyThreeValueLineGraph(value, self.time, 1)
-            IM = MyThreeValueLineGraph(value, self.time, 2)
+            KH = MyThreeValueLineGraph(old,new, self.timeLabel, 0)
+            SM = MyThreeValueLineGraph(old,new, self.timeLabel, 1)
+            IM = MyThreeValueLineGraph(old,new, self.timeLabel, 2)
             KH_Label1 = QLabel('方差同比缩小：--%')
             KH_Label1.setFont(QFont('Timers', 12, QFont.Times))
             KH_Label1.setAlignment(Qt.AlignCenter)
@@ -3259,8 +3259,9 @@ class MyCaLineGraph(MyMplCanvas):
 
 
 class MyThreeValueLineGraph(MyMplCanvas):
-    def __init__(self, value, time, flag):
-        self.value = value
+    def __init__(self, old,new, time, flag):
+        self.oldValue = old
+        self.newValue=new
         self.x_ticklabels = time
         self.flag = flag
         super(MyThreeValueLineGraph, self).__init__()
