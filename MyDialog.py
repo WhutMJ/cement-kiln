@@ -1,11 +1,13 @@
 from Production_warning import *
 from provide_data_for_gui import *
 from Connect_to_Database import *
+from Model import *
 import config as con
 import sys
-
+import sip
 import os
 from MyPic import *
+from MyLineEdit import *
 from youlg_predict import *
 from rexiaolv_model import *
 from cent_svm_predict import *
@@ -15,11 +17,13 @@ from PyQt5.QtGui import *
 from PyQt5.QtWidgets import *
 from PyQt5.QtCore import *
 from numpy import arange
+import numpy as np
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg as FigureCanvas
 from matplotlib.figure import Figure
 import matplotlib
 import re
 import matplotlib.font_manager as fm
+import copy
 
 myfont = fm.FontProperties(fname="C:\\Windows\\Fonts\\simsun.ttc", size=14)  # 设置字体，实现显示中文
 matplotlib.rcParams["axes.unicode_minus"] = False
@@ -1960,6 +1964,901 @@ class MyDataReviseWnd(QMainWindow):  # 数据修改功能窗口
             self.close()
 
 
+class MyProduceSimWnd(QMainWindow):
+    def __init__(self, day, hour):
+        super(MyProduceSimWnd, self).__init__()
+        metric = QDesktopWidget().screenGeometry()
+        self.Width = metric.width()
+        self.Height = metric.height()
+        self.setWindowTitle('生产预警')
+        self.ratio_w = 0.6
+        self.ratio_h = 0.78
+
+        self.output, self.real = production_warning(str(day), str(hour))
+        self.data, self.name = get_by_fragment2(str(day) + str(hour), 5)
+        time = ['']
+        for element in self.data:
+            time.append(element[0][4:6] + '/' + element[0][6:] + ' ' + element[1])
+        self.data = get_by_hour(str(day) + str(hour))
+
+        left = -9  # 为了使窗口能够位于左上角
+        self.move(left, 0)
+        self.setFixedSize(self.Width, self.Height - 72 * self.Height / 768)  # 72为win10任务栏高度
+
+        self.mainWidget = QWidget()
+        self.setCentralWidget(self.mainWidget)
+
+        self.scroll = QScrollArea()
+        self.filler = QWidget()
+        self.fillLay = QGridLayout()
+        self.filler.setFixedWidth(self.Width - 40)  # 为了不让水平方向上出现滚轮，需要固定填充控件的宽度不超过分辨率的宽度
+
+        list_time = ['20170220-11','20170220-12']
+        list_table = ['窑头压力']
+        list_model = ['SVM-ADaboost', 'RNN', 'RNN-LSTM', 'NN']
+
+        self.time_box = QComboBox(self.filler)
+        self.time_box.setObjectName('time_box')
+        self.time_box.activated.connect(self.timeEvent)
+        self.time_box.addItem('请选择时间点')
+        for item in list_time:
+            self.time_box.addItem(item)
+        self.fillLay.addWidget(self.time_box, 0, 0)
+
+        self.model_box = QComboBox(self.filler)
+        self.model_box.setObjectName('model_box')
+        self.model_box.activated.connect(self.modelEvent)
+        self.model_box.addItem('请选择模型')
+        for item in list_model:
+            self.model_box.addItem(item)
+        self.fillLay.addWidget(self.model_box, 0, 1)
+
+        tableHWidget = QWidget(self.filler)
+        tableHLay = QHBoxLayout()
+        tableHWidget.setLayout(tableHLay)
+
+        tableVCombox = QWidget(self.filler)
+        tableVComLay = QVBoxLayout()
+        tableVCombox.setLayout(tableVComLay)
+
+        self.table_box = QComboBox(self.filler)
+        self.table_box.setObjectName('table_box')
+        self.table_box.activated.connect(self.tableEvent)
+        self.table_box.addItem('请选择')
+        for item in list_table:
+            self.table_box.addItem(item)
+        tableVComLay.addWidget(self.table_box)
+
+        limit_min = 0.6
+        limit_max = 0.9
+        self.limit_lab = QLabel('(' + str(limit_min) + ' ～ ' + str(limit_max) + ')')
+        self.limit_lab.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        self.limit_lab.setFont(QFont('Timers', 10, QFont.Times))
+        tableVComLay.addWidget(self.limit_lab)
+        tableHLay.addWidget(tableVCombox)
+
+        valueWidget = QWidget(self.filler)
+        valueWidget.setObjectName('valueWidget')
+        valueLay = QGridLayout()
+        valueWidget.setLayout(valueLay)
+        startValueLab = QLabel('初始值')
+        startValueLab.setFont(QFont('Timers', 10, QFont.Times))
+        controlValueLab = QLabel('调控值')
+        controlValueLab.setFont(QFont('Timers', 10, QFont.Times))
+        valueLay.addWidget(startValueLab, 0, 0)
+        valueLay.addWidget(controlValueLab, 0, 1)
+        self.percentEdt = QLineEdit(self.filler)
+        self.percentEdt.setObjectName('percentEdt')
+        self.percentEdt.setText('99')
+        self.percentEdt.setValidator(QRegExpValidator(QRegExp("^(([1-9]{1}\\d*)|([0]{1}))(\\.(\\d){0,2})?$")))
+        # self.percentEdt.textChanged.connect(self.percentEvent)
+        self.percentEdt.returnPressed.connect(self.percentEvent)
+        valueLay.addWidget(self.percentEdt, 0, 2)
+        baifenhao = QLabel('%')
+        baifenhao.setFont(QFont('Timers', 10, QFont.Times))
+        valueLay.addWidget(baifenhao, 0, 3)
+
+        # Vline = QtWidgets.QFrame(self)
+        # Vline.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        # Vline.setFrameShape(QtWidgets.QFrame.VLine)
+        # Vline.setFrameShadow(QtWidgets.QFrame.Sunken)
+        #
+        # Hline = QtWidgets.QFrame(self)
+        # Hline.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        # Hline.setFrameShape(QtWidgets.QFrame.HLine)
+        # Hline.setFrameShadow(QtWidgets.QFrame.Sunken)
+
+        self.startValue = {}
+        self.controlValue = {}
+        for i in range(8):
+            self.startValue[i] = QLabel(str(i))
+            self.startValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.startValue[i].setAlignment(Qt.AlignCenter)
+            self.controlValue[i] = QLabel(str(i + 1))
+            self.controlValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.controlValue[i].setAlignment(Qt.AlignCenter)
+            valueLay.addWidget(self.startValue[i], i + 1, 0)
+            valueLay.addWidget(self.controlValue[i], i + 1, 1)
+        self.fillLay.addWidget(tableHWidget, 1, 0)
+        self.fillLay.addWidget(valueWidget, 1, 1, 1, 3)
+
+        self.line0 = QtWidgets.QFrame(self)
+        self.line0.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        self.line0.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line0.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.fillLay.addWidget(self.line0, 0, 4, 2, 1)
+
+        yaotouWidget = QWidget(self.filler)
+        yaotouWidget.setObjectName('yaotouWidget')
+        yaotouLay = QGridLayout()
+        yaotouWidget.setLayout(yaotouLay)
+        yaotouLab = QLabel('窑头秤')
+        yaotouLab.setFont(QFont('Timers', 15, QFont.Times))
+        yaotouLab.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        yaotouStartLab = QLabel('初始值')
+        yaotouStartLab.setFont(QFont('Timers', 10, QFont.Times))
+        yaotouControlLab = QLabel('调控值')
+        yaotouControlLab.setFont(QFont('Timers', 10, QFont.Times))
+        yaotouPercent = QLabel('变化幅度')
+        yaotouPercent.setFont(QFont('Timers', 10, QFont.Times))
+        yaotouLay.addWidget(yaotouLab, 0, 0, 1, 3)
+        yaotouLay.addWidget(yaotouStartLab, 1, 0)
+        yaotouLay.addWidget(yaotouControlLab, 1, 1)
+        yaotouLay.addWidget(yaotouPercent, 1, 2)
+        self.yaotouStartValue = {}
+        self.yaotouControlValue = {}
+        self.yaotouChangePercent = {}
+        for i in range(8):
+            self.yaotouStartValue[i] = QLabel(str(i))
+            self.yaotouStartValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.yaotouStartValue[i].setAlignment(Qt.AlignCenter)
+            self.yaotouControlValue[i] = QLabel(str(i + 1))
+            self.yaotouControlValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.yaotouControlValue[i].setAlignment(Qt.AlignCenter)
+            self.yaotouChangePercent[i] = QLabel('↑↓' + str(i + 2))
+            self.yaotouChangePercent[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.yaotouChangePercent[i].setAlignment(Qt.AlignCenter)
+            yaotouLay.addWidget(self.yaotouStartValue[i], i + 2, 0)
+            yaotouLay.addWidget(self.yaotouControlValue[i], i + 2, 1)
+            yaotouLay.addWidget(self.yaotouChangePercent[i], i + 2, 2)
+        self.fillLay.addWidget(yaotouWidget, 0, 5, 2, 3)
+
+        self.line1 = QtWidgets.QFrame(self)
+        self.line1.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        self.line1.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line1.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.fillLay.addWidget(self.line1, 0, 8, 2, 1)
+
+        yaoweiWidget = QWidget(self.filler)
+        yaoweiWidget.setObjectName('yaoweiWidget')
+        yaoweiLay = QGridLayout()
+        yaoweiWidget.setLayout(yaoweiLay)
+        yaoweiLab = QLabel('窑尾秤')
+        yaoweiLab.setFont(QFont('Timers', 15, QFont.Times))
+        yaoweiLab.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        yaoweiStartLab = QLabel('初始值')
+        yaoweiStartLab.setFont(QFont('Timers', 10, QFont.Times))
+        yaoweiControlLab = QLabel('调控值')
+        yaoweiControlLab.setFont(QFont('Timers', 10, QFont.Times))
+        yaoweiPercent = QLabel('变化幅度')
+        yaoweiPercent.setFont(QFont('Timers', 10, QFont.Times))
+        yaoweiLay.addWidget(yaoweiLab, 0, 0, 1, 3)
+        yaoweiLay.addWidget(yaoweiStartLab, 1, 0)
+        yaoweiLay.addWidget(yaoweiControlLab, 1, 1)
+        yaoweiLay.addWidget(yaoweiPercent, 1, 2)
+        self.yaoweiStartValue = {}
+        self.yaoweiControlValue = {}
+        self.yaoweiChangePercent = {}
+        for i in range(8):
+            self.yaoweiStartValue[i] = QLabel(str(i))
+            self.yaoweiStartValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.yaoweiStartValue[i].setAlignment(Qt.AlignCenter)
+            self.yaoweiControlValue[i] = QLabel(str(i + 1))
+            self.yaoweiControlValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.yaoweiControlValue[i].setAlignment(Qt.AlignCenter)
+            self.yaoweiChangePercent[i] = QLabel('↑↓' + str(i + 2))
+            self.yaoweiChangePercent[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.yaoweiChangePercent[i].setAlignment(Qt.AlignCenter)
+            yaoweiLay.addWidget(self.yaoweiStartValue[i], i + 2, 0)
+            yaoweiLay.addWidget(self.yaoweiControlValue[i], i + 2, 1)
+            yaoweiLay.addWidget(self.yaoweiChangePercent[i], i + 2, 2)
+        # self.fillLay.addWidget(yaoweiLab, 1, 10)
+        self.fillLay.addWidget(yaoweiWidget, 0, 9, 2, 3)
+
+        self.line2 = QtWidgets.QFrame(self)
+        self.line2.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        self.line2.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line2.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.fillLay.addWidget(self.line2, 0, 12, 2, 1)
+
+        rehaoWidget = QWidget(self.filler)
+        rehaoWidget.setObjectName('rehaoWidget')
+        rehaoLay = QVBoxLayout()
+        rehaoWidget.setLayout(rehaoLay)
+        rehaoLab = QLabel('热耗')
+        rehaoLab.setFont(QFont('Timers', 15, QFont.Times))
+        rehaoLab.setAlignment(Qt.AlignCenter)
+        rehaoLay.addWidget(rehaoLab)
+        rehaoValue = {1, 2, 3, 4, 5, 6, 7, 8}
+        self.rehaoValueLab = {}
+        for i in range(8):
+            self.rehaoValueLab[i] = QLabel(str(i))
+            self.rehaoValueLab[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.rehaoValueLab[i].setAlignment(Qt.AlignCenter)
+            rehaoLay.addWidget(self.rehaoValueLab[i])
+        self.fillLay.addWidget(rehaoWidget, 0, 13, 2, 1)
+
+        self.line3 = QtWidgets.QFrame(self)
+        self.line3.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        self.line3.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line3.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.fillLay.addWidget(self.line3, 0, 14, 2, 1)
+
+        Ca_Widget = QWidget(self.filler)
+        Ca_Widget.setObjectName('CaWidget')
+        Ca_VLayout = QVBoxLayout()
+        Ca_Widget.setLayout(Ca_VLayout)
+
+        try:
+            value = self.output['youlig']['youlig']
+            old = []
+            new = []
+            Ca = MyCaLineGraph(old, new, time)
+            fangcha = QLabel('方差同比缩小：--%')
+            fangcha.setFont(QFont('Timers', 12, QFont.Times))
+            fangcha.setAlignment(Qt.AlignCenter)
+            yuanhegelv = QLabel('原始合格率：--%')
+            yuanhegelv.setFont(QFont('Timers', 12, QFont.Times))
+            yuanhegelv.setAlignment(Qt.AlignCenter)
+            houhegelv = QLabel('调控后合格率：--%')
+            houhegelv.setFont(QFont('Timers', 12, QFont.Times))
+            houhegelv.setAlignment(Qt.AlignCenter)
+            Ca_VLayout.addWidget(Ca)
+            Ca_VLayout.addWidget(fangcha)
+            Ca_VLayout.addWidget(yuanhegelv)
+            Ca_VLayout.addWidget(houhegelv)
+            self.fillLay.addWidget(Ca_Widget, 0, 15, 2, 1)
+        except Exception:
+            QMessageBox.information(self, '提示', '游离钙数据出错', QMessageBox.Yes)
+
+        # self.line4 = QtWidgets.QFrame(self)
+        # self.line4.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        # self.line4.setFrameShape(QtWidgets.QFrame.VLine)
+        # self.line4.setFrameShadow(QtWidgets.QFrame.Sunken)
+        # self.fillLay.addWidget(self.line4, 0, 18, 2, 1)
+
+        self.line4 = QtWidgets.QFrame(self)
+        self.line4.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        self.line4.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line4.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.fillLay.addWidget(self.line4, 2, 0, 1, 20)
+
+        ThreeValueWidget = QWidget(self.filler)
+        ThreeValueHLayout = QHBoxLayout()
+        ThreeValueWidget.setLayout(ThreeValueHLayout)
+        KHVWidget = QWidget()
+        KHVLay = QVBoxLayout()
+        KHVWidget.setLayout(KHVLay)
+        SMVWidget = QWidget()
+        SMVLay = QVBoxLayout()
+        SMVWidget.setLayout(SMVLay)
+        IMVWidget = QWidget()
+        IMVLay = QVBoxLayout()
+        IMVWidget.setLayout(IMVLay)
+
+        try:
+            value = self.output['youlig']['youlig']
+            KH = MyThreeValueLineGraph(value, time, 0)
+            SM = MyThreeValueLineGraph(value, time, 1)
+            IM = MyThreeValueLineGraph(value, time, 2)
+            KH_Label1 = QLabel('方差同比缩小：--%')
+            KH_Label1.setFont(QFont('Timers', 12, QFont.Times))
+            KH_Label1.setAlignment(Qt.AlignCenter)
+            KH_Label2 = QLabel('原始合格率：--%')
+            KH_Label2.setFont(QFont('Timers', 12, QFont.Times))
+            KH_Label2.setAlignment(Qt.AlignCenter)
+            KH_Label3 = QLabel('调控后合格率：--%')
+            KH_Label3.setFont(QFont('Timers', 12, QFont.Times))
+            KH_Label3.setAlignment(Qt.AlignCenter)
+            SM_Label1 = QLabel('方差同比缩小：--%')
+            SM_Label1.setFont(QFont('Timers', 12, QFont.Times))
+            SM_Label1.setAlignment(Qt.AlignCenter)
+            SM_Label2 = QLabel('原始合格率：--%')
+            SM_Label2.setFont(QFont('Timers', 12, QFont.Times))
+            SM_Label2.setAlignment(Qt.AlignCenter)
+            SM_Label3 = QLabel('调控后合格率：--%')
+            SM_Label3.setFont(QFont('Timers', 12, QFont.Times))
+            SM_Label3.setAlignment(Qt.AlignCenter)
+            IM_Label1 = QLabel('方差同比缩小：--%')
+            IM_Label1.setFont(QFont('Timers', 12, QFont.Times))
+            IM_Label1.setAlignment(Qt.AlignCenter)
+            IM_Label2 = QLabel('原始合格率：--%')
+            IM_Label2.setFont(QFont('Timers', 12, QFont.Times))
+            IM_Label2.setAlignment(Qt.AlignCenter)
+            IM_Label3 = QLabel('调控后合格率：--%')
+            IM_Label3.setFont(QFont('Timers', 12, QFont.Times))
+            IM_Label3.setAlignment(Qt.AlignCenter)
+            KHVLay.addWidget(KH)
+            KHVLay.addWidget(KH_Label1)
+            KHVLay.addWidget(KH_Label2)
+            KHVLay.addWidget(KH_Label3)
+            SMVLay.addWidget(SM)
+            SMVLay.addWidget(SM_Label1)
+            SMVLay.addWidget(SM_Label2)
+            SMVLay.addWidget(SM_Label3)
+            IMVLay.addWidget(IM)
+            IMVLay.addWidget(IM_Label1)
+            IMVLay.addWidget(IM_Label2)
+            IMVLay.addWidget(IM_Label3)
+            ThreeValueHLayout.addWidget(KHVWidget)
+            ThreeValueHLayout.addWidget(SMVWidget)
+            ThreeValueHLayout.addWidget(IMVWidget)
+            ThreeValueWidget.setFixedHeight(self.Height * 0.618)  # 调整三率值的页面高度
+            self.fillLay.addWidget(ThreeValueWidget, 3, 0, 2, 16)
+        except Exception:
+            QMessageBox.information(self, '提示', '三率值数据出错', QMessageBox.Yes)
+
+        self.line5 = QtWidgets.QFrame(self)
+        self.line5.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        self.line5.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line5.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.fillLay.addWidget(self.line5, 5, 0, 1, 20)
+
+        yijitong_VWidget = QWidget(self.filler)
+        yijitong_VWidget.setObjectName('yijitongWidget')
+        yijitong_VLayout = QVBoxLayout()
+        yijitong_VWidget.setLayout(yijitong_VLayout)
+        yijitong_HWidget = QWidget(self.filler)
+        yijitong_HLayout = QHBoxLayout()
+        yijitong_HWidget.setLayout(yijitong_HLayout)
+
+        try:
+            value = self.output['yijit']
+
+            yijitwdA = MyYijitongMplCanvas(value['yijitwdA'], self.real['yijit']['yijitwdA'], 0, time)
+            yijityqA = MyYijitongMplCanvas(value['yijityqA'], self.real['yijit']['yijityqA'], 1, time)
+            yijitwdB = MyYijitongMplCanvas(value['yijitwdB'], self.real['yijit']['yijitwdB'], 2, time)
+            yijityqB = MyYijitongMplCanvas(value['yijityqB'], self.real['yijit']['yijityqB'], 3, time)
+            # yijitong_title = QLabel('一级筒指标预测')
+            # yijitong_title.setAlignment(Qt.AlignLeft)
+            # yijitong_VLayout.addWidget(yijitong_title)
+            yijitong_HLayout.addWidget(yijitwdA)
+            yijitong_HLayout.addWidget(yijityqA)
+            yijitong_HLayout.addWidget(yijitwdB)
+            yijitong_HLayout.addWidget(yijityqB)
+            yijitong_VLayout.addWidget(yijitong_HWidget)
+            yijitong_VWidget.setFixedHeight(self.Height * 0.618)  # 调整一级筒数据的页面高度
+            self.fillLay.addWidget(yijitong_VWidget, 6, 0, 1, 16)
+        except Exception:
+            QMessageBox.information(self, '提示', '一级筒指标数据出错', QMessageBox.Yes)
+
+        self.line6 = QtWidgets.QFrame(self)
+        self.line6.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        self.line6.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line6.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.fillLay.addWidget(self.line6, 7, 0, 1, 20)
+
+        fjlWidget = QWidget(self.filler)
+        fjlWidget.setObjectName('fjlWidget')
+        fjlHLayout = QHBoxLayout()
+        fjlWidget.setLayout(fjlHLayout)
+
+        try:
+            value = self.output['youlig']['youlig']
+            wd = MyFjlLineGraph(value, time, 0)
+            yq = MyFjlLineGraph(value, time, 1)
+            Label1 = QLabel('温度：--%')
+            Label1.setFont(QFont('Timers', 12, QFont.Times))
+            Label1.setAlignment(Qt.AlignCenter)
+            Label2 = QLabel('压强--%')
+            Label2.setFont(QFont('Timers', 12, QFont.Times))
+            Label2.setAlignment(Qt.AlignCenter)
+            fjlHLayout.addWidget(wd)
+            fjlHLayout.addWidget(Label1)
+            fjlHLayout.addWidget(yq)
+            fjlHLayout.addWidget(Label2)
+            fjlWidget.setFixedHeight(self.Height * 0.618)  # 调整分解炉的页面高度
+            self.fillLay.addWidget(fjlWidget, 8, 0, 1, 16)
+        except Exception:
+            QMessageBox.information(self, '提示', '分解炉数据出错', QMessageBox.Yes)
+
+        self.line7 = QtWidgets.QFrame(self)
+        self.line7.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        self.line7.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line7.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.fillLay.addWidget(self.line7, 9, 0, 1, 20)
+
+        # bljHWidget = QWidget(self.filler)
+        # bljHLayout = QHBoxLayout()
+        # bljHWidget.setLayout(bljHLayout)
+        # bljVWidget =QWidget(self.filler)
+        # bljVLayout=QVBoxLayout()
+        # bljVWidget.setLayout(bljVLayout)
+        # bljGraph=QWidget(self.filler)
+        # bljGLayout =QGridLayout()
+        # bljGraph.setLayout(bljGLayout)
+        #
+        # try:
+        #     value = output['youlig']['youlig']
+        #     blj1 = MyBljLineGraph(value, time, 0)
+        #     blj2 = MyBljLineGraph(value, time, 0)
+        #     blj3 = MyBljLineGraph(value, time, 0)
+        #     blj4 = MyBljLineGraph(value, time, 0)
+        #     blj5 = MyBljLineGraph(value, time, 0)
+        #     blj6 = MyBljLineGraph(value, time, 0)
+        #     bljGLayout.addWidget(blj1,0,0)
+        #     bljGLayout.addWidget(blj2,0,1)
+        #     bljGLayout.addWidget(blj3,0,2)
+        #     bljGLayout.addWidget(blj4,1,0)
+        #     bljGLayout.addWidget(blj5,1,1)
+        #     bljGLayout.addWidget(blj6,1,2)
+        #
+        #     Label1 = QLabel('温度：--%')
+        #     Label1.setFont(QFont('Timers', 12, QFont.Times))
+        #     Label1.setAlignment(Qt.AlignCenter)
+        #     Label2 = QLabel('压强--%')
+        #     Label2.setFont(QFont('Timers', 12, QFont.Times))
+        #     Label2.setAlignment(Qt.AlignCenter)
+        #     bljVLayout.addWidget(Label1)
+        #     bljVLayout.addWidget(Label2)
+        #     bljHLayout.addWidget(bljGraph)
+        #     bljHLayout.addWidget(bljVWidget)
+        #
+        #     bljHWidget.setFixedHeight(self.Height*0.618)#调整篦冷机的页面高度
+        #     self.fillLay.addWidget(bljHWidget, 10, 0, 1, 16)
+        # except Exception:
+        #     QMessageBox.information(self, '提示', '分解炉数据出错', QMessageBox.Yes)
+        #
+        # self.line8 = QtWidgets.QFrame(self)
+        # self.line8.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        # self.line8.setFrameShape(QtWidgets.QFrame.HLine)
+        # self.line8.setFrameShadow(QtWidgets.QFrame.Sunken)
+        # self.fillLay.addWidget(self.line8, 11, 0, 1, 20)
+
+        hzyWidget = QWidget(self.filler)
+        hzyWidget.setObjectName('hzyWidget')
+        hzyHLayout = QHBoxLayout()
+        hzyWidget.setLayout(hzyHLayout)
+
+        try:
+            value = self.output['youlig']['youlig']
+            wd = MyHzyLineGraph(value, time, 0)
+            yq = MyHzyLineGraph(value, time, 1)
+            Label1 = QLabel('温度：--%')
+            Label1.setFont(QFont('Timers', 12, QFont.Times))
+            Label1.setAlignment(Qt.AlignCenter)
+            Label2 = QLabel('压强--%')
+            Label2.setFont(QFont('Timers', 12, QFont.Times))
+            Label2.setAlignment(Qt.AlignCenter)
+            hzyHLayout.addWidget(wd)
+            hzyHLayout.addWidget(Label1)
+            hzyHLayout.addWidget(yq)
+            hzyHLayout.addWidget(Label2)
+            hzyWidget.setFixedHeight(self.Height * 0.618)  # 调整回转窑的页面高度
+            self.fillLay.addWidget(hzyWidget, 12, 0, 1, 16)
+        except Exception:
+            QMessageBox.information(self, '提示', '回转窑数据出错', QMessageBox.Yes)
+
+        # 确定布局
+        self.filler.setLayout(self.fillLay)
+        ##创建一个滚动条
+        # self.filler.setMinimumSize(self.Width * self.ratio_w-48, self.Height+200)  #######设置滚动条区域的尺寸
+        self.scroll.setWidget(self.filler)
+        self.vbox = QVBoxLayout()
+        self.vbox.addWidget(self.scroll)
+        self.mainWidget.setLayout(self.vbox)
+
+        # self.statusBar().showMessage("底部信息栏")
+        self.show()
+
+    def timeEvent(self):
+        if (self.time_box.currentIndex() != 0):
+            time = self.time_box.currentText()
+            print(time[:8]+time[9:])
+            self.deadline = time[:8] + time[9:]
+            try:
+                self.model1 = Model_rehao(self.deadline)
+                print(self.deadline)
+            except Exception:
+                QMessageBox.information(self,'提示','模型数据出错',QMessageBox.Yes)
+            data, name = get_by_fragment2(self.deadline, 8)  # 返回deadline的前8小时
+            self.timeLabel = ['']
+            print(data)
+            for element in data:
+                self.timeLabel.append(element[0][4:6] + '/' + element[0][6:] + ' ' + element[1])
+            print(self.timeLabel)
+            ModelData = self.model1.use_model()
+            print(ModelData)
+            self.replaceYaotouWidget(ModelData['old']['yaotouc'], ModelData['new']['yaotouc'])
+            self.replaceYaoweiWidget(ModelData['old']['yaoweic'], ModelData['new']['yaoweic'])
+            self.replaceCaWidget(ModelData['old']['youlig'], ModelData['new']['youlig'], self.timeLabel)
+            # self.replaceRehaoWidget()
+
+    def modelEvent(self):
+        if (self.model_box.currentIndex() != 0):
+            pass
+        print(self.model_box.currentText())
+
+    def tableEvent(self):
+        if (self.table_box.currentIndex() != 0):
+            pass
+        print(self.table_box.currentText())
+
+    def percentEvent(self):
+        if self.time_box.currentIndex()==0:
+            QMessageBox.information(self,'提示','请先选择时间点',QMessageBox.Yes)
+            self.percentEdt.setText('99')
+        elif self.percentEdt.text() != None:
+            percent = float(self.percentEdt.text())/100
+            print(percent)
+            self.model1.set_radio(percent)
+            ModelData = self.model1.use_model()
+            print(ModelData)
+            self.replaceYaotouWidget(ModelData['old']['yaotouc'], ModelData['new']['yaotouc'])
+            self.replaceYaoweiWidget(ModelData['old']['yaoweic'], ModelData['new']['yaoweic'])
+            self.replaceCaWidget(ModelData['old']['youlig'], ModelData['new']['youlig'], self.timeLabel)
+        # print(self.percentEdt.text())
+
+    def replacePercentWidget(self):
+        valueWidget = QWidget(self.filler)
+        valueLay = QGridLayout()
+        valueWidget.setLayout(valueLay)
+        self.startValue = {}
+        self.controlValue = {}
+        for i in range(8):
+            self.startValue[i] = QLabel(str(i))
+            self.startValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.startValue[i].setAlignment(Qt.AlignCenter)
+            self.controlValue[i] = QLabel(str(i + 1))
+            self.controlValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.controlValue[i].setAlignment(Qt.AlignCenter)
+            valueLay.addWidget(self.startValue[i], i + 1, 0)
+            valueLay.addWidget(self.controlValue[i], i + 1, 1)
+        oldWidget = self.findChild(QWidget, 'valueWidget')
+        if oldWidget != None:
+            self.fillLay.removeWidget(oldWidget)
+            sip.delete(oldWidget)
+        valueWidget.setObjectName('valueWidget')
+        self.fillLay.addWidget(valueWidget, 1, 1, 1, 3)
+
+    def replaceYaotouWidget(self, old, new):
+        yaotouWidget = QWidget(self.filler)
+        yaotouLay = QGridLayout()
+        yaotouWidget.setLayout(yaotouLay)
+        yaotouLab = QLabel('窑头秤')
+        yaotouLab.setFont(QFont('Timers', 15, QFont.Times))
+        yaotouLab.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        yaotouStartLab = QLabel('初始值')
+        yaotouStartLab.setFont(QFont('Timers', 10, QFont.Times))
+        yaotouControlLab = QLabel('调控值')
+        yaotouControlLab.setFont(QFont('Timers', 10, QFont.Times))
+        yaotouPercent = QLabel('变化幅度')
+        yaotouPercent.setFont(QFont('Timers', 10, QFont.Times))
+        yaotouLay.addWidget(yaotouLab, 0, 0, 1, 3)
+        yaotouLay.addWidget(yaotouStartLab, 1, 0)
+        yaotouLay.addWidget(yaotouControlLab, 1, 1)
+        yaotouLay.addWidget(yaotouPercent, 1, 2)
+        for i in range(8):
+            self.yaotouStartValue[i] = QLabel(str(round(old[i], 2)))
+            self.yaotouStartValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.yaotouStartValue[i].setAlignment(Qt.AlignCenter)
+            self.yaotouControlValue[i] = QLabel(str(round(new[i], 2)))
+            self.yaotouControlValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.yaotouControlValue[i].setAlignment(Qt.AlignCenter)
+            percent = (new[i] - old[i]) / old[i]
+            if percent > 0:
+                self.yaotouChangePercent[i] = QLabel('↑' + str(round(percent * 100, 2)) + '%')
+                self.yaotouChangePercent[i].setFont(QFont('Timers', 12, QFont.Times))
+                self.yaotouChangePercent[i].setStyleSheet("QLabel{color:rgb(255,0,0)}")
+                self.yaotouChangePercent[i].setAlignment(Qt.AlignCenter)
+            else:
+                self.yaotouChangePercent[i] = QLabel('↓' + str(round(-percent * 100, 2)) + '%')
+                self.yaotouChangePercent[i].setFont(QFont('Timers', 12, QFont.Times))
+                self.yaotouChangePercent[i].setStyleSheet("QLabel{color:rgb(0,255,0)}")
+                self.yaotouChangePercent[i].setAlignment(Qt.AlignCenter)
+            yaotouLay.addWidget(self.yaotouStartValue[i], i + 2, 0)
+            yaotouLay.addWidget(self.yaotouControlValue[i], i + 2, 1)
+            yaotouLay.addWidget(self.yaotouChangePercent[i], i + 2, 2)
+
+        oldWidget = self.findChild(QWidget, 'yaotouWidget')
+        if oldWidget != None:
+            self.fillLay.removeWidget(oldWidget)
+            sip.delete(oldWidget)
+        yaotouWidget.setObjectName('yaotouWidget')
+        self.fillLay.addWidget(yaotouWidget, 0, 5, 2, 3)
+
+    def replaceYaoweiWidget(self, old, new):
+        yaoweiWidget = QWidget(self.filler)
+        yaoweiLay = QGridLayout()
+        yaoweiWidget.setLayout(yaoweiLay)
+        yaoweiLab = QLabel('窑尾秤')
+        yaoweiLab.setFont(QFont('Timers', 15, QFont.Times))
+        yaoweiLab.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
+        yaoweiStartLab = QLabel('初始值')
+        yaoweiStartLab.setFont(QFont('Timers', 10, QFont.Times))
+        yaoweiControlLab = QLabel('调控值')
+        yaoweiControlLab.setFont(QFont('Timers', 10, QFont.Times))
+        yaoweiPercent = QLabel('变化幅度')
+        yaoweiPercent.setFont(QFont('Timers', 10, QFont.Times))
+        yaoweiLay.addWidget(yaoweiLab, 0, 0, 1, 3)
+        yaoweiLay.addWidget(yaoweiStartLab, 1, 0)
+        yaoweiLay.addWidget(yaoweiControlLab, 1, 1)
+        yaoweiLay.addWidget(yaoweiPercent, 1, 2)
+        self.yaoweiStartValue = {}
+        self.yaoweiControlValue = {}
+        self.yaoweiChangePercent = {}
+        for i in range(8):
+            self.yaoweiStartValue[i] = QLabel(str(round(old[i], 2)))
+            self.yaoweiStartValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.yaoweiStartValue[i].setAlignment(Qt.AlignCenter)
+            self.yaoweiControlValue[i] = QLabel(str(round(new[i], 2)))
+            self.yaoweiControlValue[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.yaoweiControlValue[i].setAlignment(Qt.AlignCenter)
+            percent = (new[i] - old[i]) / old[i]
+            if percent > 0:
+                self.yaoweiChangePercent[i] = QLabel('↑' + str(round(percent * 100, 2)) + '%')
+                self.yaoweiChangePercent[i].setFont(QFont('Timers', 12, QFont.Times))
+                self.yaoweiChangePercent[i].setStyleSheet("QLabel{color:rgb(255,0,0)}")
+                self.yaoweiChangePercent[i].setAlignment(Qt.AlignCenter)
+            else:
+                self.yaoweiChangePercent[i] = QLabel('↓' + str(round(-percent * 100, 2)) + '%')
+                self.yaoweiChangePercent[i].setFont(QFont('Timers', 12, QFont.Times))
+                self.yaoweiChangePercent[i].setStyleSheet("QLabel{color:rgb(0,255,0)}")
+                self.yaoweiChangePercent[i].setAlignment(Qt.AlignCenter)
+
+            yaoweiLay.addWidget(self.yaoweiStartValue[i], i + 2, 0)
+            yaoweiLay.addWidget(self.yaoweiControlValue[i], i + 2, 1)
+            yaoweiLay.addWidget(self.yaoweiChangePercent[i], i + 2, 2)
+
+        oldWidget = self.findChild(QWidget, 'yaoweiWidget')
+        if oldWidget != None:
+            self.fillLay.removeWidget(oldWidget)
+            sip.delete(oldWidget)
+        yaoweiWidget.setObjectName('yaoweiWidget')
+        self.fillLay.addWidget(yaoweiWidget, 0, 9, 2, 3)
+
+    def replaceRehaoWidget(self, old, new):
+        rehaoWidget = QWidget(self.filler)
+        rehaoLay = QVBoxLayout()
+        rehaoWidget.setLayout(rehaoLay)
+        rehaoLab = QLabel('热耗')
+        rehaoLab.setFont(QFont('Timers', 15, QFont.Times))
+        rehaoLab.setAlignment(Qt.AlignCenter)
+        rehaoLay.addWidget(rehaoLab)
+        rehaoValue = {1, 2, 3, 4, 5, 6, 7, 8}
+        self.rehaoValueLab = {}
+        for i in range(8):
+            self.rehaoValueLab[i] = QLabel(str(i))
+            self.rehaoValueLab[i].setFont(QFont('Timers', 12, QFont.Times))
+            self.rehaoValueLab[i].setAlignment(Qt.AlignCenter)
+            rehaoLay.addWidget(self.rehaoValueLab[i])
+
+        oldWidget = self.findChild(QWidget, 'rehaoWidget')
+        if oldWidget != None:
+            self.fillLay.removeWidget(oldWidget)
+            sip.delete(oldWidget)
+        rehaoWidget.setObjectName('rehaoWidget')
+        self.fillLay.addWidget(rehaoWidget, 0, 13, 2, 1)
+
+    def replaceCaWidget(self, old, new, time):
+        Ca_Widget = QWidget(self.filler)
+        Ca_VLayout = QVBoxLayout()
+        Ca_Widget.setLayout(Ca_VLayout)
+
+        try:
+            # value = self.output['youlig']['youlig']
+            Ca = MyCaLineGraph(old, new, time)
+            oldPass=0
+            newPass=0
+            for element in old:
+                if element<=2:
+                    oldPass+=1
+            for element in new:
+                if element<=2:
+                    newPass+=1
+            oldRate = round((oldPass / len(old)) * 100,2)
+            newRate = round((newPass / len(new)) * 100,2)
+            print(oldRate)
+            print(newRate)
+            oldVar=np.var(old)#求原方差
+            newVar=np.var(new)#求调控后方差
+            VarChange=round(((newVar-oldVar)/oldVar)*100,2)
+            print(VarChange)
+            if VarChange<0:
+                fangcha = QLabel('方差同比缩小：'+str(-VarChange)+'%')
+            else:
+                fangcha = QLabel('方差同比增长：'+str(VarChange)+'%')
+            fangcha.setFont(QFont('Timers', 12, QFont.Times))
+            fangcha.setAlignment(Qt.AlignCenter)
+            yuanhegelv = QLabel('原始合格率：'+str(oldRate)+'%')
+            yuanhegelv.setFont(QFont('Timers', 12, QFont.Times))
+            yuanhegelv.setAlignment(Qt.AlignCenter)
+            houhegelv = QLabel('调控后合格率：'+str(newRate)+'%')
+            houhegelv.setFont(QFont('Timers', 12, QFont.Times))
+            houhegelv.setAlignment(Qt.AlignCenter)
+            Ca_VLayout.addWidget(Ca)
+            Ca_VLayout.addWidget(fangcha)
+            Ca_VLayout.addWidget(yuanhegelv)
+            Ca_VLayout.addWidget(houhegelv)
+        except Exception:
+            QMessageBox.information(self, '提示', '游离钙数据出错', QMessageBox.Yes)
+
+        oldWidget = self.findChild(QWidget, 'CaWidget')
+        if oldWidget != None:
+            self.fillLay.removeWidget(oldWidget)
+            sip.delete(oldWidget)
+        Ca_Widget.setObjectName('CaWidget')
+        self.fillLay.addWidget(Ca_Widget, 0, 15, 2, 1)
+
+    def replaceThreeValueWidget(self, data):
+        ThreeValueWidget = QWidget(self.filler)
+        ThreeValueHLayout = QHBoxLayout()
+        ThreeValueWidget.setLayout(ThreeValueHLayout)
+        KHVWidget = QWidget()
+        KHVLay = QVBoxLayout()
+        KHVWidget.setLayout(KHVLay)
+        SMVWidget = QWidget()
+        SMVLay = QVBoxLayout()
+        SMVWidget.setLayout(SMVLay)
+        IMVWidget = QWidget()
+        IMVLay = QVBoxLayout()
+        IMVWidget.setLayout(IMVLay)
+
+        try:
+            value = self.output['youlig']['youlig']
+            KH = MyThreeValueLineGraph(value, self.time, 0)
+            SM = MyThreeValueLineGraph(value, self.time, 1)
+            IM = MyThreeValueLineGraph(value, self.time, 2)
+            KH_Label1 = QLabel('方差同比缩小：--%')
+            KH_Label1.setFont(QFont('Timers', 12, QFont.Times))
+            KH_Label1.setAlignment(Qt.AlignCenter)
+            KH_Label2 = QLabel('原始合格率：--%')
+            KH_Label2.setFont(QFont('Timers', 12, QFont.Times))
+            KH_Label2.setAlignment(Qt.AlignCenter)
+            KH_Label3 = QLabel('调控后合格率：--%')
+            KH_Label3.setFont(QFont('Timers', 12, QFont.Times))
+            KH_Label3.setAlignment(Qt.AlignCenter)
+            SM_Label1 = QLabel('方差同比缩小：--%')
+            SM_Label1.setFont(QFont('Timers', 12, QFont.Times))
+            SM_Label1.setAlignment(Qt.AlignCenter)
+            SM_Label2 = QLabel('原始合格率：--%')
+            SM_Label2.setFont(QFont('Timers', 12, QFont.Times))
+            SM_Label2.setAlignment(Qt.AlignCenter)
+            SM_Label3 = QLabel('调控后合格率：--%')
+            SM_Label3.setFont(QFont('Timers', 12, QFont.Times))
+            SM_Label3.setAlignment(Qt.AlignCenter)
+            IM_Label1 = QLabel('方差同比缩小：--%')
+            IM_Label1.setFont(QFont('Timers', 12, QFont.Times))
+            IM_Label1.setAlignment(Qt.AlignCenter)
+            IM_Label2 = QLabel('原始合格率：--%')
+            IM_Label2.setFont(QFont('Timers', 12, QFont.Times))
+            IM_Label2.setAlignment(Qt.AlignCenter)
+            IM_Label3 = QLabel('调控后合格率：--%')
+            IM_Label3.setFont(QFont('Timers', 12, QFont.Times))
+            IM_Label3.setAlignment(Qt.AlignCenter)
+            KHVLay.addWidget(KH)
+            KHVLay.addWidget(KH_Label1)
+            KHVLay.addWidget(KH_Label2)
+            KHVLay.addWidget(KH_Label3)
+            SMVLay.addWidget(SM)
+            SMVLay.addWidget(SM_Label1)
+            SMVLay.addWidget(SM_Label2)
+            SMVLay.addWidget(SM_Label3)
+            IMVLay.addWidget(IM)
+            IMVLay.addWidget(IM_Label1)
+            IMVLay.addWidget(IM_Label2)
+            IMVLay.addWidget(IM_Label3)
+            ThreeValueHLayout.addWidget(KHVWidget)
+            ThreeValueHLayout.addWidget(SMVWidget)
+            ThreeValueHLayout.addWidget(IMVWidget)
+            ThreeValueWidget.setFixedHeight(self.Height * 0.618)  # 调整三率值的页面高度
+        except Exception:
+            QMessageBox.information(self, '提示', '三率值数据出错', QMessageBox.Yes)
+
+        oldWidget = self.findChild(QWidget, 'ThreeValueWidget')
+        if oldWidget != None:
+            self.fillLay.removeWidget(oldWidget)
+            sip.delete(oldWidget)
+        ThreeValueWidget.setObjectName('ThreeValueWidget')
+        self.fillLay.addWidget(ThreeValueWidget, 3, 0, 2, 16)
+
+    def replaceYijitongWidget(self, data):
+        yijitong_VWidget = QWidget(self.filler)
+        yijitong_VLayout = QVBoxLayout()
+        yijitong_VWidget.setLayout(yijitong_VLayout)
+        yijitong_HWidget = QWidget(self.filler)
+        yijitong_HLayout = QHBoxLayout()
+        yijitong_HWidget.setLayout(yijitong_HLayout)
+
+        try:
+            value = self.output['yijit']
+
+            yijitwdA = MyYijitongMplCanvas(value['yijitwdA'], self.real['yijit']['yijitwdA'], 0, data)
+            yijityqA = MyYijitongMplCanvas(value['yijityqA'], self.real['yijit']['yijityqA'], 1, data)
+            yijitwdB = MyYijitongMplCanvas(value['yijitwdB'], self.real['yijit']['yijitwdB'], 2, data)
+            yijityqB = MyYijitongMplCanvas(value['yijityqB'], self.real['yijit']['yijityqB'], 3, data)
+            # yijitong_title = QLabel('一级筒指标预测')
+            # yijitong_title.setAlignment(Qt.AlignLeft)
+            # yijitong_VLayout.addWidget(yijitong_title)
+            yijitong_HLayout.addWidget(yijitwdA)
+            yijitong_HLayout.addWidget(yijityqA)
+            yijitong_HLayout.addWidget(yijitwdB)
+            yijitong_HLayout.addWidget(yijityqB)
+            yijitong_VLayout.addWidget(yijitong_HWidget)
+            yijitong_VWidget.setFixedHeight(self.Height * 0.618)  # 调整一级筒数据的页面高度
+        except Exception:
+            QMessageBox.information(self, '提示', '一级筒指标数据出错', QMessageBox.Yes)
+
+        oldWidget = self.findChild(QWidget, 'yijitongWidget')
+        self.fillLay.removeWidget(oldWidget)
+        sip.delete(oldWidget)
+        self.fillLay.addWidget(yijitong_VWidget, 6, 0, 1, 16)
+
+    def replaceFjlWidget(self, data):
+        fjlWidget = QWidget(self.filler)
+        fjlHLayout = QHBoxLayout()
+        fjlWidget.setLayout(fjlHLayout)
+
+        try:
+            value = self.output['youlig']['youlig']
+            wd = MyFjlLineGraph(value, data, 0)
+            yq = MyFjlLineGraph(value, data, 1)
+            Label1 = QLabel('温度：--%')
+            Label1.setFont(QFont('Timers', 12, QFont.Times))
+            Label1.setAlignment(Qt.AlignCenter)
+            Label2 = QLabel('压强--%')
+            Label2.setFont(QFont('Timers', 12, QFont.Times))
+            Label2.setAlignment(Qt.AlignCenter)
+            fjlHLayout.addWidget(wd)
+            fjlHLayout.addWidget(Label1)
+            fjlHLayout.addWidget(yq)
+            fjlHLayout.addWidget(Label2)
+            fjlWidget.setFixedHeight(self.Height * 0.618)  # 调整分解炉的页面高度
+        except Exception:
+            QMessageBox.information(self, '提示', '分解炉数据出错', QMessageBox.Yes)
+
+        oldWidget = self.findChild(QWidget, 'fjlWidget')
+        self.fillLay.removeWidget(oldWidget)
+        sip.delete(oldWidget)
+        self.fillLay.addWidget(fjlWidget, 8, 0, 1, 16)
+
+    #
+    # def replaceBljWidget(self, data):
+    #
+    #     oldWidget = self.findChild(QWidget, 'CaWidget')
+    #     self.fillLay.removeWidget(oldWidget)
+    #     sip.delete(oldWidget)
+    #     self.fillLay.addWidget(Ca_Widget, 0, 15, 2, 1)
+
+    def replaceHzyWidget(self, data):
+        hzyWidget = QWidget(self.filler)
+        hzyHLayout = QHBoxLayout()
+        hzyWidget.setLayout(hzyHLayout)
+
+        try:
+            value = self.output['youlig']['youlig']
+            wd = MyHzyLineGraph(value, data, 0)
+            yq = MyHzyLineGraph(value, data, 1)
+            Label1 = QLabel('温度：--%')
+            Label1.setFont(QFont('Timers', 12, QFont.Times))
+            Label1.setAlignment(Qt.AlignCenter)
+            Label2 = QLabel('压强--%')
+            Label2.setFont(QFont('Timers', 12, QFont.Times))
+            Label2.setAlignment(Qt.AlignCenter)
+            hzyHLayout.addWidget(wd)
+            hzyHLayout.addWidget(Label1)
+            hzyHLayout.addWidget(yq)
+            hzyHLayout.addWidget(Label2)
+            hzyWidget.setFixedHeight(self.Height * 0.618)  # 调整回转窑的页面高度
+        except Exception:
+            QMessageBox.information(self, '提示', '回转窑数据出错', QMessageBox.Yes)
+
+        oldWidget = self.findChild(QWidget, 'hzyWidget')
+        self.fillLay.removeWidget(oldWidget)
+        sip.delete(oldWidget)
+        self.fillLay.addWidget(hzyWidget, 12, 0, 1, 16)
+
+
 class MyProduceWarWnd(QMainWindow):
     def __init__(self, day, hour, number=1):  # number为条数，暂且只预测一个时间点
         super(MyProduceWarWnd, self).__init__()
@@ -2320,6 +3219,201 @@ class MyCaMplCanvas(MyMplCanvas):
         #     self.axes.text(x + 5, y, '%.2f' % x, ha='right', va='center', fontsize=10)
 
 
+class MyCaLineGraph(MyMplCanvas):
+    def __init__(self, old, new, time):
+        for i in range(len(old)):
+            old[i] = round(old[i], 2)
+        for i in range(len(new)):
+            new[i] = round(new[i], 2)
+        self.oldValue = old
+        self.newValue = new
+        self.x_ticklabels = time
+        super(MyCaLineGraph, self).__init__()
+
+    def compute_initial_figure(self):
+        # data = MyMplCanvas.find_data(self.day, self.hour)
+
+        matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+        matplotlib.rcParams['axes.unicode_minus'] = False
+        # x = [0, 1, 2, 3, 4, 5, 6, 7]
+        # y = [0.6, 0.7, 0.8, 0.9, 0.8, 0.9, 0.8, 0.6]
+        # y1 = [0.5, 0.6, 0.7, 0.8, 0.9, 0.8, 0.9, 0.7]
+        y = self.oldValue
+        y1 = self.newValue
+        x = range(len(y))
+        self.axes.plot(x, y, label='weight changes', linewidth=1, color='r', marker='o',
+                       markerfacecolor='blue', markersize=5)
+        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='^',
+                       markerfacecolor='green', markersize=5, linestyle="--")
+
+        self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
+
+        self.axes.set_title('游离钙趋势图')
+        self.axes.set_ylabel('游离钙', verticalalignment='center', fontproperties=labelfont)
+
+        # self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+        for a, b in zip(x, y):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+        for a, b in zip(x, y1):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+
+
+class MyThreeValueLineGraph(MyMplCanvas):
+    def __init__(self, value, time, flag):
+        self.value = value
+        self.x_ticklabels = time
+        self.flag = flag
+        super(MyThreeValueLineGraph, self).__init__()
+
+    def compute_initial_figure(self):
+        # data = MyMplCanvas.find_data(self.day, self.hour)
+        matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+        matplotlib.rcParams['axes.unicode_minus'] = False
+        x = [0, 1, 2, 3, 4, 5, 6, 7]
+        y = [0.6, 0.7, 0.8, 0.9, 0.8, 0.9, 0.8, 0.6]
+        y1 = [0.5, 0.6, 0.7, 0.8, 0.9, 0.8, 0.9, 0.7]
+        self.axes.plot(x, y, label='weight changes', linewidth=1, color='r', marker='o',
+                       markerfacecolor='blue', markersize=5)
+        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='^',
+                       markerfacecolor='green', markersize=5, linestyle="--")
+
+        self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
+
+        self.axes.set_ylabel('单位/%', verticalalignment='center', fontproperties=labelfont)
+
+        if self.flag == 0:
+            self.axes.set_title('KH')
+        elif self.flag == 1:
+            self.axes.set_title('SM')
+        elif self.flag == 2:
+            self.axes.set_title('IM')
+        else:
+            return False
+
+        # self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+        for a, b in zip(x, y):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+        for a, b in zip(x, y1):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+
+
+class MyFjlLineGraph(MyMplCanvas):
+    def __init__(self, value, time, flag):
+        self.value = value
+        self.x_ticklabels = time
+        self.flag = flag
+        super(MyFjlLineGraph, self).__init__()
+
+    def compute_initial_figure(self):
+        # data = MyMplCanvas.find_data(self.day, self.hour)
+        matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+        matplotlib.rcParams['axes.unicode_minus'] = False
+        x = [0, 1, 2, 3, 4, 5, 6, 7]
+        y = [0.6, 0.7, 0.8, 0.9, 0.8, 0.9, 0.8, 0.6]
+        y1 = [0.5, 0.6, 0.7, 0.8, 0.9, 0.8, 0.9, 0.7]
+        self.axes.plot(x, y, label='weight changes', linewidth=1, color='r', marker='o',
+                       markerfacecolor='blue', markersize=5)
+        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='^',
+                       markerfacecolor='green', markersize=5, linestyle="--")
+
+        self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
+
+        self.axes.set_ylabel('单位/%', verticalalignment='center', fontproperties=labelfont)
+
+        if self.flag == 0:
+            self.axes.set_title('分解炉温度')
+        elif self.flag == 1:
+            self.axes.set_title('分解炉压强')
+        elif self.flag == 2:
+            self.axes.set_title('IM')
+        else:
+            return False
+
+        # self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+        for a, b in zip(x, y):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+        for a, b in zip(x, y1):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+
+
+class MyHzyLineGraph(MyMplCanvas):
+    def __init__(self, value, time, flag):
+        self.value = value
+        self.x_ticklabels = time
+        self.flag = flag
+        super(MyHzyLineGraph, self).__init__()
+
+    def compute_initial_figure(self):
+        # data = MyMplCanvas.find_data(self.day, self.hour)
+        matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+        matplotlib.rcParams['axes.unicode_minus'] = False
+        x = [0, 1, 2, 3, 4, 5, 6, 7]
+        y = [0.6, 0.7, 0.8, 0.9, 0.8, 0.9, 0.8, 0.6]
+        y1 = [0.5, 0.6, 0.7, 0.8, 0.9, 0.8, 0.9, 0.7]
+        self.axes.plot(x, y, label='weight changes', linewidth=1, color='r', marker='o',
+                       markerfacecolor='blue', markersize=5)
+        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='^',
+                       markerfacecolor='green', markersize=5, linestyle="--")
+
+        self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
+
+        self.axes.set_ylabel('单位/%', verticalalignment='center', fontproperties=labelfont)
+
+        if self.flag == 0:
+            self.axes.set_title('回转窑温度')
+        elif self.flag == 1:
+            self.axes.set_title('回转窑压强')
+        elif self.flag == 2:
+            self.axes.set_title('IM')
+        else:
+            return False
+
+        # self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+        for a, b in zip(x, y):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+        for a, b in zip(x, y1):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+
+
+class MyBljLineGraph(MyMplCanvas):
+    def __init__(self, value, time, flag):
+        self.value = value
+        self.x_ticklabels = time
+        self.flag = flag
+        super(MyBljLineGraph, self).__init__()
+
+    def compute_initial_figure(self):
+        # data = MyMplCanvas.find_data(self.day, self.hour)
+        matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+        matplotlib.rcParams['axes.unicode_minus'] = False
+        x = [0, 1, 2, 3, 4, 5, 6, 7]
+        y = [0.6, 0.7, 0.8, 0.9, 0.8, 0.9, 0.8, 0.6]
+        y1 = [0.5, 0.6, 0.7, 0.8, 0.9, 0.8, 0.9, 0.7]
+        self.axes.plot(x, y, label='weight changes', linewidth=1, color='r', marker='o',
+                       markerfacecolor='blue', markersize=5)
+        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='^',
+                       markerfacecolor='green', markersize=5, linestyle="--")
+
+        self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
+
+        self.axes.set_ylabel('单位/%', verticalalignment='center', fontproperties=labelfont)
+
+        if self.flag == 0:
+            self.axes.set_title('篦冷机')
+        elif self.flag == 1:
+            self.axes.set_title('篦冷机')
+        elif self.flag == 2:
+            self.axes.set_title('篦冷机')
+        else:
+            return False
+
+        # self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+        for a, b in zip(x, y):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+        for a, b in zip(x, y1):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+
+
 class MyEfficMpCanvas(MyMplCanvas):
     def __init__(self, value):
         self.value = value
@@ -2417,8 +3511,8 @@ class MyYijitongMplCanvas(MyMplCanvas):
         y1 = self.value
         self.axes.plot(x, y, label='weight changes', linewidth=1, color='r', marker='o',
                        markerfacecolor='blue', markersize=5)
-        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='o',
-                       markerfacecolor='blue', markersize=5, linestyle="--")
+        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='^',
+                       markerfacecolor='green', markersize=5, linestyle="--")
 
         self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
         if self.flag == 0:
@@ -2460,8 +3554,8 @@ class MyYaoMplCanvas(MyMplCanvas):
         y1 = self.value
         self.axes.plot(x, y, label='weight changes', linewidth=1, color='r', marker='o',
                        markerfacecolor='blue', markersize=5)
-        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='o',
-                       markerfacecolor='blue', markersize=5, linestyle="--")
+        self.axes.plot(x, y1, label='weight changes', linewidth=1, color='r', marker='^',
+                       markerfacecolor='green', markersize=5, linestyle="--")
 
         self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
         if self.flag == 0:
@@ -2492,7 +3586,8 @@ if __name__ == "__main__":
     # form = MyOpenFileWnd()
     # form = MyCheckWnd()
     # form = MyRadioWnd()
-    form = MyProduceWarWnd(20170223, 10)
+    # form = MyProduceWarWnd(20170223, 10)
+    form = MyProduceSimWnd(20170223, 10)
     # form=MyDataReviseWnd()
     # form = MyUserManageDlg()
     # form = MyUserSettingDlg()
