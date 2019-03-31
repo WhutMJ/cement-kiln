@@ -7,6 +7,7 @@ import sys
 import sip
 import os
 from MyPic import *
+from test_2019 import *
 from youlg_predict import *
 from rexiaolv_model import *
 from cent_svm_predict import *
@@ -2012,15 +2013,12 @@ class MyProduceSimWnd(QMainWindow):
             self.model_box.addItem(item)
         self.fillLay.addWidget(self.model_box, 0, 1)
 
-
-
         tableVCombox = QWidget(self.filler)
         tableVComLay = QVBoxLayout()
         tableVCombox.setLayout(tableVComLay)
-        tableHWidget = QWidget(self.filler)
-        tableHLay = QHBoxLayout()
-        tableHWidget.setLayout(tableHLay)
-
+        # tableHWidget = QWidget(self.filler)
+        # tableHLay = QHBoxLayout()
+        # tableHWidget.setLayout(tableHLay)
         self.table_box = QComboBox(self.filler)
         self.table_box.setObjectName('table_box')
         self.table_box.activated.connect(self.tableEvent)
@@ -2028,21 +2026,38 @@ class MyProduceSimWnd(QMainWindow):
         for item in list_table:
             self.table_box.addItem(item)
         tableVComLay.addWidget(self.table_box)
-
         limit_min = 0.6
         limit_max = 0.9
         self.limit_lab = QLabel('(' + str(limit_min) + ' ～ ' + str(limit_max) + ')')
         self.limit_lab.setAlignment(Qt.AlignHCenter | Qt.AlignTop)
         self.limit_lab.setFont(QFont('Timers', 10, QFont.Times))
         tableVComLay.addWidget(self.limit_lab)
-        tableHLay.addWidget(tableVCombox)#为了居中显示，外面嵌套一层水平布局
-        self.fillLay.addWidget(tableHWidget, 1, 0,2,1)
+        percentHWidget = QWidget(self.filler)
+        percentHLay = QHBoxLayout()
+        percentHWidget.setLayout(percentHLay)
+        self.percentEdt = QLineEdit(self.filler)
+        self.percentEdt.setAlignment(Qt.AlignTop | Qt.AlignHCenter)
+        self.percentEdt.setObjectName('percentEdt')
+        self.percentEdt.setText('99')
+        self.percentEdt.setValidator(QRegExpValidator(QRegExp("^(([1-9]{1}\\d*)|([0]{1}))(\\.(\\d){0,2})?$")))
+        self.percentEdt.returnPressed.connect(self.percentEvent)
+        percentHLay.addWidget(self.percentEdt)
+        baifenhao = QLabel('%')
+        baifenhao.setFont(QFont('Timers', 10, QFont.Times))
+        percentHLay.addWidget(baifenhao)
+        tableVComLay.addWidget(percentHWidget)
+        # tableHLay.addWidget(tableVCombox)  # 为了居中显示，外面嵌套一层水平布局
+        tableVCombox.setFixedWidth(128)
+        self.fillLay.addWidget(tableVCombox, 1, 0, 1, 1)
+        # tableVCombox.setStyleSheet('border:1px solid red;')
 
-        percentWidget = QWidget(self.filler)#标签控件应与值控件分开布局,为了以后替换方便
+        percentWidget = QWidget(self.filler)  # 标签控件应与值控件分开布局,为了以后替换方便
         percentWidget.setObjectName('percentWidget')
         # percentWidget.setStyleSheet('border:1px solid red;')
-        percentWidget.setFixedHeight(self.model_box.height()*2)
+        percentWidget.setFixedHeight(self.model_box.height() * 2)
+
         percentLay = QHBoxLayout()
+        percentLay.setAlignment(Qt.AlignBottom)
         percentWidget.setLayout(percentLay)
         startValueLab = QLabel('初始值')
         startValueLab.setFont(QFont('Timers', 10, QFont.Times))
@@ -2050,18 +2065,9 @@ class MyProduceSimWnd(QMainWindow):
         controlValueLab.setFont(QFont('Timers', 10, QFont.Times))
         percentLay.addWidget(startValueLab)
         percentLay.addWidget(controlValueLab)
-        self.percentEdt = QLineEdit(self.filler)
-        self.percentEdt.setObjectName('percentEdt')
-        self.percentEdt.setText('99')
-        self.percentEdt.setValidator(QRegExpValidator(QRegExp("^(([1-9]{1}\\d*)|([0]{1}))(\\.(\\d){0,2})?$")))
-        # self.percentEdt.textChanged.connect(self.percentEvent)
-        self.percentEdt.returnPressed.connect(self.percentEvent)
-        percentLay.addWidget(self.percentEdt)
-        baifenhao = QLabel('%')
-        baifenhao.setFont(QFont('Timers', 10, QFont.Times))
-        percentLay.addWidget(baifenhao)
-        self.fillLay.addWidget(percentWidget,1,1,1,3)
+        self.fillLay.addWidget(percentWidget, 1, 1)
 
+        self.fillLay.setSpacing(0)
         valueWidget = QWidget(self.filler)
         valueWidget.setObjectName('valueWidget')
         # valueWidget.setStyleSheet('border:1px solid red;')
@@ -2072,10 +2078,10 @@ class MyProduceSimWnd(QMainWindow):
         for i in range(8):
             startValue[i] = QLabel(str(i))
             startValue[i].setFont(QFont('Timers', 12, QFont.Times))
-            startValue[i].setAlignment(Qt.AlignHCenter|Qt.AlignTop)
+            startValue[i].setAlignment(Qt.AlignHCenter | Qt.AlignTop)
             controlValue[i] = QLabel(str(i + 1))
             controlValue[i].setFont(QFont('Timers', 12, QFont.Times))
-            controlValue[i].setAlignment(Qt.AlignHCenter|Qt.AlignTop)
+            controlValue[i].setAlignment(Qt.AlignHCenter | Qt.AlignTop)
             valueLay.addWidget(startValue[i], i, 0)
             valueLay.addWidget(controlValue[i], i, 1)
         self.fillLay.addWidget(valueWidget, 2, 1)
@@ -2084,7 +2090,7 @@ class MyProduceSimWnd(QMainWindow):
         self.line0.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
         self.line0.setFrameShape(QtWidgets.QFrame.VLine)
         self.line0.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.fillLay.addWidget(self.line0, 0, 4, 3, 1)
+        self.fillLay.addWidget(self.line0, 0, 2, 3, 1)
 
         yaotouWidget = QWidget(self.filler)
         yaotouWidget.setObjectName('yaotouWidget')
@@ -2119,13 +2125,13 @@ class MyProduceSimWnd(QMainWindow):
             yaotouLay.addWidget(self.yaotouStartValue[i], i + 2, 0)
             yaotouLay.addWidget(self.yaotouControlValue[i], i + 2, 1)
             yaotouLay.addWidget(self.yaotouChangePercent[i], i + 2, 2)
-        self.fillLay.addWidget(yaotouWidget, 0, 5, 3, 3)
+        self.fillLay.addWidget(yaotouWidget, 0, 3, 3, 3)
 
         self.line1 = QtWidgets.QFrame(self)
         self.line1.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
         self.line1.setFrameShape(QtWidgets.QFrame.VLine)
         self.line1.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.fillLay.addWidget(self.line1, 0, 8, 3, 1)
+        self.fillLay.addWidget(self.line1, 0, 6, 3, 1)
 
         yaoweiWidget = QWidget(self.filler)
         yaoweiWidget.setObjectName('yaoweiWidget')
@@ -2161,13 +2167,13 @@ class MyProduceSimWnd(QMainWindow):
             yaoweiLay.addWidget(self.yaoweiControlValue[i], i + 2, 1)
             yaoweiLay.addWidget(self.yaoweiChangePercent[i], i + 2, 2)
         # self.fillLay.addWidget(yaoweiLab, 1, 10)
-        self.fillLay.addWidget(yaoweiWidget, 0, 9, 3, 3)
+        self.fillLay.addWidget(yaoweiWidget, 0, 7, 3, 3)
 
         self.line2 = QtWidgets.QFrame(self)
         self.line2.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
         self.line2.setFrameShape(QtWidgets.QFrame.VLine)
         self.line2.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.fillLay.addWidget(self.line2, 0, 12, 3, 1)
+        self.fillLay.addWidget(self.line2, 0, 10, 3, 1)
 
         rehaoWidget = QWidget(self.filler)
         rehaoWidget.setObjectName('rehaoWidget')
@@ -2183,13 +2189,13 @@ class MyProduceSimWnd(QMainWindow):
             rehaoValueLab[i].setFont(QFont('Timers', 12, QFont.Times))
             rehaoValueLab[i].setAlignment(Qt.AlignCenter)
             rehaoLay.addWidget(rehaoValueLab[i])
-        self.fillLay.addWidget(rehaoWidget, 0, 13, 3, 1)
+        self.fillLay.addWidget(rehaoWidget, 0, 11, 3, 1)
 
         self.line3 = QtWidgets.QFrame(self)
         self.line3.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
         self.line3.setFrameShape(QtWidgets.QFrame.VLine)
         self.line3.setFrameShadow(QtWidgets.QFrame.Sunken)
-        self.fillLay.addWidget(self.line3, 0, 14, 3, 1)
+        self.fillLay.addWidget(self.line3, 0, 12, 3, 1)
 
         Ca_Widget = QWidget(self.filler)
         Ca_Widget.setObjectName('CaWidget')
@@ -2214,7 +2220,7 @@ class MyProduceSimWnd(QMainWindow):
             Ca_VLayout.addWidget(fangcha)
             Ca_VLayout.addWidget(yuanhegelv)
             Ca_VLayout.addWidget(houhegelv)
-            self.fillLay.addWidget(Ca_Widget, 0, 15, 3, 1)
+            self.fillLay.addWidget(Ca_Widget, 0, 13, 3, 7)
         except Exception:
             QMessageBox.information(self, '提示', '游离钙数据出错', QMessageBox.Yes)
 
@@ -2294,7 +2300,7 @@ class MyProduceSimWnd(QMainWindow):
             ThreeValueHLayout.addWidget(SMVWidget)
             ThreeValueHLayout.addWidget(IMVWidget)
             ThreeValueWidget.setFixedHeight(self.Height * 0.618)  # 调整三率值的页面高度
-            self.fillLay.addWidget(ThreeValueWidget, 4, 0, 2, 16)
+            self.fillLay.addWidget(ThreeValueWidget, 4, 0, 2, 20)
         except Exception:
             QMessageBox.information(self, '提示', '三率值数据出错', QMessageBox.Yes)
 
@@ -2316,20 +2322,69 @@ class MyProduceSimWnd(QMainWindow):
             # value = self.output['yijit']
             old = []
             new = []
+            Widget1 = QWidget()
+            Layout1 = QVBoxLayout()
+            Widget1.setLayout(Layout1)
+            Label1 = QLabel('均值为：--')
+            Label1.setFont(QFont('Timers', 12, QFont.Times))
+            Label1.setAlignment(Qt.AlignCenter)
+            Label2 = QLabel('方差为：--')
+            Label2.setFont(QFont('Timers', 12, QFont.Times))
+            Label2.setAlignment(Qt.AlignCenter)
             yijitwdA = MyYijitongMplCanvas(old, new, 0, time)
+            Layout1.addWidget(yijitwdA)
+            Layout1.addWidget(Label1)
+            Layout1.addWidget(Label2)
+
+            Widget2 = QWidget()
+            Layout2 = QVBoxLayout()
+            Widget2.setLayout(Layout2)
+            Label3 = QLabel('均值为：--')
+            Label3.setFont(QFont('Timers', 12, QFont.Times))
+            Label3.setAlignment(Qt.AlignCenter)
+            Label4 = QLabel('方差为：--')
+            Label4.setFont(QFont('Timers', 12, QFont.Times))
+            Label4.setAlignment(Qt.AlignCenter)
             yijityqA = MyYijitongMplCanvas(old, new, 1, time)
+            Layout2.addWidget(yijityqA)
+            Layout2.addWidget(Label3)
+            Layout2.addWidget(Label4)
+
+            Widget3 = QWidget()
+            Layout3 = QVBoxLayout()
+            Widget3.setLayout(Layout3)
+            Label5 = QLabel('均值为：--')
+            Label5.setFont(QFont('Timers', 12, QFont.Times))
+            Label5.setAlignment(Qt.AlignCenter)
+            Label6 = QLabel('方差为：--')
+            Label6.setFont(QFont('Timers', 12, QFont.Times))
+            Label6.setAlignment(Qt.AlignCenter)
             yijitwdB = MyYijitongMplCanvas(old, new, 2, time)
+            Layout3.addWidget(yijitwdB)
+            Layout3.addWidget(Label5)
+            Layout3.addWidget(Label6)
+
+            Widget4 = QWidget()
+            Layout4 = QVBoxLayout()
+            Widget4.setLayout(Layout4)
+            Label7 = QLabel('均值为：--')
+            Label7.setFont(QFont('Timers', 12, QFont.Times))
+            Label7.setAlignment(Qt.AlignCenter)
+            Label8 = QLabel('方差为：--')
+            Label8.setFont(QFont('Timers', 12, QFont.Times))
+            Label8.setAlignment(Qt.AlignCenter)
             yijityqB = MyYijitongMplCanvas(old, new, 3, time)
-            # yijitong_title = QLabel('一级筒指标预测')
-            # yijitong_title.setAlignment(Qt.AlignLeft)
-            # yijitong_VLayout.addWidget(yijitong_title)
-            yijitong_HLayout.addWidget(yijitwdA)
-            yijitong_HLayout.addWidget(yijityqA)
-            yijitong_HLayout.addWidget(yijitwdB)
-            yijitong_HLayout.addWidget(yijityqB)
+            Layout4.addWidget(yijityqB)
+            Layout4.addWidget(Label7)
+            Layout4.addWidget(Label8)
+
+            yijitong_HLayout.addWidget(Widget1)
+            yijitong_HLayout.addWidget(Widget2)
+            yijitong_HLayout.addWidget(Widget3)
+            yijitong_HLayout.addWidget(Widget4)
             yijitong_VLayout.addWidget(yijitong_HWidget)
             yijitong_VWidget.setFixedHeight(self.Height * 0.618)  # 调整一级筒数据的页面高度
-            self.fillLay.addWidget(yijitong_VWidget, 7, 0, 1, 16)
+            self.fillLay.addWidget(yijitong_VWidget, 7, 0, 1, 20)
         except Exception:
             QMessageBox.information(self, '提示', '一级筒指标数据出错', QMessageBox.Yes)
 
@@ -2343,9 +2398,7 @@ class MyProduceSimWnd(QMainWindow):
         fjlWidget.setObjectName('fjlWidget')
         fjlHLayout = QHBoxLayout()
         fjlWidget.setLayout(fjlHLayout)
-
         try:
-            # value = self.output['youlig']['youlig']
             old = []
             new = []
             wd = MyFjlLineGraph(old, new, time, 0)
@@ -2361,7 +2414,7 @@ class MyProduceSimWnd(QMainWindow):
             fjlHLayout.addWidget(yq)
             fjlHLayout.addWidget(Label2)
             fjlWidget.setFixedHeight(self.Height * 0.618)  # 调整分解炉的页面高度
-            self.fillLay.addWidget(fjlWidget, 9, 0, 1, 16)
+            self.fillLay.addWidget(fjlWidget, 9, 0, 1, 20)
         except Exception:
             QMessageBox.information(self, '提示', '分解炉数据出错', QMessageBox.Yes)
 
@@ -2423,7 +2476,6 @@ class MyProduceSimWnd(QMainWindow):
         hzyWidget.setObjectName('hzyWidget')
         hzyHLayout = QHBoxLayout()
         hzyWidget.setLayout(hzyHLayout)
-
         try:
             # value = self.output['youlig']['youlig']
             old = []
@@ -2441,9 +2493,88 @@ class MyProduceSimWnd(QMainWindow):
             hzyHLayout.addWidget(yq)
             hzyHLayout.addWidget(Label2)
             hzyWidget.setFixedHeight(self.Height * 0.618)  # 调整回转窑的页面高度
-            self.fillLay.addWidget(hzyWidget, 13, 0, 1, 16)
+            self.fillLay.addWidget(hzyWidget, 13, 0, 1, 20)
         except Exception:
             QMessageBox.information(self, '提示', '回转窑数据出错', QMessageBox.Yes)
+
+        self.line9 = QtWidgets.QFrame(self)
+        self.line9.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 32, self.Height))
+        self.line9.setFrameShape(QtWidgets.QFrame.HLine)
+        self.line9.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.fillLay.addWidget(self.line9, 14, 0, 1, 20)
+
+        futuralWidget = QWidget(self.filler)
+        futuralWidget.setObjectName('futuralWidget')
+        futuralLayout = QGridLayout()
+        futuralWidget.setLayout(futuralLayout)
+        try:
+            value = []
+            Label1 = QLabel('预计未来4小时内：')
+            Label1.setFont(QFont('Timers', 12, QFont.Times))
+            Label1.setAlignment(Qt.AlignLeading)
+            time = ['', '1', '2', '3', '4']
+            futuralKH = MyFuturalLineGraph(value, time, 0)
+            futuralSM = MyFuturalLineGraph(value, time, 1)
+            futuralIM = MyFuturalLineGraph(value, time, 2)
+            futuralRehao = MyFuturalLineGraph(value, time, 3)
+            futuralCa = MyFuturalLineGraph(value, time, 4)
+            futuralLayout.addWidget(Label1, 0, 0, 1, 2)
+            futuralLayout.addWidget(futuralKH, 1, 0, 2, 2)
+            futuralLayout.addWidget(futuralSM, 1, 2, 2, 2)
+            futuralLayout.addWidget(futuralIM, 1, 4, 2, 2)
+            futuralLayout.addWidget(futuralRehao, 3, 1, 2, 2)
+            futuralLayout.addWidget(futuralCa, 3, 3, 2, 2)
+        except Exception:
+            QMessageBox.information(self, '提示', '预测值数据出错', QMessageBox.Yes)
+        futuralWidget.setFixedHeight(self.Height * 0.618)  # 调整预测区的页面高度
+        self.fillLay.addWidget(futuralWidget, 15, 0, 5, 15)
+
+        self.line10 = QtWidgets.QFrame(self)
+        self.line10.setGeometry(QtCore.QRect(self.Width * 0.5, 0, 16, self.Height))
+        self.line10.setFrameShape(QtWidgets.QFrame.VLine)
+        self.line10.setFrameShadow(QtWidgets.QFrame.Sunken)
+        self.fillLay.addWidget(self.line10, 15, 15, 5, 1)
+
+        Label2 = QLabel('系统判定')
+        Label2.setFont(QFont('Timers', 15, QFont.Times))
+        Label2.setAlignment(Qt.AlignLeading)
+        self.fillLay.addWidget(Label2, 15, 16, 1, 2)
+
+        statusWidget = QWidget(self.filler)
+        statusWidget.setObjectName('statusWidget')
+        statusLayout = QVBoxLayout()
+        statusWidget.setLayout(statusLayout)
+
+        deviceStatus = '90%'
+        Label3 = QLabel('生产设备运转状况：' + deviceStatus + '正常')
+        Label3.setFont(QFont('Timers', 12, QFont.Times))
+        Label3.setAlignment(Qt.AlignLeading)
+        quality = '80%'
+        Label4 = QLabel('熟料质量：' + quality + '合格')
+        Label4.setFont(QFont('Timers', 12, QFont.Times))
+        Label4.setAlignment(Qt.AlignLeading)
+        airStatus = '稳定'
+        Label5 = QLabel('气流运转情况：' + airStatus)
+        Label5.setFont(QFont('Timers', 12, QFont.Times))
+        Label5.setAlignment(Qt.AlignLeading)
+        yijian = '可更新'
+        Label6 = QLabel('气流评测意见：' + yijian)
+        Label6.setFont(QFont('Timers', 12, QFont.Times))
+        Label6.setAlignment(Qt.AlignLeading)
+        statusLayout.addWidget(Label3)
+        statusLayout.addWidget(Label4)
+        statusLayout.addWidget(Label5)
+        statusLayout.addWidget(Label6)
+        self.fillLay.addWidget(statusWidget, 16, 16, 3, 2)
+
+        btnWidget = QWidget(self.filler)
+        btnLay = QHBoxLayout()
+        btnWidget.setLayout(btnLay)
+        UpdateBtn = QPushButton('更新')
+        CancleBtn = QPushButton('取消')
+        btnLay.addWidget(UpdateBtn)
+        btnLay.addWidget(CancleBtn)
+        self.fillLay.addWidget(btnWidget, 19, 17)
 
         # 确定布局
         self.filler.setLayout(self.fillLay)
@@ -2463,16 +2594,15 @@ class MyProduceSimWnd(QMainWindow):
             # print(time[:8]+time[9:])
             self.deadline = time[:8] + time[9:]
             print(self.deadline)
+            self.percentEdt.setText('99')
             try:
                 self.model1 = Model_rehao(self.deadline)
-                print(self.deadline)
-                # ModelData = self.model1.use_model()
-                # print(ModelData)
-                print(self.deadline)
-                # self.model2 = Model_detection(Model_rehao('2017022011'))
-                # Model2Data = self.model2.detection()
-                # print(Model2Data)
-                print(222)
+                ModelData = self.model1.use_model()
+                print(ModelData)
+                self.model2 = Model_detection(self.model1)
+                Model2Data = self.model2.detection()
+                Model2FuturalData = self.model2.forword_predict()
+                print(Model2Data)
             except Exception as e:
                 QMessageBox.information(self, '提示', '模型数据出错', QMessageBox.Yes)
                 print(e)
@@ -2482,15 +2612,17 @@ class MyProduceSimWnd(QMainWindow):
             for element in table_data:
                 self.timeLabel.append(element[0][4:6] + '/' + element[0][6:] + ' ' + element[1])
             print(self.timeLabel)
-            # print(Model2Data['rehao']['new']['rehao'])
-            # self.replaceYaotouWidget(ModelData['old']['yaotouc'], ModelData['new']['yaotouc'])
-            # self.replaceYaoweiWidget(ModelData['old']['yaoweic'], ModelData['new']['yaoweic'])
-            # self.replaceCaWidget(ModelData['old']['youlig'], ModelData['new']['youlig'], self.timeLabel)
-            # self.replaceRehaoWidget(Model2Data['rehao']['new']['rehao'])
-            # self.replaceThreeValueWidget(Model2Data['sanlvz']['old'],Model2Data['sanlvz']['new'])
-            # self.replaceYijitongWidget(Model2Data['yijit']['old'],Model2Data['yijit']['new'])
-            # self.replaceFjlWidget(Model2Data['fenjiel_huizhuany']['old'],Model2Data['fenjiel_huizhuany']['new'])
-            # self.replaceHzyWidget(Model2Data['fenjiel_huizhuany']['old'],Model2Data['fenjiel_huizhuany']['new'])
+
+            self.replaceYaotouWidget(ModelData['old']['yaotouc'], ModelData['new']['yaotouc'])
+            self.replaceYaoweiWidget(ModelData['old']['yaoweic'], ModelData['new']['yaoweic'])
+            self.replaceCaWidget(ModelData['old']['youlig'], ModelData['new']['youlig'], self.timeLabel)
+            self.replaceRehaoWidget(Model2Data['rehao']['new']['rehao'])
+            self.replaceThreeValueWidget(Model2Data['sanlvz']['old'], Model2Data['sanlvz']['new'])
+            self.replaceYijitongWidget(Model2Data['yijit']['old'], Model2Data['yijit']['new'])
+            self.replaceFjlWidget(Model2Data['fenjiel_huizhuany']['old'], Model2Data['fenjiel_huizhuany']['new'])
+            self.replaceHzyWidget(Model2Data['fenjiel_huizhuany']['old'], Model2Data['fenjiel_huizhuany']['new'])
+            self.futuralTime = ['', '1', '2', '3', '4']
+            self.replaceFuturalWidget(Model2FuturalData, self.futuralTime)
 
     def modelEvent(self):
         if (self.model_box.currentIndex() != 0):
@@ -2509,19 +2641,62 @@ class MyProduceSimWnd(QMainWindow):
         elif self.percentEdt.text() != None:
             percent = float(self.percentEdt.text()) / 100
             print(percent)
-            # self.model1.set_radio(percent)
-            # ModelData = self.model1.use_model()
-            # print(ModelData)
-            # self.replaceYaotouWidget(ModelData['old']['yaotouc'], ModelData['new']['yaotouc'])
-            # self.replaceYaoweiWidget(ModelData['old']['yaoweic'], ModelData['new']['yaoweic'])
-            # self.replaceCaWidget(ModelData['old']['youlig'], ModelData['new']['youlig'], self.timeLabel)
-            old=[100,100,100,100,100,100,100,100]
-            new=[x*percent for x in old]
+            self.model1.set_radio(percent)
+            ModelData = self.model1.use_model()
+            print(ModelData)
+            self.model2 = Model_detection(self.model1)
+            Model2Data = self.model2.detection()
+            Model2FuturalData = self.model2.forword_predict()
+            self.replaceYaotouWidget(ModelData['old']['yaotouc'], ModelData['new']['yaotouc'])
+            self.replaceYaoweiWidget(ModelData['old']['yaoweic'], ModelData['new']['yaoweic'])
+            self.replaceCaWidget(ModelData['old']['youlig'], ModelData['new']['youlig'], self.timeLabel)
+            self.replaceRehaoWidget(Model2Data['rehao']['new']['rehao'])
+            self.replaceThreeValueWidget(Model2Data['sanlvz']['old'], Model2Data['sanlvz']['new'])
+            self.replaceYijitongWidget(Model2Data['yijit']['old'], Model2Data['yijit']['new'])
+            self.replaceFjlWidget(Model2Data['fenjiel_huizhuany']['old'], Model2Data['fenjiel_huizhuany']['new'])
+            self.replaceHzyWidget(Model2Data['fenjiel_huizhuany']['old'], Model2Data['fenjiel_huizhuany']['new'])
+            self.futuralTime = ['', '1', '2', '3', '4']
+            self.replaceFuturalWidget(Model2FuturalData, self.futuralTime)
+            old = [100, 100, 100, 100, 100, 100, 100, 100]
+            new = [x * percent for x in old]
             print(new)
-            self.replacePercentWidget(old,new)
+            self.replacePercentWidget(old, new)
         print(self.percentEdt.text())
 
-    def replacePercentWidget(self,old,new):
+    def replaceFuturalWidget(self, value, time):
+        futuralWidget = QWidget(self.filler)
+        futuralWidget.setObjectName('futuralWidget')
+        futuralLayout = QGridLayout()
+        futuralWidget.setLayout(futuralLayout)
+        try:
+            # value = []
+            Label1 = QLabel('预计未来4小时内：')
+            Label1.setFont(QFont('Timers', 12, QFont.Times))
+            Label1.setAlignment(Qt.AlignLeading)
+            # time = ['', '1', '2', '3', '4']
+            futuralKH = MyFuturalLineGraph(value['sanlvz']['shuliaoKH'], time, 0)
+            futuralSM = MyFuturalLineGraph(value['sanlvz']['shuliaoSM'], time, 1)
+            futuralIM = MyFuturalLineGraph(value['sanlvz']['shuliaoIM'], time, 2)
+            futuralRehao = MyFuturalLineGraph(value['rehao'], time, 3)
+            futuralCa = MyFuturalLineGraph(value['youlig'], time, 4)
+            futuralLayout.addWidget(Label1, 0, 0, 1, 2)
+            futuralLayout.addWidget(futuralKH, 1, 0, 2, 2)
+            futuralLayout.addWidget(futuralSM, 1, 2, 2, 2)
+            futuralLayout.addWidget(futuralIM, 1, 4, 2, 2)
+            futuralLayout.addWidget(futuralRehao, 3, 1, 2, 2)
+            futuralLayout.addWidget(futuralCa, 3, 3, 2, 2)
+        except Exception:
+            QMessageBox.information(self, '提示', '预测值数据出错', QMessageBox.Yes)
+        futuralWidget.setFixedHeight(self.Height * 0.618)  # 调整预测区的页面高度
+
+        oldWidget = self.findChild(QWidget, 'futuralWidget')
+        if oldWidget != None:
+            self.fillLay.removeWidget(oldWidget)
+            sip.delete(oldWidget)
+        futuralWidget.setObjectName('futuralWidget')
+        self.fillLay.addWidget(futuralWidget, 15, 0, 5, 15)
+
+    def replacePercentWidget(self, old, new):
         valueWidget = QWidget(self.filler)
         valueWidget.setObjectName('valueWidget')
         # valueWidget.setStyleSheet('border:1px solid red;')
@@ -2530,10 +2705,10 @@ class MyProduceSimWnd(QMainWindow):
         startValue = {}
         controlValue = {}
         for i in range(8):
-            startValue[i] = QLabel(str(round(old[i],2)))
+            startValue[i] = QLabel(str(round(old[i], 2)))
             startValue[i].setFont(QFont('Timers', 12, QFont.Times))
             startValue[i].setAlignment(Qt.AlignHCenter | Qt.AlignTop)
-            controlValue[i] = QLabel(str(round(new[i],2)))
+            controlValue[i] = QLabel(str(round(new[i], 2)))
             controlValue[i].setFont(QFont('Timers', 12, QFont.Times))
             controlValue[i].setAlignment(Qt.AlignHCenter | Qt.AlignTop)
             valueLay.addWidget(startValue[i], i, 0)
@@ -2589,7 +2764,7 @@ class MyProduceSimWnd(QMainWindow):
             self.fillLay.removeWidget(oldWidget)
             sip.delete(oldWidget)
         yaotouWidget.setObjectName('yaotouWidget')
-        self.fillLay.addWidget(yaotouWidget, 0, 5, 2, 3)
+        self.fillLay.addWidget(yaotouWidget, 0, 3, 3, 3)
 
     def replaceYaoweiWidget(self, old, new):
         yaoweiWidget = QWidget(self.filler)
@@ -2639,7 +2814,7 @@ class MyProduceSimWnd(QMainWindow):
             self.fillLay.removeWidget(oldWidget)
             sip.delete(oldWidget)
         yaoweiWidget.setObjectName('yaoweiWidget')
-        self.fillLay.addWidget(yaoweiWidget, 0, 9, 2, 3)
+        self.fillLay.addWidget(yaoweiWidget, 0, 7, 3, 3)
 
     def replaceRehaoWidget(self, newValue):
         rehaoWidget = QWidget(self.filler)
@@ -2649,14 +2824,14 @@ class MyProduceSimWnd(QMainWindow):
         rehaoLab.setFont(QFont('Timers', 15, QFont.Times))
         rehaoLab.setAlignment(Qt.AlignCenter)
         rehaoLay.addWidget(rehaoLab)
-        print(123)
+        # print(123)
         for i in range(len(newValue)):
             newValue[i] = round(newValue[i], 2)
-        print(newValue)
+        # print(newValue)
         rehaoValue = newValue
         rehaoValueLab = {}
         for i in range(8):
-            rehaoValueLab[i] = QLabel(str(rehaoValue))
+            rehaoValueLab[i] = QLabel(str(rehaoValue[i]))
             rehaoValueLab[i].setFont(QFont('Timers', 12, QFont.Times))
             rehaoValueLab[i].setAlignment(Qt.AlignCenter)
             rehaoLay.addWidget(rehaoValueLab[i])
@@ -2666,7 +2841,7 @@ class MyProduceSimWnd(QMainWindow):
             self.fillLay.removeWidget(oldWidget)
             sip.delete(oldWidget)
         rehaoWidget.setObjectName('rehaoWidget')
-        self.fillLay.addWidget(rehaoWidget, 0, 13, 2, 1)
+        self.fillLay.addWidget(rehaoWidget, 0, 11, 3, 1)
 
     def replaceCaWidget(self, old, new, time):
         Ca_Widget = QWidget(self.filler)
@@ -2676,7 +2851,7 @@ class MyProduceSimWnd(QMainWindow):
         try:
             # value = self.output['youlig']['youlig']
             Ca = MyCaLineGraph(old, new, time)
-            VarChange,oldRate,newRate=self.calculate(old,new)
+            VarChange, oldRate, newRate = self.calculate(old, new)
             if VarChange < 0:
                 fangcha = QLabel('方差同比缩小：' + str(-VarChange) + '%')
             else:
@@ -2701,9 +2876,9 @@ class MyProduceSimWnd(QMainWindow):
             self.fillLay.removeWidget(oldWidget)
             sip.delete(oldWidget)
         Ca_Widget.setObjectName('CaWidget')
-        self.fillLay.addWidget(Ca_Widget, 0, 15, 2, 1)
+        self.fillLay.addWidget(Ca_Widget, 0, 13, 3, 7)
 
-    def calculate(self,old,new):
+    def calculate(self, old, new):
         oldPass = 0
         newPass = 0
         for element in old:
@@ -2717,7 +2892,41 @@ class MyProduceSimWnd(QMainWindow):
         oldVar = np.var(old)  # 求原方差
         newVar = np.var(new)  # 求调控后方差
         VarChange = round(((newVar - oldVar) / oldVar) * 100, 2)
-        return VarChange,oldRate,newRate
+        return VarChange, oldRate, newRate
+
+    def calculateThreeValue(self, old, new, flag):
+        oldPass = 0
+        newPass = 0
+        if flag == 0:  # KH是否合格
+            for element in old:
+                if 0.87 < element < 0.96:
+                    oldPass += 1
+            for element in new:
+                if 0.87 < element < 0.96:
+                    newPass += 1
+        elif flag == 1:  # SM是否合格
+            for element in old:
+                if 1.7 <= element <= 2.5:
+                    oldPass += 1
+            for element in new:
+                if 1.7 <= element <= 2.5:
+                    newPass += 1
+        elif flag == 2:  # IM是否合格
+            for element in old:
+                if 0.9 <= element <= 1.7:
+                    oldPass += 1
+            for element in new:
+                if 0.9 <= element <= 1.7:
+                    newPass += 1
+        else:
+            QMessageBox.information(self, '提示', '标志位设置错误', QMessageBox.Yes)
+        oldRate = round((oldPass / len(old)) * 100, 2)
+        newRate = round((newPass / len(new)) * 100, 2)
+        oldVar = np.var(old)  # 求原方差
+        newVar = np.var(new)  # 求调控后方差
+        VarChange = round(((newVar - oldVar) / oldVar) * 100, 2)
+        return VarChange, oldRate, newRate
+
     def replaceThreeValueWidget(self, old, new):
         ThreeValueWidget = QWidget(self.filler)
         ThreeValueHLayout = QHBoxLayout()
@@ -2738,7 +2947,7 @@ class MyProduceSimWnd(QMainWindow):
             SM = MyThreeValueLineGraph(old['shuliaoSM'], new['shuliaoSM'], self.timeLabel, 1)
             IM = MyThreeValueLineGraph(old['shuliaoIM'], new['shuliaoIM'], self.timeLabel, 2)
 
-            VarChange, oldRate, newRate = self.calculate(old['shuliaoKH'], new['shuliaoKH'])
+            VarChange, oldRate, newRate = self.calculateThreeValue(old['shuliaoKH'], new['shuliaoKH'], 0)
             if VarChange < 0:
                 KH_Label1 = QLabel('方差同比缩小：' + str(-VarChange) + '%')
             else:
@@ -2752,7 +2961,7 @@ class MyProduceSimWnd(QMainWindow):
             KH_Label3.setFont(QFont('Timers', 12, QFont.Times))
             KH_Label3.setAlignment(Qt.AlignCenter)
 
-            VarChange, oldRate, newRate = self.calculate(old['shuliaoSM'], new['shuliaoSM'])
+            VarChange, oldRate, newRate = self.calculateThreeValue(old['shuliaoSM'], new['shuliaoSM'], 1)
             if VarChange < 0:
                 SM_Label1 = QLabel('方差同比缩小：' + str(-VarChange) + '%')
             else:
@@ -2766,7 +2975,7 @@ class MyProduceSimWnd(QMainWindow):
             SM_Label3.setFont(QFont('Timers', 12, QFont.Times))
             SM_Label3.setAlignment(Qt.AlignCenter)
 
-            VarChange, oldRate, newRate = self.calculate(old['shuliaoIM'], new['shuliaoIM'])
+            VarChange, oldRate, newRate = self.calculateThreeValue(old['shuliaoIM'], new['shuliaoIM'], 2)
             if VarChange < 0:
                 IM_Label1 = QLabel('方差同比缩小：' + str(-VarChange) + '%')
             else:
@@ -2804,29 +3013,147 @@ class MyProduceSimWnd(QMainWindow):
             self.fillLay.removeWidget(oldWidget)
             sip.delete(oldWidget)
         ThreeValueWidget.setObjectName('ThreeValueWidget')
-        self.fillLay.addWidget(ThreeValueWidget, 3, 0, 2, 16)
+        self.fillLay.addWidget(ThreeValueWidget, 4, 0, 2, 20)
 
-    def replaceYijitongWidget(self, old,new):
+    def calculateYijitong(self,old,new):
+        oldAverage=np.mean(old)
+        newAverage=np.mean(new)
+        AvrChange=round(newAverage-oldAverage,2)
+        oldVar = np.var(old)  # 求原方差
+        newVar = np.var(new)  # 求调控后方差
+        VarChange = round(newVar - oldVar, 2)
+        return AvrChange,VarChange
+
+    def replaceYijitongWidget(self, old, new):
         yijitong_VWidget = QWidget(self.filler)
         yijitong_VLayout = QVBoxLayout()
         yijitong_VWidget.setLayout(yijitong_VLayout)
         yijitong_HWidget = QWidget(self.filler)
         yijitong_HLayout = QHBoxLayout()
         yijitong_HWidget.setLayout(yijitong_HLayout)
-
         try:
             # value = self.output['yijit']
-            yijitwdA = MyYijitongMplCanvas(old['yijitwdA'],new['yijitwdA'], 0, self.timeLabel)
-            yijityqA = MyYijitongMplCanvas(old['yijityqA'],new['yijityqA'], 1, self.timeLabel)
-            yijitwdB = MyYijitongMplCanvas(old['yijitwdB'],new['yijitwdB'], 2, self.timeLabel)
-            yijityqB = MyYijitongMplCanvas(old['yijityqB'],new['yijityqB'], 3, self.timeLabel)
-            # yijitong_title = QLabel('一级筒指标预测')
-            # yijitong_title.setAlignment(Qt.AlignLeft)
-            # yijitong_VLayout.addWidget(yijitong_title)
-            yijitong_HLayout.addWidget(yijitwdA)
-            yijitong_HLayout.addWidget(yijityqA)
-            yijitong_HLayout.addWidget(yijitwdB)
-            yijitong_HLayout.addWidget(yijityqB)
+            Widget1=QWidget()
+            Layout1=QVBoxLayout()
+            Widget1.setLayout(Layout1)
+            yijitwdA = MyYijitongMplCanvas(old['yijitwdA'], new['yijitwdA'], 0, self.timeLabel)
+            AvrChange, VarChange=self.calculateYijitong(old['yijitwdA'], new['yijitwdA'])
+            if AvrChange < 0:
+                Label1 = QLabel('均值：↓' + str(-AvrChange))
+                Label1.setFont(QFont('Timers', 12, QFont.Times))
+                Label1.setStyleSheet("QLabel{color:rgb(0,255,0)}")
+                Label1.setAlignment(Qt.AlignCenter)
+            else:
+                Label1 = QLabel('均值：↑' + str(AvrChange))
+                Label1.setFont(QFont('Timers', 12, QFont.Times))
+                Label1.setStyleSheet("QLabel{color:rgb(255,0,0)}")
+                Label1.setAlignment(Qt.AlignCenter)
+            if VarChange < 0:
+                Label2 = QLabel('方差：↓' + str(-VarChange))
+                Label2.setFont(QFont('Timers', 12, QFont.Times))
+                Label2.setStyleSheet("QLabel{color:rgb(0,255,0)}")
+                Label2.setAlignment(Qt.AlignCenter)
+            else:
+                Label2 = QLabel('方差：↑' + str(VarChange))
+                Label2.setFont(QFont('Timers', 12, QFont.Times))
+                Label2.setStyleSheet("QLabel{color:rgb(255,0,0)}")
+                Label2.setAlignment(Qt.AlignCenter)
+
+
+            Widget2=QWidget()
+            Layout2=QVBoxLayout()
+            Widget2.setLayout(Layout2)
+            yijityqA = MyYijitongMplCanvas(old['yijityqA'], new['yijityqA'], 1, self.timeLabel)
+            AvrChange, VarChange = self.calculateYijitong(old['yijityqA'], new['yijityqA'])
+            if AvrChange < 0:
+                Label3 = QLabel('均值：↓' + str(-AvrChange))
+                Label3.setFont(QFont('Timers', 12, QFont.Times))
+                Label3.setStyleSheet("QLabel{color:rgb(0,255,0)}")
+                Label3.setAlignment(Qt.AlignCenter)
+            else:
+                Label3 = QLabel('均值：↑' + str(AvrChange))
+                Label3.setFont(QFont('Timers', 12, QFont.Times))
+                Label3.setStyleSheet("QLabel{color:rgb(255,0,0)}")
+                Label3.setAlignment(Qt.AlignCenter)
+            if VarChange < 0:
+                Label4 = QLabel('方差：↓' + str(-VarChange))
+                Label4.setFont(QFont('Timers', 12, QFont.Times))
+                Label4.setStyleSheet("QLabel{color:rgb(0,255,0)}")
+                Label4.setAlignment(Qt.AlignCenter)
+            else:
+                Label4 = QLabel('方差：↑' + str(VarChange))
+                Label4.setFont(QFont('Timers', 12, QFont.Times))
+                Label4.setStyleSheet("QLabel{color:rgb(255,0,0)}")
+                Label4.setAlignment(Qt.AlignCenter)
+
+            Widget3=QWidget()
+            Layout3=QVBoxLayout()
+            Widget3.setLayout(Layout3)
+            yijitwdB = MyYijitongMplCanvas(old['yijitwdB'], new['yijitwdB'], 2, self.timeLabel)
+            AvrChange, VarChange = self.calculateYijitong(old['yijitwdB'], new['yijitwdB'])
+            if AvrChange < 0:
+                Label5 = QLabel('均值：↓' + str(-AvrChange))
+                Label5.setFont(QFont('Timers', 12, QFont.Times))
+                Label5.setStyleSheet("QLabel{color:rgb(0,255,0)}")
+                Label5.setAlignment(Qt.AlignCenter)
+            else:
+                Label5 = QLabel('均值：↑' + str(AvrChange))
+                Label5.setFont(QFont('Timers', 12, QFont.Times))
+                Label5.setStyleSheet("QLabel{color:rgb(255,0,0)}")
+                Label5.setAlignment(Qt.AlignCenter)
+            if VarChange < 0:
+                Label6 = QLabel('方差：↓' + str(-VarChange))
+                Label6.setFont(QFont('Timers', 12, QFont.Times))
+                Label6.setStyleSheet("QLabel{color:rgb(0,255,0)}")
+                Label6.setAlignment(Qt.AlignCenter)
+            else:
+                Label6 = QLabel('方差：↑' + str(VarChange))
+                Label6.setFont(QFont('Timers', 12, QFont.Times))
+                Label6.setStyleSheet("QLabel{color:rgb(255,0,0)}")
+                Label6.setAlignment(Qt.AlignCenter)
+
+            Widget4=QWidget()
+            Layout4=QVBoxLayout()
+            Widget4.setLayout(Layout4)
+            yijityqB = MyYijitongMplCanvas(old['yijityqB'], new['yijityqB'], 3, self.timeLabel)
+            AvrChange, VarChange = self.calculateYijitong(old['yijityqB'], new['yijityqB'])
+            if AvrChange < 0:
+                Label7 = QLabel('均值：↓' + str(-AvrChange))
+                Label7.setFont(QFont('Timers', 12, QFont.Times))
+                Label7.setStyleSheet("QLabel{color:rgb(0,255,0)}")
+                Label7.setAlignment(Qt.AlignCenter)
+            else:
+                Label7 = QLabel('均值：↑' + str(AvrChange))
+                Label7.setFont(QFont('Timers', 12, QFont.Times))
+                Label7.setStyleSheet("QLabel{color:rgb(255,0,0)}")
+                Label7.setAlignment(Qt.AlignCenter)
+            if VarChange < 0:
+                Label8 = QLabel('方差：↓' + str(-VarChange))
+                Label8.setFont(QFont('Timers', 12, QFont.Times))
+                Label8.setStyleSheet("QLabel{color:rgb(0,255,0)}")
+                Label8.setAlignment(Qt.AlignCenter)
+            else:
+                Label8 = QLabel('方差：↑' + str(VarChange))
+                Label8.setFont(QFont('Timers', 12, QFont.Times))
+                Label8.setStyleSheet("QLabel{color:rgb(255,0,0)}")
+                Label8.setAlignment(Qt.AlignCenter)
+
+            Layout1.addWidget(yijitwdA)
+            Layout1.addWidget(Label1)
+            Layout1.addWidget(Label2)
+            Layout2.addWidget(yijityqA)
+            Layout2.addWidget(Label3)
+            Layout2.addWidget(Label4)
+            Layout3.addWidget(yijitwdB)
+            Layout3.addWidget(Label5)
+            Layout3.addWidget(Label6)
+            Layout4.addWidget(yijityqB)
+            Layout4.addWidget(Label7)
+            Layout4.addWidget(Label8)
+            yijitong_HLayout.addWidget(Widget1)
+            yijitong_HLayout.addWidget(Widget2)
+            yijitong_HLayout.addWidget(Widget3)
+            yijitong_HLayout.addWidget(Widget4)
             yijitong_VLayout.addWidget(yijitong_HWidget)
             yijitong_VWidget.setFixedHeight(self.Height * 0.618)  # 调整一级筒数据的页面高度
         except Exception:
@@ -2837,17 +3164,17 @@ class MyProduceSimWnd(QMainWindow):
             self.fillLay.removeWidget(oldWidget)
             sip.delete(oldWidget)
         yijitong_VWidget.setObjectName('yijitongWidget')
-        self.fillLay.addWidget(yijitong_VWidget, 6, 0, 1, 16)
+        self.fillLay.addWidget(yijitong_VWidget, 7, 0, 1, 20)
 
-    def replaceFjlWidget(self, old,new):
+    def replaceFjlWidget(self, old, new):
         fjlWidget = QWidget(self.filler)
         fjlHLayout = QHBoxLayout()
         fjlWidget.setLayout(fjlHLayout)
 
         try:
             # value = self.output['youlig']['youlig']
-            wd = MyFjlLineGraph(old['fenjielwd'],new['fenjielwd'],self.timeLabel,0)
-            yq = MyFjlLineGraph(old['fenjielyq'],new['fenjielyq'],self.timeLabel,1)
+            wd = MyFjlLineGraph(old['fenjielwd'], new['fenjielwd'], self.timeLabel, 0)
+            yq = MyFjlLineGraph(old['fenjielyq'], new['fenjielyq'], self.timeLabel, 1)
             Label1 = QLabel('温度：--%')
             Label1.setFont(QFont('Timers', 12, QFont.Times))
             Label1.setAlignment(Qt.AlignCenter)
@@ -2867,7 +3194,7 @@ class MyProduceSimWnd(QMainWindow):
             self.fillLay.removeWidget(oldWidget)
             sip.delete(oldWidget)
         fjlWidget.setObjectName('fjlWidget')
-        self.fillLay.addWidget(fjlWidget, 8, 0, 1, 16)
+        self.fillLay.addWidget(fjlWidget, 9, 0, 1, 20)
 
     #
     def replaceBljWidget(self, data):
@@ -2879,14 +3206,14 @@ class MyProduceSimWnd(QMainWindow):
         # bljHWidget.setObjectName('bljWidget')
         # self.fillLay.addWidget(Ca_Widget, 0, 15, 2, 1)
 
-    def replaceHzyWidget(self, old,new):
+    def replaceHzyWidget(self, old, new):
         hzyWidget = QWidget(self.filler)
         hzyHLayout = QHBoxLayout()
         hzyWidget.setLayout(hzyHLayout)
 
         try:
             # value = self.output['youlig']['youlig']
-            wd = MyHzyLineGraph(old['yaoweiwd'], new['yaoweiwd'], 0)
+            wd = MyHzyLineGraph(old['yaoweiwd'], new['yaoweiwd'],self.timeLabel, 0)
             # yq = MyHzyLineGraph(, , 1)
             Label1 = QLabel('温度：--%')
             Label1.setFont(QFont('Timers', 12, QFont.Times))
@@ -2907,7 +3234,7 @@ class MyProduceSimWnd(QMainWindow):
             self.fillLay.removeWidget(oldWidget)
             sip.delete(oldWidget)
         hzyWidget.setObjectName('hzyWidget')
-        self.fillLay.addWidget(hzyWidget, 12, 0, 1, 16)
+        self.fillLay.addWidget(hzyWidget, 13, 0, 1, 20)
 
 
 class MyProduceWarWnd(QMainWindow):
@@ -3038,7 +3365,7 @@ class MyProduceWarWnd(QMainWindow):
             SM_VLayout.addWidget(SM_title)
             three_Layout.addWidget(SM)
             SM_VLayout.addWidget(three)
-            SM_des = QLabel('IM表示熟料中SiO₂含量与Al₂O₃、\nFe₂O₃之和的比')
+            SM_des = QLabel('SM表示熟料中SiO₂含量与Al₂O₃、\nFe₂O₃之和的比')
             SM_VLayout.addWidget(SM_des)
             SM_VWidget = QWidget()
             SM_VWidget.setLayout(SM_VLayout)
@@ -3491,6 +3818,46 @@ class MyBljLineGraph(MyMplCanvas):
         for a, b in zip(x, y):
             self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
         for a, b in zip(x, y1):
+            self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
+
+
+class MyFuturalLineGraph(MyMplCanvas):
+    def __init__(self, value, time, flag):
+        for i in range(len(value)):
+            value[i] = round(value[i], 2)
+        self.newValue = value
+        self.x_ticklabels = time
+        self.flag = flag
+        super(MyFuturalLineGraph, self).__init__()
+
+    def compute_initial_figure(self):
+        # data = MyMplCanvas.find_data(self.day, self.hour)
+        matplotlib.rcParams['font.sans-serif'] = ['SimHei']
+        matplotlib.rcParams['axes.unicode_minus'] = False
+        # x = [0, 1, 2, 3]
+        # y = [0.6, 0.7, 0.8, 0.9]
+        # y1 = [0.5, 0.6, 0.7, 0.8]
+        y = self.newValue
+        x = range(len(y))
+        self.axes.plot(x, y, label='weight changes', linewidth=1, color='r', marker='o',
+                       markerfacecolor='blue', markersize=5)
+        self.axes.set_xticklabels(self.x_ticklabels, rotation=15, fontsize=9)
+        self.axes.set_ylabel('单位/%', verticalalignment='center', fontproperties=labelfont)
+        if self.flag == 0:
+            self.axes.set_title('熟料KH')
+        elif self.flag == 1:
+            self.axes.set_title('熟料SM')
+        elif self.flag == 2:
+            self.axes.set_title('熟料IM')
+        elif self.flag == 3:
+            self.axes.set_title('热耗')
+        elif self.flag == 4:
+            self.axes.set_title('游离钙')
+        else:
+            QMessageBox.information(self, '提示', '预测区标志位设置错误', QMessageBox.Yes)
+
+        # self.axes.set_xlabel('时间/h', verticalalignment='center', fontproperties=labelfont)
+        for a, b in zip(x, y):
             self.axes.text(a, b, b, ha='center', va='bottom', fontsize=12)
 
 
